@@ -65,7 +65,7 @@ sqlplus -s -l  $CONNECTDW <<EOF> ${LOG}/${PROCESS}_runstats_start.log @${SQL}/ru
 EOF
 ########################################################################################
 echo "Running the script started at `date '+%a %b %e %T'`" >${LOG_FILE}
-sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL} "$SCHEMA" "$BANNER" "$PIM_DBLINK">>${LOG_FILE}
+sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL} "${SCHEMA}" "${BANNER}" "${PIM_DBLINK}">>${LOG_FILE}
 echo "running the o5_prd_mini_product statments completed  at `date '+%a %b %e %T'`" >>${LOG_FILE}
 ########################################################################################
 LOAD_COUNT=`sqlplus -s -l  $CONNECTDW<<EOF
