@@ -85,7 +85,7 @@ LOG_FILE="$LOG/${PROCESS}_${ENV_TYPE}_log.txt"
 echo "Start Main " >  ${LOG_FILE}
 if [ "$ENV_TYPE" = "o5_preview" ]; then
 echo "Started PDW Update in o5.prd_hier_price_status tables" >> ${LOG_FILE}
-sqlplus -s $CONNECTDW @${PDW_SQL}  >>${LOG_FILE}
+sqlplus -s $CONNECTDW @${PDW_SQL} "$SCHEMA" >>${LOG_FILE}
 wait
 echo "Finished PDW Update in o5.prd_hier_price_status tables" >> ${LOG_FILE}
 export DB_CONNECT=$PDP_DBCONNECT_O5_PREVIEW
