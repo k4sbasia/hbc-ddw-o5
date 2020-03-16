@@ -116,7 +116,7 @@ else
 fi
 #################################################################
 echo "Started exporting data at `date '+%a %b %e %T'`" >>${LOG_FILE}
-sqlplus -s -l  $CONNECTDW @${SQL}/${PROCESS_SQL2} "${SCHEMA}", ${FILE_NAME}
+sqlplus -s -l  $CONNECTDW @${SQL}/${PROCESS_SQL2} "${SCHEMA}" ${FILE_NAME}
 SQL_RET_CODE=$?
 echo "Finished exporting data  at `date '+%a %b %e %T'`" >>${LOG_FILE}
 cd $DATA
