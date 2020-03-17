@@ -1,0 +1,4 @@
+exec &2 P_PARTIAL_UPDATE_NEW_ARRIVAL@&1
+
+quit
+
