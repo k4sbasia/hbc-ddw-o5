@@ -126,14 +126,14 @@ if [ ${SOURCE_COUNT} -gt 60000 ]
 then
 echo " ${SOURCE_COUNT} records found in ${SAKS_FILE_NAME1} file " >> ${LOG_FILE}
 ## DO FTP here
-#cd $DATA
-#cp ${SAKS_FILE_NAME1} ${SAKS_FILE_NAME2} >>${LOG_FILE}
-#echo -e "FTP for Inventory started to google at `date '+%a %b %e %T'`" >>${LOG_FILE}
-#lftp -u mc-sftp-9439371,'^4>M$,!O7a' sftp://partnerupload.google.com:19321 <<EOF>>${LOG_FILE}
-#put ${SAKS_FILE_NAME2}
-#wait
-#Bye
-#EOF
+cd $DATA
+cp ${SAKS_FILE_NAME1} ${SAKS_FILE_NAME2} >>${LOG_FILE}
+echo -e "FTP for Inventory started to google at `date '+%a %b %e %T'`" >>${LOG_FILE}
+lftp -u mc-sftp-9439371,'^4>M$,!O7a' sftp://partnerupload.google.com:19321 <<EOF>>${LOG_FILE}
+put ${SAKS_FILE_NAME2}
+wait
+Bye
+EOF
 #################################################################
 ##FTP TRANSFER VALIDATION
 #################################################################
@@ -144,9 +144,9 @@ echo " ${SOURCE_COUNT} records found in ${SAKS_FILE_NAME1} file " >> ${LOG_FILE}
 ##exit 99
 ##fi
 #################################################################
-#echo -e "FTP for inventory ended to google at `date '+%a %b %e %T'` " >>${LOG_FILE}
+echo -e "FTP for inventory ended to google at `date '+%a %b %e %T'` " >>${LOG_FILE}
 ################################################################
-#echo "Finished Extracting data  at `date '+%a %b %e %T'`" >>${LOG_FILE}
+echo "Finished Extracting data  at `date '+%a %b %e %T'`" >>${LOG_FILE}
 else
 echo "${PROCESS} failed. Please investigate. Only ${SOURCE_COUNT} records found in $DATA/${SAKS_FILE_NAME1} file which is less than 60000. Please check  ${SAKS_FILE_NAME1}  file" >> ${LOG_FILE}
 ##echo "Google product feed for ${BANNER}. Please check $DATA/${SAKS_FILE_NAME1} file "| mailx -s "Google product feed failed - ${BANNER}" hbcdigitaldatamanagement@saksinc.com
@@ -173,13 +173,13 @@ cd $DATA
 cp ${O5_FILE_NAME1}  ${O5_FILE_NAME2} >>${LOG_FILE}
 ## DO FTP here
 ################################################################
-#echo -e "FTP for O5 Inventory started to google at `date '+%a %b %e %T'`" >>${LOG_FILE}
-#lftp -u mc-sftp-17287421,'q!c!_6m{Oa' sftp://partnerupload.google.com:19321 <<EOF>>${LOG_FILE}
-#put ${O5_FILE_NAME2}
-#wait
-#Bye
-#EOF
-#echo "Finished Extracting data  at `date '+%a %b %e %T'`" >>${LOG_FILE}
+echo -e "FTP for O5 Inventory started to google at `date '+%a %b %e %T'`" >>${LOG_FILE}
+lftp -u mc-sftp-17287421,'q!c!_6m{Oa' sftp://partnerupload.google.com:19321 <<EOF>>${LOG_FILE}
+put ${O5_FILE_NAME2}
+wait
+Bye
+EOF
+echo "Finished Extracting data  at `date '+%a %b %e %T'`" >>${LOG_FILE}
 #else
 #echo "${PROCESS} failed. Please investigate. Only ${SOURCE_COUNT} records found in $DATA/${O5_FILE_NAME1} file which is less than 60000. Please check error in  ${O5_FILE_NAME1}  file" >> ${LOG_FILE}
 #send_delay_email
@@ -205,13 +205,13 @@ cd $DATA
 cp ${LT_FILE_NAME1}  ${LT_FILE_NAME2} >>${LOG_FILE}
 ## DO FTP here
 ################################################################
-#echo -e "FTP for LT Inventory started to google at `date '+%a %b %e %T'`" >>${LOG_FILE}
-#lftp -u mc-sftp-6649174,'T:y7#Htw<K' sftp://partnerupload.google.com:19321 <<EOF>>${LOG_FILE}
-#put ${LT_FILE_NAME2}
-#wait
-#Bye
-#EOF
-#echo "Finished Extracting data  at `date '+%a %b %e %T'`" >>${LOG_FILE}
+echo -e "FTP for LT Inventory started to google at `date '+%a %b %e %T'`" >>${LOG_FILE}
+lftp -u mc-sftp-6649174,'T:y7#Htw<K' sftp://partnerupload.google.com:19321 <<EOF>>${LOG_FILE}
+put ${LT_FILE_NAME2}
+wait
+Bye
+EOF
+echo "Finished Extracting data  at `date '+%a %b %e %T'`" >>${LOG_FILE}
 else
 echo "${PROCESS} failed. Please investigate. Only ${SOURCE_COUNT} records found in $DATA/${LT_FILE_NAME1} file which is less than 60000. Please check error in  ${LT_FILE_NAME1}  file" >> ${LOG_FILE}
 send_delay_email

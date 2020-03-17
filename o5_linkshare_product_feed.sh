@@ -91,13 +91,13 @@ quit;
 EOF`
 ##########################################################################################
 #### FTP the file to Linkshare
-#cd $DATA
-#ftp -nv Mftp.linksynergy.com  << EOF>>${LOG_FILE}
-#user offSAK PNYUV47c
-#put 38801_nmerchandis`TZ=GMT+24 date +"%Y%m%d"`.txt
-#put 38801_nattributes`TZ=GMT+24 date +"%Y%m%d"`.txt
-#bye
-#EOF
+cd $DATA
+ftp -nv Mftp.linksynergy.com  << EOF>>${LOG_FILE}
+user offSAK PNYUV47c
+put 38801_nmerchandis`TZ=GMT+24 date +"%Y%m%d"`.txt
+put 38801_nattributes`TZ=GMT+24 date +"%Y%m%d"`.txt 
+bye
+EOF
 ##########################################################################################
 #### Bad Records Check
 ##################################################################################################

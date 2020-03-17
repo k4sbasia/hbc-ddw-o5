@@ -82,20 +82,20 @@ echo "Completed the  product extract  at `date '+%a %b %e %T'`" >>${LOG_FILE}
 TFILE_SIZE="`ls -ll $DATA/$FILE_NAME |tr -s ' ' '|' |cut -f5 -d'|'`"
 ##########################################################################################
 #### FTP the file to CM
-#cd $DATA
-#lftp -u SDO5feeds,rEfrU8 sftp://tt.cheetahmail.com <<EOF>>${LOG_FILE}
-#cd autoproc
-#put ${FILE_NAME}
-#quit
-#EOF
+cd $DATA
+lftp -u SDO5feeds,rEfrU8 sftp://tt.cheetahmail.com <<EOF>>${LOG_FILE}
+cd autoproc
+put ${FILE_NAME}
+quit
+EOF
 #### FTP the file to SAS
-#ftp -nv 10.130.176.210  <<EOF>>${LOG_FILE}
-#user sasftp sasftp0313S
-#prompt off
-#bin
-#put ${FILE_NAME} o5_cm_product.txt
-#quit
-#EOF
+ftp -nv 10.130.176.210  <<EOF>>${LOG_FILE}
+user sasftp sasftp0313S
+prompt off
+bin
+put ${FILE_NAME} o5_cm_product.txt
+quit
+EOF
 ##########################################################################################
 #### Bad Records Check
 ##################################################################################################
