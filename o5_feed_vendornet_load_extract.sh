@@ -83,13 +83,13 @@ EOF
 #################################################################
 #Ftp the file to Vednornet
 #################################################################
-#echo "Starting the ftp process to vendornet at `date '+%a %b %e %T %Z %Y'` " >>${LOG_FILE}
-#cd $DATA
-#sftp SaksFifthAve@prd-transfer.vendornet.com <<EOF>>${LOG_FILE}
-#cd  Live/DS/Products
-#put dropship_extract_o5.txt
-#quit
-#EOF
+echo "Starting the ftp process to vendornet at `date '+%a %b %e %T %Z %Y'` " >>${LOG_FILE}
+cd $DATA
+sftp SaksFifthAve@prd-transfer.vendornet.com <<EOF>>${LOG_FILE}
+cd  Live/DS/Products
+put dropship_extract_o5.txt
+quit
+EOF
 
 #LFTP_RET_CODE=1
 #while [ $LFTP_RET_CODE -eq 0 ]; do
