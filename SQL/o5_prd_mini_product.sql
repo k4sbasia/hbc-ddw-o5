@@ -180,7 +180,7 @@ MERGE INTO &1.bi_mini_product hst
   ( select product_id,max(readyforprod_set_dt) readyforprod_set_dt from &1.READYFORPROD_SORT s
   --,o5.bi_mini_product bp
  -- where s.product_id = bp.product_code
-   group by product_id ) a, mrep.bi_mini_product p
+   group by product_id ) a, &1.bi_mini_product p
    where a.product_id = p.product_code
    and nvl(readyforprod_set_dt,'01-JAN-1999') <> nvl(pub_date,'01-JAN-1999') ) trn
         ON (trn.product_id = hst.product_code)
@@ -192,6 +192,8 @@ THEN
 commit;
 
 --Pubdate upodated with itemsetup task complete date after checking the readyfor prod date.
+--After SFCC datamart tables are not populated when check workflow is only used in reports not in any SDW changes do commenting this
+/*
 MERGE INTO &1.bi_mini_product hst
      USING (select distinct i.svs,Max(p.current_workflow_status)current_workflow_status,Max(trunc(to_date(p.item_set_up_task_complete,'MM/DD/YYYY HH:MI PM')))pub_date from mrch_dm.item@sdwdsg_LT i,mrch_dm.product@sdwdsg_LT p
    where lpad(p.PRODUCT_NO, 13, '0') = replace(i.PRODUCT_NO,CHR(13),'')
@@ -205,6 +207,7 @@ THEN
                                 hst.pub_date=trn.pub_date;
 
 commit;
+*/
 
 
 
