@@ -34,7 +34,7 @@ where
  a.upc = A.REORDER_UPC_NO
 and lpad(a.upc,13,0)=p.upc
 and A.SHORT_DESCRIPTION <> 'DO NOT USE'
-and exists (select product_id from &1.v_active_product_&2 b where p.product_code = b.product_id);
+and exists (select product_id from &1.v_active_product_&2 b where p.product_code = b.product_id)
 --and a.DEPARTMENT_ID in ('932')
 --and a.DIVISION_ID like '4%'
 --and lower(p.brand_name) in ('pure navy','renvy','saks fifth avenue','ava & aiden','nhp','russel park')
