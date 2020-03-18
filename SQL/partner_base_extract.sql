@@ -12,6 +12,9 @@ ALTER SESSION ENABLE PARALLEL DML;
 declare
 Begin
 DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '|| TO_CHAR(SYSDATE,'MM-DD-YYYY HH:MI:SS') || ' START of Partners Extract Insert');
+EXECUTE IMMEDIATE 'TRUNCATE TABLE &2.&3';
+EXECUTE IMMEDIATE 'TRUNCATE TABLE &2.image_alt_&1';
+EXECUTE IMMEDIATE 'TRUNCATE TABLE &2.bi_product_aggregate';
 INSERT INTO &2.&3 (
         merchant_id,
         department_name,
@@ -136,7 +139,7 @@ INSERT INTO &2.&3 (
             'T' AS is_readyforprod,
             prd_attr.is_reviewable       AS is_reviewable,
             prd_attr.is_shopthelook      AS is_shopthelook,
-            NULL AS country_restriction,
+            prd_attr.pd_restrictedcountry_text AS country_restriction,
             prd_attr.item_gender         AS item_gender,
             NULL AS pip_text,
             CASE
@@ -239,7 +242,6 @@ dbms_output.put_line('SQL OUTPUT :  '
                          SET SERVEROUTPUT ON;
                          WHENEVER SQLERROR EXIT 1
 DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '||TO_CHAR(SYSDATE,'MM-DD-YYYY HH:Mi:SS')||' Loaded IMAGE_BAY_&2 table. '||' '||NVL((SQL%ROWCOUNT),0)||' rows affected.');
-DELETE FROM &2.image_alt_&1;
 INSERT INTO &2.image_alt_&1
 SELECT
              REGEXP_REPLACE(a.PRODUCT_CODE,'[^[:digit:]]','') product_code,
@@ -258,40 +260,49 @@ SELECT
                               AND a.catalog_ind = 'Y'
                               AND a.upc = a.reorder_upc_no
                           GROUP BY a.product_code;
-
+COMMIT;
 DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '||TO_CHAR(SYSDATE,'MM-DD-YYYY HH:Mi:SS')||' Loaded IMAGE_BAY_ALT table. '||' '||NVL((SQL%ROWCOUNT),0)||' rows affected.');
-
 INSERT INTO &2.bi_product_aggregate
-        SELECT
-            agg.product_code,
-            agg.prod_sizes,
-            agg.prod_colors,
-            '' prod_alt_img_urls,
-            sysdate   AS create_timestamp,
-            sysdate   AS update_timestamp
-        FROM
-            (
-                SELECT
-                    styl_seq_num product_code,
-                    LISTAGG(sku_color, ',') WITHIN GROUP(
-                        ORDER BY
-                            styl_seq_num
-                    ) AS prod_colors,
-                    LISTAGG(sku_size1_desc, ',') WITHIN GROUP(
-                        ORDER BY
-                            styl_seq_num
-                    ) AS prod_sizes
-                FROM
-                    &2.&3
-                GROUP BY
-                    styl_seq_num
-            ) agg;
- LEFT JOIN &2.image_alt_&1 img ON img.product_code = agg.product_code;
+SELECT
+agg.product_code,
+agg.prod_sizes,
+agg.prod_colors,
+alt_image_url prod_alt_img_urls,
+sysdate   AS create_timestamp,
+sysdate   AS update_timestamp
+FROM
+(
+with colr as
+  (SELECT
+      styl_seq_num product_code,
+   LISTAGG(sku_color, ',') WITHIN GROUP(
+     ORDER BY
+          styl_seq_num
+      ) AS prod_colors
+      from (select distinct sku_color sku_color,styl_seq_num from &2.&3 ) a
+         GROUP BY
+      a.styl_seq_num) ,
+      siz as  (SELECT
+      styl_seq_num product_code,
+   LISTAGG(sku_size1_desc, ',') WITHIN GROUP(
+     ORDER BY
+          styl_seq_num
+      ) AS prod_sizes
+      from (select distinct sku_size1_desc ,styl_seq_num from &2.&3 ) a
+         GROUP BY
+      a.styl_seq_num)
+
+      select nvl(c.product_code,z.product_code) product_code, prod_colors,prod_sizes from colr c
+      join siz z
+      on c.product_code = z.product_code
+      ) agg
+      LEFT JOIN &2.image_alt_&1 img ON img.product_id = agg.product_code;
 dbms_stats.gather_table_stats('&1', '&3', force => true);
 -- Start Merging Prices for All SKU's into Partners
 dbms_output.put_line('SQL OUTPUT :  '
                          || 'Merge prices for All SKUs Start : '
                          || to_char(sysdate, 'MM-DD-YYYY HH:MI:SS'));
+COMMIT;                         
 MERGE INTO &2.&3 tg
     USING (
               SELECT
