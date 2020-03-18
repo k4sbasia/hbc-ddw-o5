@@ -40,7 +40,7 @@ then
 export LOG_FILE="$LOG/${PROCESS}_${BANNER}_log.txt"
 export SCHEMA="mrep."
 export PART_TABLE="BI_PARTNERS_EXTRACT_WRK"
-export OMS_RFS_STG_TAB = "OMS_RFS_SAKS_STG"
+export OMS_RFS_STG_TAB="OMS_RFS_SAKS_STG"
 fi
 #############################################################
 ########    OFF5TH BANNER    ###############################
