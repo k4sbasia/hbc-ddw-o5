@@ -26,7 +26,8 @@ select 'retailstoreid' ||chr(9) ||
 from
 ( select s.CUR_TKT_PRICE_DOL,o.UPC, o.skn_no from O5.OMS_RFS_O5_STG s, O5.STG_GOOGLE_FEED_O5 o
 Where o.upc = s.UPC ) a,
-(select item_id,SHIPNODE_KEY ship_node ,ATP -PICKUP_SS  ONHAND_AVAILABLE_QUANTITY  from  O5.O5_OMS_COMMON_INV where trim(ORGANIZATION_CODE) = 'OFF5' and trim(SHIPNODE_KEY) not in ('DC-LVG-789','DC-789-593')
+(select item_id,SHIPNODE_KEY ship_node ,ATP -PICKUP_SS  ONHAND_AVAILABLE_QUANTITY  from  O5.O5_OMS_COMMON_INV
+  where trim(ORGANIZATION_CODE) = 'OFF5' and trim(SHIPNODE_KEY) not in ('DC-LVG-789','DC-789-593')
 --and trim(SHIPNODE_KEY) in ('7843','7842')
 and ATP - PICKUP_SS >=2) b
 Where a.skn_no = trim(b.item_id);
