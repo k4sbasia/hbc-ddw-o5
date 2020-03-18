@@ -49,7 +49,7 @@ if [ "${BANNER}" == "o5" ];
 then
 export SCHEMA="o5."
 export PART_TABLE="O5_PARTNERS_EXTRACT_WRK"
-export OMS_RFS_STG_TAB = "OMS_RFS_O5_STG"
+export OMS_RFS_STG_TAB="OMS_RFS_O5_STG"
 fi
 #############################################################
 ##Update Runstats Start
