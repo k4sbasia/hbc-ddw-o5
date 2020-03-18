@@ -3,9 +3,9 @@
 #####                           SAKS INC.
 #############################################################################################################################
 #####
-#####   PROGRAM NAME :o5_prd_mini_product.sh
+#####   PROGRAM NAME :product_info_seo_url_update.sh
 #####
-#####   DESCRIPTION  : This script does the following
+#####   DESCRIPTION  : This script does the following : Update seo url
 #####   CODE HISTORY :                   Name                     Date            Description
 #####                                   ------------            ----------      ------------
 #####
@@ -17,12 +17,11 @@
 export SQL=$HOME/SQL
 export LOG=$HOME/LOG
 export DATA=$HOME/DATA
-export PROCESS='o5_prd_mini_product'
+export PROCESS='product_info_seo_url_update'
 export LOG_FILE="$LOG/${PROCESS}_log.txt"
 export JOB_NAME='PRD_LOAD'
 export SCRIPT_NAME="${PROCESS}"
 export EXTRACT_SQL='$SQL/${PROCESS}.sql'
-export FILE_NAME='bi_mini_product table'
 export SFILE_SIZE=0
 export FILE_COUNT=0
 export TFILE_SIZE=0
@@ -38,6 +37,7 @@ if [ "${BANNER}" == "s5a" ];
 then
 export LOG_FILE="$LOG/${PROCESS}_${BANNER}_log.txt"
 export SCHEMA="mrep."
+export SEO_URL_TABLE="PRODUCT_SEO_URL_MAPPING"
 fi
 #############################################################
 ########    OFF5TH BANNER    ###############################
@@ -45,6 +45,7 @@ fi
 if [ "${BANNER}" == "o5" ];
 then
 export SCHEMA="o5."
+export SEO_URL_TABLE="PRODUCT_SEO_URL_MAPPING"
 fi
 
 ########Run the stats####################################################################
@@ -52,8 +53,8 @@ sqlplus -s -l  $CONNECTDW <<EOF> ${LOG}/${PROCESS}_runstats_start.log @${SQL}/ru
 EOF
 ########################################################################################
 echo "Running the script started at `date '+%a %b %e %T'`" >${LOG_FILE}
-sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL} "${SCHEMA}" "${BANNER}" >>${LOG_FILE}
-echo "running the o5_prd_mini_product statments completed  at `date '+%a %b %e %T'`" >>${LOG_FILE}
+sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL} "${SCHEMA}" "${BANNER}" "${SEO_URL_TABLE}" >>${LOG_FILE}
+echo "running the product_info_seo_url_update statments completed  at `date '+%a %b %e %T'`" >>${LOG_FILE}
 ########################################################################################
 #### Bad Records Check
 ##################################################################################################
