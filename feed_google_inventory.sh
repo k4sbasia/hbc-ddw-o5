@@ -46,60 +46,9 @@ export O5_FILE_NAME1="google_inventory_feed_${BANNER}_`date +"%Y_%m_%d"`.txt"
 export O5_FILE_NAME2="saksofffifthavenue_en-us_price-quantity_test"
 export LT_FILE_NAME1="google_inventory_feed_${BANNER}_`date +"%Y_%m_%d"`.txt"
 export LT_FILE_NAME2="lordandtaylor_en-us_price-quantity_test"
+export BANNER=&1
 ########################################################################
 ##Initialize Email Function
-########################################################################
-function send_email {
- CURRENT_TIME=`date +"%m/%d/%Y-%H:%M:%S"`
- cat $HOME/email_distribution_list.txt|grep '^3'|while read group address
- do
- echo ${CURRENT_TIME}|mailx -s "${SUBJECT}" $address
- done
-}
-function send_delay_email {
- CURRENT_TIME=`date +"%m/%d/%Y-%H:%M:%S"`
- export SUBJECT=${BAD_SUBJECT}
- BBODY="Google: product feed is delayed and we are looking into it. Thanks"
- BADDRESS="nilima_mehta@5a.com hbcdigitaldatamanagement@saksinc.com"
- BSUBJECT="GOOGLE SAKS PRODUCT FEED DELAYED"
- echo ${BBODY} ${CURRENT_TIME}|mailx -s "${BSUBJECT}" ${BADDRESS}
- send_email
-}
-
-if [ "${BANNER}" == "s5a" ];
-then
-export LOG_FILE="$LOG/${PROCESS}_${BANNER}_log.txt"
-export SCHEMA="mrep."
-export PIM_PRD_ATTR_TAB="saks_all_active_pim_prd_attr"
-export PIM_SKU_ATTR_TAB="saks_all_active_pim_sku_attr"
-export PIM_ASSRT_TAB="saks_all_actv_pim_assortment"
-export PART_TABLE="BI_PARTNERS_EXTRACT_WRK"
-export BMCONNECTION="PRODSTO_MREP"
-fi
-#############################################################
-########    OFF5TH BANNER    ###############################
-############################################################
-if [ "${BANNER}" == "o5" ];
-then
-export SCHEMA="o5."
-export PART_TABLE="O5_PARTNERS_EXTRACT_WRK"
-export LOG_FILE="$LOG/${PROCESS}_${BANNER}_log.txt"
-export PIM_PRD_ATTR_TAB="pim_ab_o5_prd_attr_data"
-export PIM_SKU_ATTR_TAB="pim_ab_O5_sku_attr_data"
-export PIM_WEB_FOLDER_TAB="pim_ab_o5_web_folder_data"
-export PIM_ASRT_PRD_ASSGM="pim_ab_o5_bm_asrt_prd_assgn"
-export PIM_FOLDER_ATTR_DATA="pim_ab_o5_folder_attr_data"
-export PIM_DBLINK="PIM_READ"
-fi
-
-################################################################
-if [ "${BANNER_PARAM}" == "o5" ] || [ "${BANNER_PARAM}" == "lat" ] ;
-then
-  export BANNER=$BANNER_PARAM
-  export O5_FILE_NAME1="google_inventory_feed_${BANNER}_`date +"%Y_%m_%d"`.txt"
-  export LT_FILE_NAME1="google_inventory_feed_${BANNER}_`date +"%Y_%m_%d"`.txt"
-  export LOG_FILE="$LOG/${PROCESS}_${BANNER}_log.txt"
-fi
 #####################################################################
 echo -e " Google inventory feed started at `date '+%a %b %e %T'`" >${LOG_FILE}
 ##Update Runstats Start
@@ -107,10 +56,6 @@ echo -e " Google inventory feed started at `date '+%a %b %e %T'`" >${LOG_FILE}
 sqlplus -s -l  $CONNECTDW <<EOF> ${LOG}/${PROCESS}_runstats_start.log @${SQL}/runstats_start.sql "$JOB_NAME" "$SCRIPT_NAME" "$SFILE_SIZE" "$FILE_NAME" "$LOAD_COUNT" "$FILE_COUNT" "$TFILE_SIZE" "$SOURCE_COUNT" "$TARGET_COUNT"
 EOF
 ################################################################
-if [ "&1" == "o5" ]
-then
-  export BANNER = &1
-fi
 if [ "${BANNER}" == "saks" ]
 then
 export CHAIN="8"
@@ -135,14 +80,6 @@ wait
 Bye
 EOF
 #################################################################
-##FTP TRANSFER VALIDATION
-#################################################################
-##if [ $?  -ne  0 ]
-##then
-##echo "FTP process failed. Please investigate" >> ${LOG_FILE}
-##send_delay_email
-##exit 99
-##fi
 #################################################################
 echo -e "FTP for inventory ended to google at `date '+%a %b %e %T'` " >>${LOG_FILE}
 ################################################################
@@ -166,8 +103,6 @@ SOURCE_COUNT=`cat $DATA/${O5_FILE_NAME1} | wc -l`
 #############################################################
 echo "Check for no of rows in data file before sending to google. If count is less than 60000 then process will fail" >> ${LOG_FILE}
 ## Unco
-#if [ ${SOURCE_COUNT} -gt 10000 ]
-#then
 echo " ${SOURCE_COUNT} records found in ${O5_FILE_NAME1} file " >> ${LOG_FILE}
 cd $DATA
 cp ${O5_FILE_NAME1}  ${O5_FILE_NAME2} >>${LOG_FILE}
@@ -239,4 +174,3 @@ echo -e "${PROCESS} completed without errors."
 echo -e "${PROCESS} completed without errors." >> ${LOG_FILE}
 #send_email
 fi
-exit 0
