@@ -12,7 +12,7 @@ ALTER SESSION ENABLE PARALLEL DML;
 declare
 Begin
 DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '|| TO_CHAR(SYSDATE,'MM-DD-YYYY HH:MI:SS') || ' START of Partners Extract Insert');
-INSERT INTO o5.o5_partners_extract_wrk (
+INSERT INTO &2.&3 (
         merchant_id,
         department_name,
         group_name,
@@ -122,7 +122,7 @@ INSERT INTO o5.o5_partners_extract_wrk (
             NULL AS preorder,
             url.eng_url                  AS product_url,
             CASE
-                WHEN 'o5' = 'o5' THEN
+                WHEN '&1' = 'o5' THEN
                     'https://image.s5a.com/is/image/saksoff5th/' || bm.product_id
                 ELSE
                     'https://image.s5a.com/is/image/saks/' || bm.product_id
@@ -150,7 +150,7 @@ INSERT INTO o5.o5_partners_extract_wrk (
             sysdate                      AS create_timestamp,
             NULL AS update_timestamp
         FROM
-            o5.v_active_product_o5          bm
+            &2.v_active_product_&1          bm
             LEFT JOIN (
                 SELECT DISTINCT
                     prd.product_code,
@@ -172,13 +172,13 @@ INSERT INTO o5.o5_partners_extract_wrk (
                     prd.item
 --                    prd.modify_dt
                 FROM
-                    o5.bi_product prd
+                    &2.bi_product prd
                     --AND ltrim(prd.group_id,'0') = ltrim(hi.group_id,'0')
                 WHERE
                     prd.deactive_ind = 'N'
             ) prd ON bm.product_id = prd.product_code							       --Table is used to filter Active and readyforProd Products
-            INNER JOIN o5.all_active_pim_prd_attr_o5   prd_attr ON prd_attr.product_id = bm.product_id              --PIM Product Attributes
-            INNER JOIN o5.all_active_pim_sku_attr_o5   sku_attr ON sku_attr.upc = lpad(prd.upc, 13, '0')
+            INNER JOIN &2.all_active_pim_prd_attr_&1   prd_attr ON prd_attr.product_id = bm.product_id              --PIM Product Attributes
+            INNER JOIN &2.all_active_pim_sku_attr_&1   sku_attr ON sku_attr.upc = lpad(prd.upc, 13, '0')
                                                                  AND sku_status = 'Yes'                 --PIM SKU Attributes
             LEFT JOIN (
                 SELECT
@@ -202,7 +202,7 @@ INSERT INTO o5.o5_partners_extract_wrk (
                     folder_path,
                     primary_parent_category
                 FROM
-                    o5.all_actv_pim_assortment_o5
+                    &2.all_actv_pim_assortment_&1
             ) asst ON bm.product_id = asst.product_id                       --PIM Product Assortments
             LEFT JOIN (
                 SELECT DISTINCT
@@ -215,20 +215,20 @@ INSERT INTO o5.o5_partners_extract_wrk (
                     substr(r.division_id, 1, 1) division_id,
                     substr(r.department_name, 1, 24) division_name
                 FROM
-                    o5.oms_rfs_o5_stg r
+                    &2.&4 r
             ) rfs ON rfs.skn_no = ltrim(prd.sku, '0')
             LEFT JOIN (
                 SELECT
                     product_code,
                     seo_url eng_url
                 FROM
-                    o5.product_seo_url_mapping
+                    &2.product_seo_url_mapping
             ) url ON bm.product_id = url.product_code;
 
     COMMIT;
 dbms_output.put_line('SQL OUTPUT :  '
                          || to_char(sysdate, 'MM-DD-YYYY HH:Mi:SS')
-                         || ' End Inserting O5.bi_partners_extract_wrk :'
+                         || ' End Inserting &2.&3 :'
                          || ' '
                          || nvl((SQL%rowcount), 0)
                          || ' rows affected.');
@@ -236,7 +236,32 @@ COMMIT;
 dbms_output.put_line('SQL OUTPUT :  '
                          || to_char(sysdate, 'MM-DD-YYYY HH:Mi:SS')
                          || ' Start Gathering all sizes and color in order to concatenate and load product aggregate table');
-INSERT INTO o5.bi_product_aggregate
+                         SET SERVEROUTPUT ON;
+                         WHENEVER SQLERROR EXIT 1
+DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '||TO_CHAR(SYSDATE,'MM-DD-YYYY HH:Mi:SS')||' Loaded IMAGE_BAY_&2 table. '||' '||NVL((SQL%ROWCOUNT),0)||' rows affected.');
+DELETE FROM &2.image_alt_&1;
+INSERT INTO &2.image_alt_&1
+SELECT
+             REGEXP_REPLACE(a.PRODUCT_CODE,'[^[:digit:]]','') product_code,
+                                LISTAGG(
+                                case when '_&1' = 'o5'
+                                then 'https://image.s5a.com/is/image/saksoff5th/'
+                                else
+                                'https://image.s5a.com/is/image/saks/'
+                                end
+                                || a.product_code||'_300x400.jpg',',') WITHIN GROUP(ORDER BY product_code) AS alt_image_url,
+                                SYSDATE
+                            FROM
+                                &2.&4 a
+                                JOIN &2.media_manifest img ON regexp_replace(substr(asset_id,0,instr(asset_id,'_') - 1),'[^0-9]+','') = a.upc
+                            WHERE (img.asset_id LIKE '%_A1'  or img.asset_id LIKE '%_A2' or img.asset_id LIKE '%_A3' or img.asset_id LIKE '%_A4' or  img.asset_id LIKE '%_ASTL%' )
+                              AND a.catalog_ind = 'Y'
+                              AND a.upc = a.reorder_upc_no
+                          GROUP BY a.product_code;
+
+DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '||TO_CHAR(SYSDATE,'MM-DD-YYYY HH:Mi:SS')||' Loaded IMAGE_BAY_ALT table. '||' '||NVL((SQL%ROWCOUNT),0)||' rows affected.');
+
+INSERT INTO &2.bi_product_aggregate
         SELECT
             agg.product_code,
             agg.prod_sizes,
@@ -257,17 +282,17 @@ INSERT INTO o5.bi_product_aggregate
                             styl_seq_num
                     ) AS prod_sizes
                 FROM
-                    o5.o5_partners_extract_wrk
+                    &2.&3
                 GROUP BY
                     styl_seq_num
             ) agg;
--- LEFT JOIN O5.image_alt_o5 img ON img.product_code = agg.product_code;
-dbms_stats.gather_table_stats('O5', 'o5_partners_extract_wrk', force => true);
+-- LEFT JOIN &2.image_alt_&1 img ON img.product_code = agg.product_code;
+dbms_stats.gather_table_stats('&1', '&3', force => true);
 -- Start Merging Prices for All SKU's into Partners
 dbms_output.put_line('SQL OUTPUT :  '
                          || 'Merge prices for All SKUs Start : '
                          || to_char(sysdate, 'MM-DD-YYYY HH:MI:SS'));
-MERGE INTO o5.o5_partners_extract_wrk tg
+MERGE INTO &2.&3 tg
     USING (
               SELECT
                   skn_no,
@@ -289,7 +314,7 @@ MERGE INTO o5.o5_partners_extract_wrk tg
                   END price_fg,
                   compare_at
               FROM
-                  o5.v_sd_price_o5
+                  &2.v_sd_price_&1
 --     WHERE skn_no = '1013931'
           )
     src ON ( src.skn_no = tg.sku )
@@ -308,13 +333,13 @@ COMMIT;
 dbms_output.put_line('SQL OUTPUT :  '
                          || 'Merge Inventory for All SKUs Start : '
                          || to_char(sysdate, 'MM-DD-YYYY HH:MI:SS'));
-MERGE INTO o5.&3 tg
+MERGE INTO &2.&3 tg
     USING (
               SELECT
                   skn_no                  skn,
                   in_stock_sellable_qty   qty
               FROM
-                  o5.inventory src
+                  &2.inventory src
           )
     sr ON ( tg.sku = sr.skn )
     WHEN MATCHED THEN UPDATE
