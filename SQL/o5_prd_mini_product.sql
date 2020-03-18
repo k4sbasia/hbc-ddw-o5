@@ -151,7 +151,6 @@ MERGE INTO &1.bi_mini_product hst
      USING (
  SELECT DISTINCT
            oa.PRODUCT_ID AS product_id,
-           oa.primary_parent_color AS color_family,
            oa.BM_DESC AS short_description,
            oa.RETURNABLE AS returnable,
            oa.PERSONALIZABLE AS personalizable,
@@ -162,7 +161,7 @@ MERGE INTO &1.bi_mini_product hst
         ON (trn.product_id = hst.product_code)
  WHEN MATCHED
 THEN
-   UPDATE SET hst.COLOR_FAMILY = trn.color_family,
+   UPDATE SET
                           hst.item_web_description =  substr(trn.short_description, 1, 200),
                           hst.returnable = trn.returnable,
                           hst.personalizable = trn.personalizable,
@@ -170,6 +169,22 @@ THEN
                          hst.readyforprod = trn.readyforprod;
 
 COMMIT;
+
+MERGE INTO &1.bi_mini_product hst
+     USING (
+ SELECT oa.upc,primary_parent_color color_family
+ FROM &1.all_active_pim_sku_attr_&2  oa, &1.bi_mini_product op
+ where oa.upc= op.upc
+ and primary_parent_color is not null
+ and oa.primary_parent_color <> op.COLOR_FAMILY
+ ) trn
+        ON (trn.upc = hst.upc)
+ WHEN MATCHED
+THEN
+   UPDATE SET hst.COLOR_FAMILY = trn.color_family;
+
+COMMIT;
+
 
 
 --First update the pubdate with readyforprod set date
