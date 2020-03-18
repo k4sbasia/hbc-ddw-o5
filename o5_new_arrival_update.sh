@@ -20,7 +20,7 @@
 . $HOME/params.conf o5
 ################################################################
 ##Control File Variables
-export ENV=$1
+#export ENV=$1
 export SQL=$HOME/SQL
 export LOG=$HOME/LOG
 export PROCESS="o5_new_arrival_update_${ENV}"
@@ -99,7 +99,7 @@ EOF
 ##fi
 ##SDW
 
-if [ "$ENV" = "o5_preview" ]; then
+#if [ "$ENV" = "o5_preview" ]; then
 sqlplus -s -l  $CONNECTDW <<EOF>${LOG_FILE} @${SQL01} "$DBLINK" "$SCHEMA" "$BANNER"
 EOF
 #sqlplus -s -l  $CONNECTDW <<EOF>>${LOG_FILE} @${SQL1} "$DBLINK" "$SCHEMAETL"
@@ -112,7 +112,7 @@ if [ "$ENV" = "o5_stqa" ]; then
 echo "commented in STQA this code as it updates the common table used in prod" > ${LOG_FILE}
 fi
 
-if [ "$ENV" = "o5_prod" ]; then
+#if [ "$ENV" = "o5_prod" ]; then
 sqlplus -s -l  $CONNECTDW <<EOF>${LOG_FILE} @${SQL0} "$DBLINK" "$SCHEMA""$BANNER"
 EOF
 #sqlplus -s -l  $CONNECTDW <<EOF>>${LOG_FILE} @${SQL1} "$DBLINK" "$SCHEMAETL"
