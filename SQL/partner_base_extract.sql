@@ -286,7 +286,7 @@ INSERT INTO &2.bi_product_aggregate
                 GROUP BY
                     styl_seq_num
             ) agg;
--- LEFT JOIN &2.image_alt_&1 img ON img.product_code = agg.product_code;
+ LEFT JOIN &2.image_alt_&1 img ON img.product_code = agg.product_code;
 dbms_stats.gather_table_stats('&1', '&3', force => true);
 -- Start Merging Prices for All SKU's into Partners
 dbms_output.put_line('SQL OUTPUT :  '
