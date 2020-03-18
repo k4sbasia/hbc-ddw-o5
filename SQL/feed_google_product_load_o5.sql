@@ -10,9 +10,9 @@ set verify off
 set define off
 
 
-TRUNCATE TABLE &1.STG_GOOGLE_FEED_O5;
+TRUNCATE TABLE O5.STG_GOOGLE_FEED_O5;
 
-INSERT into &1.STG_GOOGLE_FEED_O5(
+INSERT into O5.STG_GOOGLE_FEED_O5(
 UPC, DEPARTMENT_NAME, SHORT_DESCRIPTION, WEB_PRICE, BRAND_NAME, IMAGE_URL, SKU_SIZE, SKU_COLOR, PRODUCT_CODE, VENDOR_STYLE_20CH, ADD_DT,SKN_NO
 )
 select distinct a.UPC,
@@ -27,13 +27,13 @@ select distinct a.UPC,
  a.VENDOR_STYLE_20CH,
  trunc(SYSDATE) ADD_DT,
  a.SKN_NO
-from &1.OMS_RFS_O5_STG a,
-    &1.bi_product p
+from O5.OMS_RFS_O5_STG a,
+    o5.bi_product p
 where
  a.upc = A.REORDER_UPC_NO
 and lpad(a.upc,13,0)=p.upc
 and A.SHORT_DESCRIPTION <> 'DO NOT USE'
-and exists (select product_id from &1.v_active_product_o5 b where p.product_code = b.product_id)
+and exists (select product_id from o5.v_active_product_o5 b where p.product_code = b.product_id)
 --and a.DEPARTMENT_ID in ('932')
 --and a.DIVISION_ID like '4%'
 --and lower(p.brand_name) in ('pure navy','renvy','saks fifth avenue','ava & aiden','nhp','russel park')
@@ -69,8 +69,8 @@ SELECT distinct regexp_replace(lpad(UPC,13,'0'), '[[:space:]]+', chr(32)) ||chr(
  regexp_replace(PRODUCT_CODE , '[[:space:]]+', chr(32))||chr(9) ||
  regexp_replace(VENDOR_STYLE_20CH, '[[:space:]]+', chr(32)) ||chr(9) ||
  'new'
-FROM  &1.STG_GOOGLE_FEED_O5 a ,
-(select item_id,SHIPNODE_KEY ship_node ,ATP -PICKUP_SS  ONHAND_AVAILABLE_QUANTITY  from  &1.O5_OMS_COMMON_INV where trim(ORGANIZATION_CODE) = 'OFF5' and trim(SHIPNODE_KEY) not in ('DC-LVG-789','DC-789-593') 
+FROM  O5.STG_GOOGLE_FEED_O5 a ,
+(select item_id,SHIPNODE_KEY ship_node ,ATP -PICKUP_SS  ONHAND_AVAILABLE_QUANTITY  from  O5.O5_OMS_COMMON_INV where trim(ORGANIZATION_CODE) = 'OFF5' and trim(SHIPNODE_KEY) not in ('DC-LVG-789','DC-789-593') 
  --and trim(SHIPNODE_KEY) in ('7843','7842')
 and (ATP - PICKUP_SS) >1) b
 Where a.skn_no = trim(b.item_id);
