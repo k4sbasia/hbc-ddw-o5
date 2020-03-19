@@ -69,7 +69,7 @@ BEGIN
     COMMIT;
 
     INSERT INTO &1.all_active_product_sku_&2
-    (skno_no,upc,product_code,add_dt)
+    (skn_no,upc,product_code,add_dt)
     SELECT
         p.skn_no,
         p.upc,
