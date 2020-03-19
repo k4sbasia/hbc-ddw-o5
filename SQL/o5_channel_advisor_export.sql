@@ -1,13 +1,12 @@
-WHENEVER OSERROR EXIT FAILURE
-WHENEVER SQLERROR EXIT FAILURE
-SET ECHO OFF
-SET FEEDBACK OFF
-SET LINESIZE 10000
-SET PAGESIZE 0
-SET HEADING OFF
-SET ARRAYSIZE 5000
-SET VERIFY OFF
-SET FEEDBACK OFF
+whenever sqlerror exit failure
+set linesize 32767
+set heading off
+set echo off
+set feedback off
+set pagesize 0
+set trimspool on
+set serverout on
+set verify off
 SET TERMOUT OFF
 SPOOL &2
 
