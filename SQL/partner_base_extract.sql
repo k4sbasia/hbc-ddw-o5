@@ -302,7 +302,7 @@ dbms_stats.gather_table_stats('&1', '&3', force => true);
 dbms_output.put_line('SQL OUTPUT :  '
                          || 'Merge prices for All SKUs Start : '
                          || to_char(sysdate, 'MM-DD-YYYY HH:MI:SS'));
-COMMIT;                         
+COMMIT;
 MERGE INTO &2.&3 tg
     USING (
               SELECT
