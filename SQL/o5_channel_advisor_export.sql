@@ -8,7 +8,7 @@ SET HEADING OFF
 SET ARRAYSIZE 5000
 SET VERIFY OFF
 SET FEEDBACK OFF
-SET TERMOUT OFF;
+SET TERMOUT OFF
 
 SELECT
     'Parent_SKU'
@@ -242,9 +242,9 @@ SELECT fcae.manufacturer_part#
             ELSE round(((fcae.sale_price - t2.item_cst_amt) / fcae.sale_price),2)
         END
 FROM
-    &1.channel_advisor_extract_new fcae
+    o5.channel_advisor_extract_new fcae
     JOIN (SELECT DISTINCT t2.product_code, t2.skn_no, t2.upc, MAX(t2.item_cst_amt) AS item_cst_amt
-            FROM &1.oms_rfs_o5_stg t2
+            FROM o5.oms_rfs_o5_stg t2
            GROUP BY t2.product_code, t2.skn_no, t2.upc) t2 ON fcae.manufacturer_part# = t2.product_code AND to_number(fcae.sku_number) = t2.upc;
 
 SPOOL OFF;
