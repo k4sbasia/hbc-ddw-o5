@@ -4,12 +4,11 @@ SET ECHO OFF
 SET FEEDBACK OFF
 SET LINESIZE 10000
 SET PAGESIZE 0
-SET SQLPROMPT ''
 SET HEADING OFF
-SET TRIMSPOOL ON
 SET ARRAYSIZE 5000
+SET VERIFY OFF
+SET FEEDBACK OFF
 SET TERMOUT OFF;
-SPOOL &2;
 
 SELECT
     'Parent_SKU'
@@ -236,7 +235,7 @@ SELECT fcae.manufacturer_part#
         when  itm_gender = '5' then 'Kids'
         when  itm_gender = '6' then 'Pets'
         else itm_gender
-        end 
+        end
     || '|'
     || CASE WHEN nvl(fcae.sale_price,0) = 0 OR t2.item_cst_amt IS NULL THEN 0
             WHEN round(((fcae.sale_price - t2.item_cst_amt) / fcae.sale_price),2) < 0 THEN 0.01
