@@ -388,7 +388,8 @@ purchase_restriction,
 SL_entity,
 SL_web_ok,
 zoom,
-PRD_STATUS
+PRD_STATUS,
+PRD_READYFORPROD
 from o5.all_active_pim_prd_attr_o5
 ;
 
@@ -438,7 +439,8 @@ select RUN_ID_SEQ.nextval  INTO v_run_id from dual;
               modify_dt = trunc(sysdate),
               item_active_ind = case when v_coll(indx).prd_status = 'Yes' then 'A'
                                 else 'I'
-                                end
+                                end,
+                readyforprod =  v_coll(indx).PRD_READYFORPROD               
           where product_code =  v_coll(indx).product_code;
               commit;
                 EXCEPTION
