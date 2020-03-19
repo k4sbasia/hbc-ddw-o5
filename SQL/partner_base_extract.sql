@@ -227,8 +227,7 @@ INSERT INTO &2.&3 (
                 FROM
                     &2.product_seo_url_mapping
             ) url ON bm.product_id = url.product_code;
-
-    COMMIT;
+COMMIT;
 dbms_output.put_line('SQL OUTPUT :  '
                          || to_char(sysdate, 'MM-DD-YYYY HH:Mi:SS')
                          || ' End Inserting &2.&3 :'
@@ -239,8 +238,6 @@ COMMIT;
 dbms_output.put_line('SQL OUTPUT :  '
                          || to_char(sysdate, 'MM-DD-YYYY HH:Mi:SS')
                          || ' Start Gathering all sizes and color in order to concatenate and load product aggregate table');
-                         SET SERVEROUTPUT ON;
-                         WHENEVER SQLERROR EXIT 1
 DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '||TO_CHAR(SYSDATE,'MM-DD-YYYY HH:Mi:SS')||' Loaded IMAGE_BAY_&2 table. '||' '||NVL((SQL%ROWCOUNT),0)||' rows affected.');
 INSERT INTO &2.image_alt_&1
 SELECT
