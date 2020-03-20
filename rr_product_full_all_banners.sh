@@ -45,7 +45,7 @@ export FILE_COUNT='0'
 export TFILE_SIZE='0'
 export SOURCE_COUNT='0'
 export TARGET_COUNT='0'
-export BANNER=$1
+export BANNER='&1'
 #######################################################################################
 ##Initialize Email Function
 ################################################################
@@ -127,7 +127,7 @@ fi
 cd DATA
 echo "RR Full catalog feed process started for $BANNER" >${LOG_FILE}
 echo "Creation of the log file started at `date '+%a %b %e %T'`" >>${LOG_FILE}
-sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL} "${SCHEMA}" "${BANNER}" >product_full_${BANNER}.txt
+sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL} "${SCHEMA}" "$BMCONNECTION" "$PART_TABLE" "$DBCONNECTPRIM" "$REVW_TABLE" "${BANNER}">product_full_${BANNER}.txt
 SQL_RET_CODE=$?
 echo "Creation of the product data file ended at `date '+%a %b %e %T'`" >>${LOG_FILE}
 wait
@@ -136,11 +136,11 @@ wait
 #################################################################
 if [ ${SQL_RET_CODE} -eq 0 ]
 then
-        echo "${EXTRACT_SQL} completed at `date '+%a %b %e %T'`" >>${LOG_FILE}
+	echo "${EXTRACT_SQL} completed at `date '+%a %b %e %T'`" >>${LOG_FILE}
 else
-        echo "Aborting: Error ${EXTRACT_SQL} at `date '+%a %b %e %T'`" >>${LOG_FILE}
-        send_delay_email
-        exit 99
+	echo "Aborting: Error ${EXTRACT_SQL} at `date '+%a %b %e %T'`" >>${LOG_FILE}
+	send_delay_email
+	exit 99
 fi
 #################################################################
 ##Rename File
@@ -151,9 +151,9 @@ wait
 #################################################################
 if [ -e ${DATA}/product_full_off5th_`date +%Y_%m_%d`.txt  ]
 then
-        FILE_NAME=product_full_off5th_`date +%Y_%m_%d`.txt
-        TFILE_SIZE="`ls -ll ${DATA}/$FILE_NAME |tr -s ' ' '|' |cut -f5 -d'|'`" # size of the file
-        FILE_COUNT="`wc -l ${DATA}/$FILE_NAME |tr -s ' ' '|' |cut -f1 -d'|'`" # linecount of the file
+	FILE_NAME=product_full_off5th_`date +%Y_%m_%d`.txt
+	TFILE_SIZE="`ls -ll ${DATA}/$FILE_NAME |tr -s ' ' '|' |cut -f5 -d'|'`" # size of the file
+	FILE_COUNT="`wc -l ${DATA}/$FILE_NAME |tr -s ' ' '|' |cut -f1 -d'|'`" # linecount of the file
 fi
 echo "File size is: ${TFILE_SIZE}" >> ${LOG_FILE}
 echo "Line count is: ${FILE_COUNT}" >> ${LOG_FILE}
@@ -169,10 +169,10 @@ else
  echo "${PROCESS} was not sent. Minimum amount of data was not present." >> $LOG_FILE
  send_delay_email
  exit 99
-fi
+fi 
 #################################################################
 ## second file
-sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL2} "$CLNECONNECTION" "$PIMLINK">category_full_${BANNER}.txt
+sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL2} "$CLNECONNECTION" >category_full_${BANNER}.txt
 SQL_RET_CODE=$?
 echo "Creation of the category data file ended at `date '+%a %b %e %T'`" >>${LOG_FILE}
 wait
@@ -181,11 +181,11 @@ wait
 #################################################################
 if [ ${SQL_RET_CODE} -eq 0 ]
 then
-        echo "${EXTRACT_SQL2} completed at `date '+%a %b %e %T'`" >>${LOG_FILE}
+	echo "${EXTRACT_SQL2} completed at `date '+%a %b %e %T'`" >>${LOG_FILE}
 else
-        echo "Aborting: Error ${EXTRACT_SQL2} at `date '+%a %b %e %T'`" >>${LOG_FILE}
-        send_delay_email
-        exit 99
+	echo "Aborting: Error ${EXTRACT_SQL2} at `date '+%a %b %e %T'`" >>${LOG_FILE}
+	send_delay_email
+	exit 99
 fi
 #################################################################
 ##Rename File
@@ -196,9 +196,9 @@ wait
 #################################################################
 if [ -e ${DATA}/category_full_off5th_`date +%Y_%m_%d`.txt  ]
 then
-        FILE_NAME=category_full_off5th_`date +%Y_%m_%d`.txt
-        TFILE_SIZE="`ls -ll ${DATA}/$FILE_NAME |tr -s ' ' '|' |cut -f5 -d'|'`" # size of the file
-        FILE_COUNT="`wc -l ${DATA}/$FILE_NAME |tr -s ' ' '|' |cut -f1 -d'|'`" # linecount of the file
+	FILE_NAME=category_full_off5th_`date +%Y_%m_%d`.txt
+	TFILE_SIZE="`ls -ll ${DATA}/$FILE_NAME |tr -s ' ' '|' |cut -f5 -d'|'`" # size of the file
+	FILE_COUNT="`wc -l ${DATA}/$FILE_NAME |tr -s ' ' '|' |cut -f1 -d'|'`" # linecount of the file
 fi
 echo "File size is: ${TFILE_SIZE}" >> ${LOG_FILE}
 echo "Line count is: ${FILE_COUNT}" >> ${LOG_FILE}
@@ -214,10 +214,10 @@ else
  echo "${PROCESS} was not sent. Minimum amount of data was not present." >> $LOG_FILE
  send_delay_email
  exit 99
-fi
+fi 
 #################################################################
 ## third file
-sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL3} "$CLNECONNECTION" "${SCHEMA}" "${BANNER}" "$PIMLINK">products_in_category_${BANNER}.txt
+sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL3} "$CLNECONNECTION" >products_in_category_${BANNER}.txt
 SQL_RET_CODE=$?
 echo "Creation of the category product data file ended at `date '+%a %b %e %T'`" >>${LOG_FILE}
 wait
@@ -226,11 +226,11 @@ wait
 #################################################################
 if [ ${SQL_RET_CODE} -eq 0 ]
 then
-        echo "${EXTRACT_SQL3} completed at `date '+%a %b %e %T'`" >>${LOG_FILE}
+	echo "${EXTRACT_SQL3} completed at `date '+%a %b %e %T'`" >>${LOG_FILE}
 else
-        echo "Aborting: Error ${EXTRACT_SQL3} at `date '+%a %b %e %T'`" >>${LOG_FILE}
-        send_delay_email
-        exit 99
+	echo "Aborting: Error ${EXTRACT_SQL3} at `date '+%a %b %e %T'`" >>${LOG_FILE}
+	send_delay_email
+	exit 99
 fi
 #################################################################
 ##Rename File
@@ -263,10 +263,10 @@ fi
 if [ -e ${DATA}/product_attribute_off5th_`date +%Y_%m_%d`.txt  ]
 then
  echo "product_attribute_off5th_`date +%Y_%m_%d`.txt already exists so not executing ${EXTRACT_SQL4} again" >>${LOG_FILE}
-else
+else 
 #################################################################
 ## fourth file
-sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL4}  "${SCHEMA}" "${BANNER}" "$PIMLINK">product_attribute_${BANNER}.txt
+sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL4}   "${SCHEMA}">product_attribute_${BANNER}.txt
 SQL_RET_CODE=$?
 echo "Creation of the product attribute data file ended at `date '+%a %b %e %T'`" >>${LOG_FILE}
 wait
@@ -275,11 +275,11 @@ wait
 #################################################################
 if [ ${SQL_RET_CODE} -eq 0 ]
 then
-        echo "${EXTRACT_SQL4} completed at `date '+%a %b %e %T'`" >>${LOG_FILE}
+	echo "${EXTRACT_SQL4} completed at `date '+%a %b %e %T'`" >>${LOG_FILE}
 else
-        echo "Aborting: Error ${EXTRACT_SQL4} at `date '+%a %b %e %T'`" >>${LOG_FILE}
-        send_delay_email
-        exit 99
+	echo "Aborting: Error ${EXTRACT_SQL4} at `date '+%a %b %e %T'`" >>${LOG_FILE}
+	send_delay_email
+	exit 99
 fi
 #################################################################
 ##Rename File
@@ -290,9 +290,9 @@ wait
 #################################################################
 if [ -e ${DATA}/product_attribute_off5th_`date +%Y_%m_%d`.txt  ]
 then
-        FILE_NAME=product_attribute_off5th_`date +%Y_%m_%d`.txt
-        TFILE_SIZE="`ls -ll ${DATA}/$FILE_NAME |tr -s ' ' '|' |cut -f5 -d'|'`" # size of the file
-        FILE_COUNT="`wc -l ${DATA}/$FILE_NAME |tr -s ' ' '|' |cut -f1 -d'|'`" # linecount of the file
+	FILE_NAME=product_attribute_off5th_`date +%Y_%m_%d`.txt
+	TFILE_SIZE="`ls -ll ${DATA}/$FILE_NAME |tr -s ' ' '|' |cut -f5 -d'|'`" # size of the file
+	FILE_COUNT="`wc -l ${DATA}/$FILE_NAME |tr -s ' ' '|' |cut -f1 -d'|'`" # linecount of the file
 fi
 echo "File size is: ${TFILE_SIZE}" >> ${LOG_FILE}
 echo "Line count is: ${FILE_COUNT}" >> ${LOG_FILE}
@@ -309,7 +309,7 @@ else
  send_delay_email
  exit 99
 fi
-fi
+fi 
 #################################################################
 
 echo  > product_full_${BANNER}_`date +%Y%m%d`.txt.fin
@@ -334,7 +334,7 @@ if [ `egrep -c "226 Transfer complete" ${LOG_FILE}` -eq 0 ]
 then
 echo "FTP process failed. Please investigate" >> ${LOG_FILE}
 send_delay_email
-exit 99
+exit 99	
 fi
 echo "Finished FTP process " >> ${LOG_FILE}
 #################################################################
@@ -359,14 +359,14 @@ if [ -e ${DATA}/RR_Off5th/catalog_full_off5th_`date +%Y_%m_%d`.zip ]
 then
  GFILE_NAME=catalog_full_off5th_`date +%Y_%m_%d`.zip
  GFILE_SIZE="`ls -ll ${DATA}/RR_Off5th/$GFILE_NAME |tr -s ' ' '|' |cut -f5 -d'|'`" # size of the file
-fi
+fi 
 if [ ${GFILE_SIZE} -gt 0 ]
 then
  echo "File zip is valid. so start FTP " >> ${LOG_FILE}
 else
- echo "Aborting: Error in ZIP file ${GFILE_NAME} at `date '+%a %b %e %T'`" >>${LOG_FILE}
+ echo "Aborting: Error in ZIP file ${GFILE_NAME} at `date '+%a %b %e %T'`" >>${LOG_FILE} 
  send_delay_email
-exit 99
+exit 99	
 fi
 #################################################################
 #ftp -nv ftp.richrelevance.com<<EOF>> $LOG_FILE
@@ -382,7 +382,7 @@ if [ `egrep -c "226 Transfer complete" ${LOG_FILE}` -eq 0 ]
 then
 echo "FTP process failed. Please investigate" >> ${LOG_FILE}
 send_delay_email
-exit 99
+exit 99	
 fi
 echo "Finished FTP process " >> ${LOG_FILE}
 #################################################################
