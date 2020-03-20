@@ -1,3 +1,4 @@
+
 #!/bin/ksh
 #############################################################################################################################
 #####                           SAKS INC.
@@ -20,8 +21,7 @@ export PROCESS='o5_Simons_product_feed'
 export SQL=$HOME/SQL
 export LOG=$HOME/LOG
 export DATA=$HOME/DATA
-export BANNER=$BANNER
-export BANNER_PARAM=$1
+export BANNER=$1
 export LOG_FILE="$LOG/${PROCESS}_log.txt"
 export BAD_SUBJECT="${PROCESS} failed"
 export JOB_NAME="${PROCESS}"
@@ -35,7 +35,7 @@ export TFILE_SIZE='0'
 export SOURCE_COUNT='0'
 export TARGET_COUNT='0'
 export SCHEMA=""
-export BANNER='&1'
+
 
 ########################################################################
 ##Initialize Email Function
@@ -66,13 +66,13 @@ echo "bi_partner_base Sdw  Process ended at `date '+%a %b %e %T'`" >>${LOG_FILE}
 SOURCE_COUNT=`cat ${FILE_NAME} | wc -l`
 #if [ ${SOURCE_COUNT} -gt 100000 ]
 #then
-#echo "ftping the file as file check was succesfull `date '+%a %b %e %T'`" >>${LOG_FILE}		
+#echo "ftping the file as file check was succesfull `date '+%a %b %e %T'`" >>${LOG_FILE}
 #lftp -u saksoff5,tWIaOiOgZ6j94RM6WfoOfAXVxa6gRrQU sftp://sftp.sspo.com<<eof
 #cd product
 #put ${FILE_NAME}
 #quit
 #eof
-#echo "End ftping the file `date '+%a %b %e %T'`" >>${LOG_FILE}		
+#echo "End ftping the file `date '+%a %b %e %T'`" >>${LOG_FILE}
 #else
 #echo "Not enough data in the product file" >>${LOG_FILE}
 #echo "Simons : off5Saks.com product feed is delayed and we are looking into it"|mailx -s "Saks Product feed delayed" hbcdigtialdatamanagement@hbc.com
