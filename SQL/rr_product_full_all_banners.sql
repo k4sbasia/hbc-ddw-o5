@@ -263,7 +263,7 @@ R.TOTALREVIEWCOUNT num_reviews,
   commit;
   end loop;
   end;
-/
+
 
 TRUNCATE TABLE &1.FEED_RR_PRODUCT_DELTA;
 
