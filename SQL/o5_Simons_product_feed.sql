@@ -19,10 +19,10 @@ for r1 in
    (
   select  to_char(skn_no) upc,
           in_stock_sellable_qty   wh_sellable_qty
-    from &1.inventory),
+    from &2.inventory),
    feed as
    ( select c.upc ,c.qty_on_hand 
-        from &1.CHANNEL_ADVISOR_EXTRACT_NEW c 
+        from &2.CHANNEL_ADVISOR_EXTRACT_NEW c 
         where c.variation_name = 'C'
    )
    select p.wh_sellable_qty ,p.upc from
@@ -31,7 +31,7 @@ for r1 in
    and  p.wh_sellable_qty <> f.qty_on_hand  )
 
    loop
-    update &1.CHANNEL_ADVISOR_EXTRACT_NEW set
+    update &2.CHANNEL_ADVISOR_EXTRACT_NEW set
     qty_on_hand = r1.wh_sellable_qty where upc = r1.upc;
     commit;
 end loop;
@@ -47,12 +47,12 @@ for r1 in
    with qty_old as
    (
    select sum(qty_on_hand) qty_on_hand,manufacturer_part# from 
-   &1.CHANNEL_ADVISOR_EXTRACT_NEW c
+   &2.CHANNEL_ADVISOR_EXTRACT_NEW c
    where  variation_name = 'C' and qty_on_hand > 0
    group by manufacturer_part# ),
    feed as
    ( select c.manufacturer_part# ,c.qty_on_hand from
-   &1.CHANNEL_ADVISOR_EXTRACT_NEW c where c.variation_name = 'P'
+   &2.CHANNEL_ADVISOR_EXTRACT_NEW c where c.variation_name = 'P'
    )
    select p.qty_on_hand ,p.manufacturer_part# from
    qty_old  p, feed f
@@ -61,7 +61,7 @@ for r1 in
    )
 
 loop
-    update &1.CHANNEL_ADVISOR_EXTRACT_NEW set 
+    update &2.CHANNEL_ADVISOR_EXTRACT_NEW set 
     qty_on_hand = r1.qty_on_hand where manufacturer_part# = r1.manufacturer_part# and variation_name= 'P';
     commit;
 end loop;
@@ -75,13 +75,13 @@ WITH final_sale AS
   FROM
     (SELECT upc_code,
       product_code
-    FROM &1.prd_hier_price_status s,
-      &1.bi_product p
+    FROM &2.prd_hier_price_status s,
+      &2.bi_product p
     WHERE price_type = 'F'
     AND s.sku_code   = p.sku
     ) f,
     (SELECT REPLACE(upc,'P','0') upc
-    FROM &1.CHANNEL_ADVISOR_EXTRACT_NEW
+    FROM &2.CHANNEL_ADVISOR_EXTRACT_NEW
     WHERE clearance_type = 'C'
     AND VARIATION_NAME   = 'C'
     ) c
@@ -90,14 +90,14 @@ WITH final_sale AS
   SELECT c.upc
   FROM
     (SELECT DISTINCT product_code
-    FROM &1.prd_hier_price_status s,
-      &1.bi_product p
+    FROM &2.prd_hier_price_status s,
+      &2.bi_product p
     WHERE price_type = 'F'
     AND s.sku_code   = p.sku
     ) f,
     (SELECT REPLACE(upc,'P','0') parent_value,
       upc
-    FROM &1.CHANNEL_ADVISOR_EXTRACT_NEW
+    FROM &2.CHANNEL_ADVISOR_EXTRACT_NEW
     WHERE clearance_type = 'C'
     AND VARIATION_NAME   = 'P'
     ) c
@@ -232,7 +232,7 @@ SELECT MANUFACTURER_PART#
     THEN 'N'
     ELSE 'Y'
   END
-FROM &1.CHANNEL_ADVISOR_EXTRACT_NEW n
+FROM &2.CHANNEL_ADVISOR_EXTRACT_NEW n
 LEFT JOIN final_sale f ON n.upc          = f.upc
 WHERE qty_on_hand > 0 AND upper(trim(brand)) NOT IN ('PRADA','TOMMY BAHAMA');
 

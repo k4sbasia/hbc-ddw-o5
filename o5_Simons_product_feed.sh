@@ -58,7 +58,7 @@ echo "bi_partner_base Extract  Process started at `date '+%a %b %e %T'`" >${LOG_
 #  Run the sql script that performs the product info extract
 #################################################################
 echo "bi_partner_base Sdw  Process started at `date '+%a %b %e %T'`" >>${LOG_FILE}
-sqlplus -s -l $CONNECTDW @${EXTRACT_SQL} ${FILE_NAME}
+sqlplus -s -l $CONNECTDW @${EXTRACT_SQL} ${FILE_NAME} ${SCHEMA}
 cd ${DATA}
 sed -i '1d' ${FILE_NAME}
 sed -i '1i Parent_SKU|Product_Id|Product_Name|Variation_Name|SKU_Number|Primary_Category|Secondary_Category|Product_URL|Product_Image_URL|Short_Product_Desc|Long_Product_Desc|Discount|Discount_Type|Sale_Price|Retail_Price|Begin_Date|End_Date|Brand|Shipping|Is_Delete_Flag|Keywords|Is_All_Flag|Manufacturer_Name|Shipping_Information|Availablity|Universal_Pricing_Code|Class_ID|Is_Product_Link_Flag|Is_Storefront_Flag|Is_Merchandiser_Flag|Currency|Path|Group|Category|Size|Color|Larger_Images|Qty_On_Hand|AUD_Sale_Price|GBP_Sale_Price|CHF_Sale_price|CAD_Sale_Price|AU_Publish|UK_Publish|CH_Publish|CA_Publish|Order_Flag|BM_Code|Material|Full_Category_Path|Prd_Alt_Image_urls|Department_id|Clearance|Gender|Final_sale' ${FILE_NAME}
