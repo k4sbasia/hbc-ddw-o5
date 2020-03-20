@@ -17,7 +17,7 @@ SELECT
     || '|'
     || label
 FROM
-    pim_exp_bm.pim_ab_o5_web_folder_data@pim_read a,
+    pim_exp_bm.pim_ab_o5_web_folder_data@&2 a,
     (
         SELECT
             *
@@ -44,7 +44,7 @@ FROM
                         END
                     ) AS readyforprodendtime
                 FROM
-                    pim_exp_bm.pim_ab_o5_folder_attr_data@pim_read
+                    pim_exp_bm.pim_ab_o5_folder_attr_data@&2
                 WHERE
                     folder_path IS NOT NULL
                 GROUP BY

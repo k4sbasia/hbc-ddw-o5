@@ -62,7 +62,7 @@ INTO FEED_RR_PRICE_RANGE
           MAX(to_number(MSRP)) MAX_ORIGINAL_PRICE,
           MIN(to_number(OFFER_PRICE) ) MIN_CURRENT_PRICE,
           MAX(to_number(OFFER_PRICE) ) MAX_CURRENT_PRICE
-        FROM o5.v_sd_price_o5 o, o5.all_active_product_sku_o5 s
+        FROM &1.v_sd_price_&6 o, &1.all_active_product_sku_&6 s
         where o.skn_no = s.skn_no
         and
           OFFER_PRICE > 1
@@ -117,7 +117,7 @@ INTO FEED_RR_PRICE_RANGE
             SO.item_id ITEM_ID,
             WI.SKN_NO SKU_ID,
             s.upc
-          FROM v_sd_price_o5 SO, o5.all_active_product_sku_o5 s,inventory WI
+          FROM v_sd_price_&6 SO, &1.all_active_product_sku_&6 s,inventory WI
         where SO.skn_no = s.skn_no
              and s.skn_no = wi.skn_no
           )
@@ -151,7 +151,7 @@ SELECT '' PRD_ID,
     ELSE '0'
   END AS OBA_BOO_VAL,
   IS_SHOPTHELOOK AS SHOPLOOK
-FROM all_active_pim_prd_attr_o5 P
+FROM all_active_pim_prd_attr_&6 P
 WHERE P.PRD_STATUS ='Yes';
 
 COMMIT;
@@ -176,7 +176,7 @@ WITH BASE AS
     PR.SALES_FLAG,
 	prd.product_url,is_egc,
     image_url
-  FROM O5_PARTNERS_EXTRACT_WRK PRD,
+  FROM &1_PARTNERS_EXTRACT_WRK PRD,
     FEED_RR_PRICE_RANGE PR
   WHERE PRD.STYL_SEQ_NUM = PR.PRODUCT_ID
  AND nvl(PRD.is_egc,'F')        <> 'T'

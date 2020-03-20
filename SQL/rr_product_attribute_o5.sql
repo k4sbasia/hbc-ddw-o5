@@ -94,8 +94,8 @@ REFSPF ||'|'||
 REFWASH ||'|'||
 RETURNABLE
 FROM
-pim_exp_bm.ALL_PRODUCT_ATTR_RR_FEED_o5@pim_read prd,
-                        O5.FEED_RR_PRODUCT_DAILY P
+pim_exp_bm.ALL_PRODUCT_ATTR_RR_FEED_&2@&3 prd,
+                        &1.FEED_RR_PRODUCT_DAILY P
                   WHERE
                          P.product_id = prd.product_id ;
 EXIT;
