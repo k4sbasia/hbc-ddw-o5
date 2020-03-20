@@ -30,6 +30,9 @@ export SQL=$HOME/SQL
 export LOG=$HOME/LOG
 export DATA=$HOME/DATA
 export CTL=$HOME/CTL
+export BANNER=$BANNER
+export BANNER_PARAM=$1
+export SCHEMA=""
 export BAD_SUBJECT="${PROCESS} failed"
 export EXTRACT_SQL='$SQL/${PROCESS}.sql'
 export EXTRACT_SQL2='$SQL/rry_category_full_all_banners.sql'
@@ -117,7 +120,7 @@ fi
 cd DATA
 echo "RR Full catalog feed process started for $BANNER" >${LOG_FILE}
 echo "Creation of the log file started at `date '+%a %b %e %T'`" >>${LOG_FILE}
-sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL} "${SCHEMA}" "$BMCONNECTION" "$PART_TABLE" "$DBCONNECTPRIM" "$REVW_TABLE" "${BANNER}" >product_full_${BANNER}.txt
+sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL} "${SCHEMA}" "${BANNER}" >product_full_${BANNER}.txt
 SQL_RET_CODE=$?
 echo "Creation of the product data file ended at `date '+%a %b %e %T'`" >>${LOG_FILE}
 wait
@@ -162,7 +165,7 @@ else
 fi
 #################################################################
 ## second file
-sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL2} "$CLNECONNECTION" "$BMCONNECTION">category_full_${BANNER}.txt
+sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL2} "$CLNECONNECTION" "$PIMLINK">category_full_${BANNER}.txt
 SQL_RET_CODE=$?
 echo "Creation of the category data file ended at `date '+%a %b %e %T'`" >>${LOG_FILE}
 wait
@@ -207,7 +210,7 @@ else
 fi
 #################################################################
 ## third file
-sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL3} "$CLNECONNECTION" "${SCHEMA}" "${BANNER}" "$BMCONNECTION">products_in_category_${BANNER}.txt
+sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL3} "$CLNECONNECTION" "${SCHEMA}" "${BANNER}" "$PIMLINK">products_in_category_${BANNER}.txt
 SQL_RET_CODE=$?
 echo "Creation of the category product data file ended at `date '+%a %b %e %T'`" >>${LOG_FILE}
 wait
@@ -256,7 +259,7 @@ then
 else
 #################################################################
 ## fourth file
-sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL4}  "${SCHEMA}" "${BANNER}" "$BMCONNECTION">product_attribute_${BANNER}.txt
+sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL4}  "${SCHEMA}" "${BANNER}" "$PIMLINK">product_attribute_${BANNER}.txt
 SQL_RET_CODE=$?
 echo "Creation of the product attribute data file ended at `date '+%a %b %e %T'`" >>${LOG_FILE}
 wait
