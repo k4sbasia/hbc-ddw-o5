@@ -30,15 +30,14 @@ export SQL=$HOME/SQL
 export LOG=$HOME/LOG
 export DATA=$HOME/DATA
 export CTL=$HOME/CTL
-export BANNER=$BANNER
-export BANNER_PARAM=$1
 export SCHEMA=""
 export BAD_SUBJECT="${PROCESS} failed"
 export EXTRACT_SQL='$SQL/${PROCESS}.sql'
 export EXTRACT_SQL2='$SQL/rry_category_full_all_banners.sql'
 export EXTRACT_SQL3='$SQL/rr_product_in_category_all_banners.sql'
 export EXTRACT_SQL4='$SQL/rr_product_attribute_o5.sql'
-export BANNER='&1'
+export BANNER=$1
+
 #######################################################################################
 ##Initialize Email Function
 ################################################################
