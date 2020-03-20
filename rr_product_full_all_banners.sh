@@ -118,7 +118,7 @@ fi
 #################################
 ###########################
 cd DATA
-echo "RR Full catalog feed process started for $BANNER" >${LOG_FILE}
+echo "RR Full catalog feed process started for $BANNER" >>${LOG_FILE}
 echo "Creation of the log file started at `date '+%a %b %e %T'`" >>${LOG_FILE}
 sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL} "${SCHEMA}" "${BANNER}" >product_full_${BANNER}.txt
 SQL_RET_CODE=$?
