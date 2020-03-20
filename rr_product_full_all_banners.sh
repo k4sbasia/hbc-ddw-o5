@@ -69,20 +69,20 @@ fi
 #################################################################
 ###########################################################
 #####      SAKS BANNER     ###########################
-if [ "${BANNER}" == "saks" ];
-then
-export DBCONNECTPRIM="PRIMSTO_MREP"
-export CONNECTDW="mrep/mrepprd@newprdsdw"
-export LOG_FILE="$LOG/${PROCESS}_${BANNER}_log.txt"
-export SCHEMA="mrep."
-export PART_TABLE="BI_PARTNERS_EXTRACT_WRK"
-export REVW_TABLE="TURN_TO_PRODUCT_REVIEW"
-export BMCONNECTION="PRODSTO_MREP"
-export CLNECONNECTION="CLONESTO_MREP"
-export FTP_FILE="product_full_$BANNER_`date +%Y%m%d`.txt"
-export FTP_FILE1="category_full_$BANNER_`date +%Y%m%d`.txt"
-export FTP_FILE2="products_in_category_$BANNER_`date +%Y%m%d`.txt"
-fi
+#if [ "${BANNER}" == "saks" ];
+#then
+#export DBCONNECTPRIM="PRIMSTO_MREP"
+#export CONNECTDW="mrep/mrepprd@newprdsdw"
+#export LOG_FILE="$LOG/${PROCESS}_${BANNER}_log.txt"
+#export SCHEMA="mrep."
+#export PART_TABLE="BI_PARTNERS_EXTRACT_WRK"
+#export REVW_TABLE="TURN_TO_PRODUCT_REVIEW"
+#export BMCONNECTION="PRODSTO_MREP"
+#export CLNECONNECTION="CLONESTO_MREP"
+#export FTP_FILE="product_full_$BANNER_`date +%Y%m%d`.txt"
+#export FTP_FILE1="category_full_$BANNER_`date +%Y%m%d`.txt"
+#export FTP_FILE2="products_in_category_$BANNER_`date +%Y%m%d`.txt"
+#fi
 #############################################################
 ########    OFF5TH BANNER    ###############################
 ############################################################
