@@ -117,7 +117,7 @@ INTO FEED_RR_PRICE_RANGE
             SO.item_id ITEM_ID,
             WI.SKN_NO SKU_ID,
             s.upc
-          FROM v_sd_price_&2 SO, &1.all_active_product_sku_&2 s,&1.inventory WI
+          FROM &1.v_sd_price_&2 SO, &1.all_active_product_sku_&2 s,&1.inventory WI
         where SO.skn_no = s.skn_no
              and s.skn_no = wi.skn_no
           )
