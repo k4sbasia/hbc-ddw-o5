@@ -11,9 +11,9 @@
 #####
 #####   CODE HISTORY :   Name             Date        Description
 #####                   ------------    ----------  ------------
-#####
+#####                   
 #####                   Aparna          05/24/2016  Created
-#####                                   Kallaar                 03/04/2017      Added additional error handling and logging
+#####					Kallaar 		03/04/2017	Added additional error handling and logging
 #####
 #############################################################################################################################
 
@@ -25,24 +25,33 @@
 ##This shell script is called by UC4 Job RR_PRODUCT_FULL_ALL_BANNERS
 #####################################################################################
 ##Varibles
-export PROCESS='rr_product_full_all_banners'
 export SQL=$HOME/SQL
 export LOG=$HOME/LOG
 export DATA=$HOME/DATA
 export CTL=$HOME/CTL
-export SCHEMA=""
+export PROCESS='rr_product_full_all_banners'
+export LOG_FILE="$LOG/${PROCESS}_${BANNER}_log.txt"
 export BAD_SUBJECT="${PROCESS} failed"
+export JOB_NAME="${PROCESS}"
+export SCRIPT_NAME="${PROCESS}"
 export EXTRACT_SQL='$SQL/${PROCESS}.sql'
 export EXTRACT_SQL2='$SQL/rry_category_full_all_banners.sql'
 export EXTRACT_SQL3='$SQL/rr_product_in_category_all_banners.sql'
 export EXTRACT_SQL4='$SQL/rr_product_attribute_o5.sql'
+export SFILE_SIZE='0'
+export FILE_NAME='0'
+export LOAD_COUNT='0'
+export FILE_COUNT='0'
+export TFILE_SIZE='0'
+export SOURCE_COUNT='0'
+export TARGET_COUNT='0'
 export BANNER=$1
 
 #######################################################################################
 ##Initialize Email Function
 ################################################################
 function send_email {
- CURRENT_TIME=`date +"%m/%d/%Y-%H:%M:%S"`
+ CURRENT_TIME=`date +"%m/%d/%Y-%H:%M:%S"` 
  cat $HOME/email_distribution_list.txt|grep '^3'|while read group address
  do
  echo ${CURRENT_TIME}|mailx -s "${SUBJECT}" $address
@@ -57,63 +66,35 @@ function send_delay_email {
  echo ${BBODY} ${CURRENT_TIME}|mailx -s "${BSUBJECT}" ${BADDRESS}
  send_email
 }
-#################################################################
-if [ "${BANNER}" == "" ];
+########################################################################
+##Initialize Email Function
+########################################################################
+if [ "${BANNER}" == "s5a" ];
 then
-    BANNER=$1
+export LOG_FILE="$LOG/${PROCESS}_${BANNER}_log.txt"
+export SCHEMA="mrep."
+export PIM_PRD_ATTR_TAB="saks_all_active_pim_prd_attr"
+export PIM_SKU_ATTR_TAB="saks_all_active_pim_sku_attr"
+export PIM_ASSRT_TAB="saks_all_actv_pim_assortment"
+export PART_TABLE="BI_PARTNERS_EXTRACT_WRK"
+export BMCONNECTION="PRODSTO_MREP"
 fi
-
-#################################################################
-##Update SCHEMA for specific BANNER
-#################################################################
-###########################################################
-#####      SAKS BANNER     ###########################
-#if [ "${BANNER}" == "saks" ];
-#then
-#export DBCONNECTPRIM="PRIMSTO_MREP"
-#export CONNECTDW="mrep/mrepprd@newprdsdw"
-#export LOG_FILE="$LOG/${PROCESS}_${BANNER}_log.txt"
-#export SCHEMA="mrep."
-#export PART_TABLE="BI_PARTNERS_EXTRACT_WRK"
-#export REVW_TABLE="TURN_TO_PRODUCT_REVIEW"
-#export BMCONNECTION="PRODSTO_MREP"
-#export CLNECONNECTION="CLONESTO_MREP"
-#export FTP_FILE="product_full_$BANNER_`date +%Y%m%d`.txt"
-#export FTP_FILE1="category_full_$BANNER_`date +%Y%m%d`.txt"
-#export FTP_FILE2="products_in_category_$BANNER_`date +%Y%m%d`.txt"
-#fi
 #############################################################
 ########    OFF5TH BANNER    ###############################
 ############################################################
 if [ "${BANNER}" == "o5" ];
 then
-export DBCONNECTPRIM="PRVO5_SAKSCUSTOM"
-export CONNECTDW="O5/o5prd@newprdsdw"
-export LOG_FILE="$LOG/${PROCESS}_${BANNER}_log.txt"
 export SCHEMA="o5."
 export PART_TABLE="O5_PARTNERS_EXTRACT_WRK"
-export REVW_TABLE="BV_PRODUCT_REVIEW"
-export BMCONNECTION="PRDO5_SAKSCUSTOM"
-export CLNECONNECTION="PRDO5_SAKSCUSTOM"
-export EXTRACT_SQL='$SQL/rr_product_full_o5_banner.sql'
-export FTP_FILE="product_full_off5th_`date +%Y_%m_%d`.txt"
-export FTP_FILE1="category_full_off5th_`date +%Y_%m_%d`.txt"
-export FTP_FILE2="products_in_category_off5th_`date +%Y_%m_%d`.txt"
+export LOG_FILE="$LOG/${PROCESS}_${BANNER}_log.txt"
+export PIM_PRD_ATTR_TAB="pim_ab_o5_prd_attr_data"
+export PIM_SKU_ATTR_TAB="pim_ab_O5_sku_attr_data"
+export PIM_WEB_FOLDER_TAB="pim_ab_o5_web_folder_data"
+export PIM_ASRT_PRD_ASSGM="pim_ab_o5_bm_asrt_prd_assgn"
+export PIM_FOLDER_ATTR_DATA="pim_ab_o5_folder_attr_data"
+export PIM_DBLINK="PIM_READ"
 fi
-#############################################################
-########    BAY BANNER    ###############################
-############################################################
-if [ "${BANNER}" == "bay" ];
-then
-export DBCONNECTPRIM="PRIMSTO_MREP"
-fi
-#############################################################
-########    LT BANNER    ###############################
-############################################################
-if [ "${BANNER}" == "lt" ];
-then
-export DBCONNECTPRIM="PRIMSTO_MREP"
-fi
+
 #################################
 ###########################
 cd DATA
