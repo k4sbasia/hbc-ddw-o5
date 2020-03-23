@@ -224,7 +224,7 @@ SELECT MANUFACTURER_PART#
     ELSE 'N'
   END
   || '|'
-  || DECODE(ITM_GENDER, 1,'Not Applicable', 2,'Men', 3,'Women', 4,'Unisex', 5,'Kids' /*,6,'Pets'*/, NULL)
+  || DECODE(ITM_GENDER, '1','Not Applicable', '2','Men', '3','Women', '4','Unisex','5','Kids','6','Pets', NULL)
   || '|'
   ||
   CASE
