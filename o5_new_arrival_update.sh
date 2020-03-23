@@ -112,7 +112,7 @@ echo "commented in STQA this code as it updates the common table used in prod" >
 fi
 
 #if [ "$ENV" = "o5_prod" ]; then
-sqlplus -s -l  $CONNECTDW <<EOF>${LOG_FILE} @${SQL0} "$SCHEMA""$BANNER"
+sqlplus -s -l  $CONNECTDW <<EOF>${LOG_FILE} @${SQL0} "$SCHEMA" "$BANNER"
 EOF
 #sqlplus -s -l  $CONNECTDW <<EOF>>${LOG_FILE} @${SQL1} "$DBLINK" "$SCHEMAETL"
 #EOF
