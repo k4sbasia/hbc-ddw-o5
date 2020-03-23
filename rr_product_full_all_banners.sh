@@ -138,7 +138,7 @@ then
 	echo "${EXTRACT_SQL} completed at `date '+%a %b %e %T'`" >>${LOG_FILE}
 else
 	echo "Aborting: Error ${EXTRACT_SQL} at `date '+%a %b %e %T'`" >>${LOG_FILE}
-	send_delay_email
+	#send_delay_email
 	exit 99
 fi
 #################################################################
@@ -166,7 +166,7 @@ then
 else
  echo "Aborting: Error loading product_full_off5th_`date +%Y_%m_%d`.txt  at `date '+%a %b %e %T'`" >>${LOG_FILE}
  echo "${PROCESS} was not sent. Minimum amount of data was not present." >> $LOG_FILE
- send_delay_email
+ #send_delay_email
  exit 99
 fi 
 #################################################################
@@ -183,7 +183,7 @@ then
 	echo "${EXTRACT_SQL2} completed at `date '+%a %b %e %T'`" >>${LOG_FILE}
 else
 	echo "Aborting: Error ${EXTRACT_SQL2} at `date '+%a %b %e %T'`" >>${LOG_FILE}
-	send_delay_email
+	#send_delay_email
 	exit 99
 fi
 #################################################################
@@ -211,7 +211,7 @@ then
 else
  echo "Aborting: Error loading category_full_off5th_`date +%Y_%m_%d`.txt  at `date '+%a %b %e %T'`" >>${LOG_FILE}
  echo "${PROCESS} was not sent. Minimum amount of data was not present." >> $LOG_FILE
- send_delay_email
+ #send_delay_email
  exit 99
 fi 
 #################################################################
@@ -228,7 +228,7 @@ then
 	echo "${EXTRACT_SQL3} completed at `date '+%a %b %e %T'`" >>${LOG_FILE}
 else
 	echo "Aborting: Error ${EXTRACT_SQL3} at `date '+%a %b %e %T'`" >>${LOG_FILE}
-	send_delay_email
+	#send_delay_email
 	exit 99
 fi
 #################################################################
@@ -256,7 +256,7 @@ then
 else
  echo "Aborting: Error loading products_in_category_off5th_`date +%Y_%m_%d`.txt  at `date '+%a %b %e %T'`" >>${LOG_FILE}
  echo "${PROCESS} was not sent. Minimum amount of data was not present." >> $LOG_FILE
- send_delay_email
+ #send_delay_email
  exit 99
 fi
 if [ -e ${DATA}/product_attribute_off5th_`date +%Y_%m_%d`.txt  ]
@@ -277,7 +277,7 @@ then
 	echo "${EXTRACT_SQL4} completed at `date '+%a %b %e %T'`" >>${LOG_FILE}
 else
 	echo "Aborting: Error ${EXTRACT_SQL4} at `date '+%a %b %e %T'`" >>${LOG_FILE}
-	send_delay_email
+	#send_delay_email
 	exit 99
 fi
 #################################################################
@@ -305,7 +305,7 @@ then
 else
  echo "Aborting: Error loading product_attribute_off5th_`date +%Y_%m_%d`.txt at `date '+%a %b %e %T'`" >>${LOG_FILE}
  echo "${PROCESS} was not sent. Minimum amount of data was not present." >> $LOG_FILE
- send_delay_email
+ #send_delay_email
  exit 99
 fi
 fi 
@@ -332,7 +332,7 @@ wait
 if [ `egrep -c "226 Transfer complete" ${LOG_FILE}` -eq 0 ]
 then
 echo "FTP process failed. Please investigate" >> ${LOG_FILE}
-send_delay_email
+#send_delay_email
 exit 99	
 fi
 echo "Finished FTP process " >> ${LOG_FILE}
@@ -364,7 +364,7 @@ then
  echo "File zip is valid. so start FTP " >> ${LOG_FILE}
 else
  echo "Aborting: Error in ZIP file ${GFILE_NAME} at `date '+%a %b %e %T'`" >>${LOG_FILE} 
- send_delay_email
+ #send_delay_email
 exit 99	
 fi
 #################################################################
@@ -380,7 +380,7 @@ fi
 if [ `egrep -c "226 Transfer complete" ${LOG_FILE}` -eq 0 ]
 then
 echo "FTP process failed. Please investigate" >> ${LOG_FILE}
-send_delay_email
+#send_delay_email
 exit 99	
 fi
 echo "Finished FTP process " >> ${LOG_FILE}
@@ -400,7 +400,7 @@ if [ `egrep -c "^ERROR|ORA-|not found|SP2-0|^553" ${LOG_FILE}` -ne 0 ]
 then
 mv "${LOG_FILE}" "${LOG_FILE}.`date +%Y%m%d`"
 echo "${PROCESS} failed. Please investigate" >> ${LOG_FILE}
-send_delay_email
+#send_delay_email
 exit 99
 else
 echo "${PROCESS} completed without errors." >> ${LOG_FILE}
