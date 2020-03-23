@@ -106,6 +106,7 @@ export CLNECONNECTION="o5PRODSTO_MREP"
 export FTP_FILE="product_full_off5th_`date +%Y_%m_%d`.txt"
 export FTP_FILE1="category_full_off5th_`date +%Y_%m_%d`.txt"
 export FTP_FILE2="products_in_category_off5th_`date +%Y_%m_%d`.txt"
+export PIM_DBLINK="PIM_READ"
 fi
 #############################################################
 ########    BAY BANNER    ###############################
