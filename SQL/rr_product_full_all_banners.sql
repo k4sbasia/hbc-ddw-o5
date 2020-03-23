@@ -176,7 +176,7 @@ WITH BASE AS
     PR.SALES_FLAG,
 	prd.product_url,is_egc,
     image_url
-  FROM &1_PARTNERS_EXTRACT_WRK PRD,
+  FROM &1.&2_PARTNERS_EXTRACT_WRK PRD,
     &1.FEED_RR_PRICE_RANGE PR
   WHERE PRD.STYL_SEQ_NUM = PR.PRODUCT_ID
  AND nvl(PRD.is_egc,'F')        <> 'T'
