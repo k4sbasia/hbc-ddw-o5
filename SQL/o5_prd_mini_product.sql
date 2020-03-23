@@ -27,7 +27,7 @@ MERGE INTO &1.bi_mini_product hst
                    CORP_ANALYSIS_CDE,
                    ANALYSIS_CDE_3,
                    compare_price,
-                                   ORIG_OWN_RTL_DOL,
+                   ORIG_OWN_RTL_DOL,
                   CORP_ITEM_RETL_AMT
               FROM &1.bi_product where deactive_ind='N' and active_ind is not null ) trn
         ON (trn.upc = hst.upc)
@@ -267,7 +267,7 @@ DECLARE
                                      || brand_name,
                                      POWER (2, 16) - 1))
                                   val
-                          FROM O5.bi_product
+                          FROM &1.bi_product
                       GROUP BY item,
                                item_description,
                                pub_date,
@@ -352,16 +352,16 @@ END;
 
 EXEC dbms_output.put_line ('BI_PRODUCT - update procedure completed');
 
-exec  dbms_stats.gather_table_stats('O5','bi_mini_product',estimate_percent=> 100);
+exec  dbms_stats.gather_table_stats('&1','bi_mini_product',estimate_percent=> 100);
 
 --Dropping the indexes for MV
-exec sddw.p_drop_index_on_mv('MV_O5_BI_MINI_PRODUCT');
+exec sddw.p_drop_index_on_mv('&3');
 
 --Refreshing the MV
-exec DBMS_MVIEW.REFRESH('sddw.mv_o5_bi_mini_product','c');
+exec DBMS_MVIEW.REFRESH('sddw.&3','c');
 
 --Recreating the indexes
-CREATE INDEX "SDDW"."IDX_O5_ITEM_IDX_MV" ON "SDDW"."MV_O5_BI_MINI_PRODUCT"
+CREATE INDEX "SDDW"."IDX_&2_ITEM_IDX_MV" ON "SDDW"."&3"
   (
     "ITEM"
   );

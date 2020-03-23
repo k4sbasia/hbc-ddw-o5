@@ -18,12 +18,13 @@
 #####
 #############################################################################################################################
 ################################################################
-. $HOME/params.conf o5
+. $HOME/params.conf $1
+export BANNER=$1
 export SQL=$HOME/SQL
 export LOG=$HOME/LOG
 export DATA=$HOME/DATA
-export PROCESS='o5_prd_hier_status_refresh'
-export LOG_FILE="$LOG/${PROCESS}_log.txt"
+export PROCESS='prd_hier_status_refresh'
+export LOG_FILE="$LOG/${BANNER}_${PROCESS}_log.txt"
 export JOB_NAME="${PROCESS}"
 export SCRIPT_NAME="${PROCESS}"
 export SFILE_SIZE=0
@@ -33,9 +34,9 @@ export TFILE_SIZE=0
 export SOURCE_COUNT=0
 export TARGET_COUNT=0
 export ENV_TYPE=$1
-export PDW_SQL='$SQL/${PROCESS}_pdw.sql'
-export EXTRACT_SQL='$SQL/${PROCESS}.sql'
-export BANNER=$1
+export PDW_SQL='$SQL/${BANNER}_${PROCESS}_pdw.sql'
+export EXTRACT_SQL='$SQL/${BANNER}_${PROCESS}.sql'
+
 
 ################################################################
 ##Initialize Email Function
@@ -49,13 +50,14 @@ function send_email {
 }
 if [ "${BANNER}" == "s5a" ];
 then
-export LOG_FILE="$LOG/${PROCESS}_${BANNER}_log.txt"
 export SCHEMA="mrep."
 export PIM_PRD_ATTR_TAB="saks_all_active_pim_prd_attr"
 export PIM_SKU_ATTR_TAB="saks_all_active_pim_sku_attr"
 export PIM_ASSRT_TAB="saks_all_actv_pim_assortment"
 export PART_TABLE="BI_PARTNERS_EXTRACT_WRK"
 export BMCONNECTION="PRODSTO_MREP"
+export RFS_TABLE="OMS_RFS_SAKS_STG"
+export WEBPRICE_TABLE="BI_WEBPRICE_WRK"
 fi
 #############################################################
 ########    OFF5TH BANNER    ###############################
@@ -64,6 +66,8 @@ if [ "${BANNER}" == "o5" ];
 then
 export SCHEMA="o5."
 export PART_TABLE="O5_PARTNERS_EXTRACT_WRK"
+export RFS_TABLE="OMS_RFS_O5_STG"
+export WEBPRICE_TABLE="O5_WEBPRICE_WRK"
 export LOG_FILE="$LOG/${PROCESS}_${BANNER}_log.txt"
 export PIM_PRD_ATTR_TAB="pim_ab_o5_prd_attr_data"
 export PIM_SKU_ATTR_TAB="pim_ab_O5_sku_attr_data"
@@ -80,14 +84,14 @@ EOF
 #####################################################################
 ##Update Environments 
 ####################################################################
-LOG_FILE="$LOG/${PROCESS}_${ENV_TYPE}_log.txt"
+LOG_FILE="$LOG/${BANNER}_${PROCESS}_${ENV_TYPE}_log.txt"
 ####################################################################
 echo "Start Main " >  ${LOG_FILE}
 if [ "$ENV_TYPE" = "o5_preview" ]; then
-echo "Started PDW Update in o5.prd_hier_price_status tables" >> ${LOG_FILE}
-sqlplus -s $CONNECTDW @${PDW_SQL} "$SCHEMA" >>${LOG_FILE}
+echo "Started PDW Update in ${SCHEMA}.prd_hier_price_status tables" >> ${LOG_FILE}
+sqlplus -s $CONNECTDW @${PDW_SQL} "$SCHEMA" "$RFS_TABLE" "$WEBPRICE_TABLE">>${LOG_FILE}
 wait
-echo "Finished PDW Update in o5.prd_hier_price_status tables" >> ${LOG_FILE}
+echo "Finished PDW Update in ${SCHEMA}.prd_hier_price_status tables" >> ${LOG_FILE}
 export DB_CONNECT=$PDP_DBCONNECT_O5_PREVIEW
 fi
 if [ "$ENV_TYPE" = "o5_stqa" ]; then
@@ -97,8 +101,8 @@ if [ "$ENV_TYPE" = "o5_prod" ]; then
 export DB_CONNECT=$PDP_DBCONNECT_O5_PROD
 fi
 
-echo "Calling the  sql in $DB_CONNECT script to insert data into o5.prd_hier_price_status tables" >>${LOG_FILE}
-#sqlplus -s $DB_CONNECT @${EXTRACT_SQL}  >>${LOG_FILE}
+echo "Calling the  sql in $DB_CONNECT script to insert data into ${SCHEMA}.prd_hier_price_status tables" >>${LOG_FILE}
+#sqlplus -s $DB_CONNECT @${EXTRACT_SQL} "$SCHEMA">>${LOG_FILE}
 echo "Extract $ENV_TYPE File Completed in $DB_CONNECT at `date +%Y%m-%d:%M:%S`" >>${LOG_FILE}
 #################################################################
 # Update the runstats 
@@ -108,14 +112,16 @@ EOF
 ################################################################
 ##Bad Records Check
 #################################################################
-if [ `egrep -c "^ERROR|ORA-|not found|SP2-0|^553" ${LOG_FILE}` -ne 0 ]
+if [ `egrep -c "^ERROR|ORA-|not found|SP2-0" ${LOG_FILE}` -ne 0 ]
 then
-echo "${PROCESS} failed. Please investigate"
-echo "${PROCESS} failed. Please investigate" >> ${LOG_FILE}
+echo "${BANNER}_${PROCESS} failed. Please investigate"
+echo "${BANNER}_${PROCESS} failed. Please investigate" >> ${LOG_FILE}
 export SUBJECT=${BAD_SUBJECT}
-send_email
+#send_email
+exit 99
 else
-echo "${PROCESS} completed without errors."
-echo "${PROCESS} completed without errors." >> ${LOG_FILE}
-fi
+echo "${BANNER}_${PROCESS} completed without errors."
+echo "${BANNER}_${PROCESS} completed without errors." >> ${LOG_FILE}
 exit 0
+fi
+
