@@ -110,7 +110,7 @@ else
 	BBODY="O5 Versa feed is delayed and we are looking into it. Thanks"
 	BADDRESS='David.Mataranglo@360i.com Sofia_Azzolina@s5a.com Hannah_Tevolini@s5a.com'
 	BSUBJECT="O5 VERSA FEED DELAYED"
-	##send_delay_email
+	send_delay_email
 	echo "Aborting: Error in ${PROCESS_SQL1} at `date '+%a %b %e %T'`" >>${LOG_FILE}
 	exit 99
 fi
@@ -132,7 +132,7 @@ else
 	BBODY="O5 Versa feed is delayed and we are looking into it. Thanks"
 	BADDRESS='David.Mataranglo@360i.com Sofia_Azzolina@s5a.com Hannah_Tevolini@s5a.com' 
 	BSUBJECT="O5 VERSA FEED DELAYED"
-	##send_delay_email
+	send_delay_email
 	echo "Aborting: Error in ${PROCESS_SQL2} at `date '+%a %b %e %T'`" >>${LOG_FILE}
 	exit 99
 fi
@@ -159,7 +159,7 @@ else
 	BBODY="O5 Versa feed is delayed and we are looking into it. Thanks"
 	BADDRESS='David.Mataranglo@360i.com Sofia_Azzolina@s5a.com Hannah_Tevolini@s5a.com' 
 	BSUBJECT="O5 VERSA FEED DELAYED"
-	##send_delay_email	
+	send_delay_email	
 	exit 99
 fi
 ################################################################
@@ -178,7 +178,7 @@ else
   BBODY="O5 Versa feed is delayed and we are looking into it. Thanks"
   BADDRESS='David.Mataranglo@360i.com Sofia_Azzolina@s5a.com Hannah_Tevolini@s5a.com' 
   BSUBJECT="O5 VERSA FEED DELAYED"
-  ##send_delay_email
+  send_delay_email
   exit 99
 fi
 echo "Starting the sftp process to Flipp for ${BANNER} at `date '+%a %b %e %T %Z %Y'` " >>${LOG_FILE}
@@ -189,11 +189,11 @@ TARGET_COUNT="`wc -l $FILE_NAME_FLIPP |tr -s ' ' '|'|cut -f1 -d'|'`"
 if [ ${TARGET_COUNT} -gt 1000 ]
 then
 echo "Flipp FTP push started " >> ${LOG_FILE}
-##lftp -u saksoff5_ad,'uY6Tvv3H' sftp://sftp.wishabi.com  <<EOF>> $LOG_FILE
-##cd "Off Fifth Google Product Feed"
-##put "$FILE_NAME_FLIPP"
-##quit
-##EOF
+lftp -u saksoff5_ad,'uY6Tvv3H' sftp://sftp.wishabi.com  <<EOF>> $LOG_FILE
+cd "Off Fifth Google Product Feed"
+put "$FILE_NAME_FLIPP"
+quit
+EOF
 echo "FLIPP FTP push ended " >> ${LOG_FILE}
 fi
 #################################################################
@@ -213,12 +213,12 @@ then
 	BBODY="O5 Versa feed is delayed and we are looking into it. Thanks"
 	BADDRESS='David.Mataranglo@360i.com Sofia_Azzolina@s5a.com Hannah_Tevolini@s5a.com' 
 	BSUBJECT="O5 VERSA FEED DELAYED"
-	##send_delay_email	
+	send_delay_email	
 	exit 99
 else        
 	BADDRESS='hbcdigtialdatamanagement@hbc.com'
 	echo "Off5th Product feed posted to Versafeed successfully"|mailx -s "File posted to Versafeed successfully" ${BADDRESS}
-	##send_success_email	
+	send_success_email	
 	echo "${PROCESS} completed without errors." >> ${LOG_FILE}
 	echo "Channeladvisor_feed PROCESS ended at `date '+%a %b %e %T'`" >>${LOG_FILE}
 fi
