@@ -99,7 +99,7 @@ EOF
 ##SDW
 
 #if [ "$ENV" = "o5_preview" ]; then
-sqlplus -s -l  $CONNECTDW <<EOF>${LOG_FILE} @${SQL01} "$DBLINK" "$SCHEMA" "$BANNER"
+sqlplus -s -l  $CONNECTDW <<EOF>${LOG_FILE} @${SQL01} "$SCHEMA" "$BANNER"
 EOF
 #sqlplus -s -l  $CONNECTDW <<EOF>>${LOG_FILE} @${SQL1} "$DBLINK" "$SCHEMAETL"
 #EOF
@@ -112,7 +112,7 @@ echo "commented in STQA this code as it updates the common table used in prod" >
 fi
 
 #if [ "$ENV" = "o5_prod" ]; then
-sqlplus -s -l  $CONNECTDW <<EOF>${LOG_FILE} @${SQL0} "$DBLINK" "$SCHEMA""$BANNER"
+sqlplus -s -l  $CONNECTDW <<EOF>${LOG_FILE} @${SQL0} "$SCHEMA""$BANNER"
 EOF
 #sqlplus -s -l  $CONNECTDW <<EOF>>${LOG_FILE} @${SQL1} "$DBLINK" "$SCHEMAETL"
 #EOF

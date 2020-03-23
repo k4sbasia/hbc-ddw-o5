@@ -1,16 +1,16 @@
-TRUNCATE TABLE &2.t_new_arrival_dt_upd_rfp_prev;
-DROP  INDEX &2.IDX_NEW_ARRIVAL_ITEM_RFP_PREV;
+TRUNCATE TABLE &1.t_new_arrival_dt_upd_rfp_prev;
+DROP  INDEX &1.IDX_NEW_ARRIVAL_ITEM_RFP_PREV;
 
-MERGE INTO &2.t_new_arrival_dt_upd_rfp_prev a USING
+MERGE INTO &1.t_new_arrival_dt_upd_rfp_prev a USING
  (SELECT DISTINCT p.PRODUCT_ID item_id,
 				 NVL(READYFORPROD_TIMER,TRUNC(r.readyforprod_set_dt)) readyforprod_date,
                  SYSDATE tstamp,
                  MIN(NVL(DECODE(BACK_ORDERABLE,'F','N','Y'),'Y')) pre_order_flag
            FROM
-                 &2.all_active_pim_prd_attr_&3 p ,
+                 &1.all_active_pim_prd_attr_&2 p ,
     		 (SELECT product_id,
                         MIN(readyforprod_set_dt) readyforprod_set_dt
-                   FROM &2.readyforprod_sort a
+                   FROM &1.readyforprod_sort a
                   WHERE readyforprod = 'Yes'
                GROUP BY product_id) r
            WHERE
@@ -25,6 +25,6 @@ MERGE INTO &2.t_new_arrival_dt_upd_rfp_prev a USING
 
 COMMIT;
 
-CREATE INDEX &2.IDX_NEW_ARRIVAL_ITEM_RFP_PREV ON &2.t_new_arrival_dt_upd_rfp_prev (item_id);
+CREATE INDEX &1.IDX_NEW_ARRIVAL_ITEM_RFP_PREV ON &1.t_new_arrival_dt_upd_rfp_prev (item_id);
 quit
 
