@@ -21,7 +21,6 @@ export PROCESS='o5_Simons_product_feed'
 export SQL=$HOME/SQL
 export LOG=$HOME/LOG
 export DATA=$HOME/DATA
-export BANNER=$1
 export LOG_FILE="$LOG/${PROCESS}_log.txt"
 export BAD_SUBJECT="${PROCESS} failed"
 export JOB_NAME="${PROCESS}"
@@ -34,7 +33,6 @@ export FILE_COUNT='0'
 export TFILE_SIZE='0'
 export SOURCE_COUNT='0'
 export TARGET_COUNT='0'
-export SCHEMA=""
 
 
 ########################################################################
