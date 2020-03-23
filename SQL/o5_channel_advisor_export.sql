@@ -1,15 +1,14 @@
-WHENEVER OSERROR EXIT FAILURE
-WHENEVER SQLERROR EXIT FAILURE
-SET ECHO OFF
-SET FEEDBACK OFF
-SET LINESIZE 10000
-SET PAGESIZE 0
-SET SQLPROMPT ''
-SET HEADING OFF
-SET TRIMSPOOL ON
-SET ARRAYSIZE 5000
-SET TERMOUT OFF;
-SPOOL &2;
+whenever sqlerror exit failure
+set linesize 32767
+set heading off
+set echo off
+set feedback off
+set pagesize 0
+set trimspool on
+set serverout on
+set verify off
+SET TERMOUT OFF
+SPOOL &2
 
 SELECT
     'Parent_SKU'
@@ -229,16 +228,23 @@ SELECT fcae.manufacturer_part#
     || '|'
     || CASE WHEN clearance_type = 'C' THEN 'Y' ELSE 'N' END
     || '|'
-    || DECODE(itm_gender,1,'Not Applicable',2,'Men',3,'Women',4,'Unisex',5,'Kids',6,'Pets',NULL)
+    || case when itm_gender = '1' then 'Not Applicable'
+        when  itm_gender = '2' then 'Men'
+        when  itm_gender = '3' then 'Women'
+        when  itm_gender = '4' then 'Unisex'
+        when  itm_gender = '5' then 'Kids'
+        when  itm_gender = '6' then 'Pets'
+        else itm_gender
+        end
     || '|'
     || CASE WHEN nvl(fcae.sale_price,0) = 0 OR t2.item_cst_amt IS NULL THEN 0
-            WHEN round(((fcae.sale_price - t2.item_cst_amt) / fcae.sale_price),2) < 0 THEN 0.01 
+            WHEN round(((fcae.sale_price - t2.item_cst_amt) / fcae.sale_price),2) < 0 THEN 0.01
             ELSE round(((fcae.sale_price - t2.item_cst_amt) / fcae.sale_price),2)
         END
 FROM
-    &1.channel_advisor_extract_new fcae
-    JOIN (SELECT DISTINCT t2.product_code, t2.skn_no, t2.upc, MAX(t2.item_cst_amt) AS item_cst_amt 
-            FROM &1.oms_rfs_o5_stg t2 
+    o5.channel_advisor_extract_new fcae
+    JOIN (SELECT DISTINCT t2.product_code, t2.skn_no, t2.upc, MAX(t2.item_cst_amt) AS item_cst_amt
+            FROM o5.oms_rfs_o5_stg t2
            GROUP BY t2.product_code, t2.skn_no, t2.upc) t2 ON fcae.manufacturer_part# = t2.product_code AND to_number(fcae.sku_number) = t2.upc;
 
 SPOOL OFF;

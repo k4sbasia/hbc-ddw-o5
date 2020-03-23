@@ -57,7 +57,7 @@ SELECT W.UPC,
   END AS UK_PUBLISH,
   CASE
     WHEN ( Upper(trim(w.country_restriction)) LIKE '%CH%'
-    OR Upper(trim(w.country_restriction)) LIKE '%ALL%')     
+    OR Upper(trim(w.country_restriction)) LIKE '%ALL%')
     THEN 'N'
     ELSE 'Y'
   END AS CH_PUBLISH,
@@ -90,8 +90,8 @@ INSERT INTO &1.CHANNEL_ADVISOR_EXTRACT_WRK
 WITH CURRENCY_CALC AS
   (SELECT *
   FROM
-    ( SELECT TARGET_CURRENCY, EXCHANGE_RATE 
-      FROM &1.FX_RATES 
+    ( SELECT TARGET_CURRENCY, EXCHANGE_RATE
+      FROM &1.FX_RATES
       WHERE TARGET_CURRENCY IN ('AUD', 'CAD', 'CHF', 'GBP')
       ORDER BY TARGET_CURRENCY
     ) PIVOT ( MAX(EXCHANGE_RATE) FOR TARGET_CURRENCY IN ('AUD' AS AUD, 'CAD' AS CAD , 'CHF' AS CHF, 'GBP' AS GBP) )
@@ -140,7 +140,7 @@ SELECT A.UPC,
   A.AU_PUBLISH,
   A.UK_PUBLISH,
   A.CH_PUBLISH,
-  A.CA_PUBLISH, 
+  A.CA_PUBLISH,
   A.ITEM_FLAG,
   A.BM_CODE,
   A.MATERIAL,
@@ -153,7 +153,8 @@ SELECT A.UPC,
   A.CHF,
   A.GBP
 FROM
-  (SELECT 'P'
+  (
+    SELECT 'P'
     ||SUBSTR(PRD.ITEM,2,LENGTH(PRD.ITEM))                                                   AS UPC,
     REPLACE(REPLACE (REPLACE (PRD.BM_DESC, CHR (10), ' '), CHR (13), ' '),'|','{PIPE}')     AS PRODUCT_NAME,
     TRIM (TO_CHAR (PRD.UPC, '0000000000000'))                                               AS SKU_NUMBER,
@@ -166,11 +167,7 @@ FROM
     NULL                                                                                    AS DISCOUNT,
     NULL                                                                                    AS DISCOUNT_TYPE,
     TO_CHAR (PRD.SKU_SALE_PRICE)                                                            AS SALE_PRICE,
-    CASE
-      WHEN to_number(DECODE(NVL(PRD.COMPARE_PRICE,0),0,NVL(PRD.SKU_LIST_PRICE,0), NVL(PRD.COMPARE_PRICE,0))) < PRD.SKU_SALE_PRICE
-      THEN PRD.SKU_SALE_PRICE
-      ELSE DECODE(NVL(PRD.COMPARE_PRICE,0),0,NVL(PRD.SKU_LIST_PRICE,0),NVL(PRD.COMPARE_PRICE,0))
-    END                                                                                    AS RETAIL_PRICE,
+    sku_list_price                                                                           AS RETAIL_PRICE,
     TRUNC(SYSDATE)                                                                         AS BEGIN_DATE,
     TRUNC(SYSDATE)                                                                         AS END_DATE,
     REPLACE(REPLACE (REPLACE (PRD.BRAND_NAME, CHR (10), ' '), CHR (13), ' '),'|','{pipe}') AS BRAND,
@@ -191,12 +188,13 @@ FROM
     PRD.PATH ,
     PRD.GROUP_ID,
     REPLACE(PRD.GROUP_NAME,'|', '{pipe}') AS CATEGORYS,
-    CASE
-      WHEN O5.F_O5_GET_CHILD_ATTR_DATA (PRD.STYL_SEQ_NUM,'sku_size1_desc') = '.'
-      THEN NULL
-      ELSE O5.F_O5_GET_CHILD_ATTR_DATA (PRD.STYL_SEQ_NUM,'sku_size1_desc')
-    END                                                        AS SIZES,
-    O5.F_O5_GET_CHILD_ATTR_DATA (PRD.STYL_SEQ_NUM,'sku_color') AS COLOR,
+    (SELECT prod_sizes
+    FROM O5.bi_product_aggregate WRK
+    WHERE product_code = PRD.STYL_SEQ_NUM)
+     AS SIZES,
+    (SELECT prod_sizes
+    FROM O5.bi_product_aggregate WRK
+    WHERE product_code = PRD.STYL_SEQ_NUM) AS COLOR,
     'P'                                                        AS VARIATION_NAME ,
     NULL                                                       AS LARGER_IMAGES,
     CASE
@@ -329,7 +327,7 @@ SELECT TO_CHAR(TO_NUMBER (PRD.UPC)),
   ROUND(PRD.SKU_SALE_PRICE * C.GBP, 2) AS GBP
 FROM &1.CHANNEL_ADVISOR_CORE_DATA PRD,
   CURRENCY_CALC C;
-  
+
 COMMIT;
 
 TRUNCATE TABLE &1.CHANNEL_ADVISOR_EXTRACT_NEW;
@@ -385,7 +383,7 @@ FROM
     ITEM_FLAG,
     MATERIAL,
     BM_CODE,
-    CHF_SALE_PRICE,   
+    CHF_SALE_PRICE,
     CLEARANCE_TYPE,
     DEPARTMENT_ID,
     ITM_GENDER,
@@ -398,8 +396,7 @@ FROM
   )
 ORDER BY ITEM_SEQ ASC,
   UPC DESC;
-  
+
 COMMIT;
 
 EXIT;
-

@@ -58,32 +58,25 @@ INTO &1.FEED_RR_PRICE_RANGE
       FROM
         (SELECT item_id ITEM_ID,
           MIN(Price_type_cd) PRICE_TYPE,
-          MIN(ORIGINAL_TICKET/100) MIN_ORIGINAL_PRICE,
-          MAX(ORIGINAL_TICKET/100) MAX_ORIGINAL_PRICE,
-          MIN(OFFER_PRICE /100) MIN_CURRENT_PRICE,
-          MAX(OFFER_PRICE /100) MAX_CURRENT_PRICE
-        FROM &1.V_SD_PRICE_&6
-            WHERE
+          MIN(to_number(MSRP)) MIN_ORIGINAL_PRICE,
+          MAX(to_number(MSRP)) MAX_ORIGINAL_PRICE,
+          MIN(to_number(OFFER_PRICE) ) MIN_CURRENT_PRICE,
+          MAX(to_number(OFFER_PRICE) ) MAX_CURRENT_PRICE
+        FROM &1.v_sd_price_&2 o, &1.all_active_product_sku_&2 s
+        where o.skn_no = s.skn_no
+        and
           OFFER_PRICE > 1
+        -- and item_id = '0400090078279'
         GROUP BY item_id
         ) PRICE
       ) TMP1,
       (SELECT ITEM_ID,
-        CASE
-          WHEN ENDECA_SAKS_CUSTOM.GET_TOGGLE_STATE@&2('SHIP_FROM_STORE') = 'T'
-          THEN
             CASE
-              WHEN (T1.IN_STOCK + T1.IN_STOCK_STORE) > 0
+              WHEN (T1.IN_STOCK ) > 0
               THEN 'true'
               ELSE 'false'
             END
-          ELSE
-            CASE
-              WHEN T1.IN_STOCK > 0
-              THEN 'true'
-              ELSE 'false'
-            END
-        END RECOMMENDABLE,
+          RECOMMENDABLE,
         CASE
           WHEN T1.MAX_CURRENT_PRICE<T1.MIN_ORIGINAL_PRICE
           THEN '1'
@@ -119,14 +112,14 @@ INTO &1.FEED_RR_PRICE_RANGE
             WI.in_stock_sellable_qty IN_STOCK,
             NVL(WI.in_store_qty,0) INSTOCK_STORE,
             Price_type_cd PRICE_TYPE,
-            ORIGINAL_TICKET/100 ORIGINAL_PRICE,
-            OFFER_PRICE /100 CURRENT_PRICE,
+            MSRP ORIGINAL_PRICE,
+            OFFER_PRICE CURRENT_PRICE,
             SO.item_id ITEM_ID,
-            WI.SKN_NO SKU_ID
-          FROM &1.v_sd_price_&6 SO,
-            &1.inventory WI
-          WHERE lpad(SO.SKN_NO,13,'0') = lpad(WI.SKN_NO,13,'0')
-
+            WI.SKN_NO SKU_ID,
+            s.upc
+          FROM &1.v_sd_price_&2 SO, &1.all_active_product_sku_&2 s,&1.inventory WI
+        where SO.skn_no = s.skn_no
+             and s.skn_no = wi.skn_no
           )
         WHERE (IN_STOCK  > 0
         OR INSTOCK_STORE > 0)
@@ -135,7 +128,6 @@ INTO &1.FEED_RR_PRICE_RANGE
       ) TMP2
     WHERE TMP1.ITEM_ID = TMP2.ITEM_ID(+)
   );
-
 COMMIT;
 
 TRUNCATE TABLE &1.FEED_RR_PRODUCT_DAILY;
@@ -143,6 +135,7 @@ TRUNCATE TABLE &1.FEED_RR_PRODUCT_DAILY;
 TRUNCATE TABLE &1.RR_BM_PRODUCT;
 
 COMMIT;
+
 
 INSERT INTO &1.RR_BM_PRODUCT
 SELECT '' PRD_ID,
@@ -158,8 +151,8 @@ SELECT '' PRD_ID,
     ELSE '0'
   END AS OBA_BOO_VAL,
   IS_SHOPTHELOOK AS SHOPLOOK
-FROM &1.all_active_pim_prd_attr_&6 P
-WHERE P.PRD_STATUS ='A';
+FROM &1.all_active_pim_prd_attr_&2 P
+WHERE P.PRD_STATUS ='Yes';
 
 COMMIT;
 
@@ -170,7 +163,7 @@ WITH BASE AS
     PRD.BM_DESC,
     PRD.GROUP_ID,
     PRD.DEPARTMENT_ID,
-    &1.F_GET_TOOGLE_FLAG('SCENE7') AS TOGGLE_FLAG,
+    'T' AS TOGGLE_FLAG,
     TO_CHAR (PRD.SKU_SALE_PRICE)   AS SKU_SALE_PRICE,
     TO_CHAR (PRD.SKU_LIST_PRICE)   AS SKU_LIST_PRICE,
     TO_CHAR (PRD.ITEM_CST_AMT)     AS ITEM_CST_AMT,
@@ -181,38 +174,22 @@ WITH BASE AS
     PR.WAS_PRICE_RANGE,
     PR.NOW_PRICE_RANGE,
     PR.SALES_FLAG,
-        prd.product_url
-  FROM &1.&3 PRD,
+	prd.product_url,is_egc,
+    image_url
+  FROM &1.O5_PARTNERS_EXTRACT_WRK PRD,
     &1.FEED_RR_PRICE_RANGE PR
   WHERE PRD.STYL_SEQ_NUM = PR.PRODUCT_ID
-  AND PRD.is_egc        <> 'T'
-  AND NVL(PRD.GWP_FLAG,'X')      <> 'T'
-  AND PRD.off_price_ind <> 'Y'
-  AND PRD.BM_DESC       IS NOT NULL
+ AND nvl(PRD.is_egc,'F')        <> 'T'
+AND NVL(PRD.GWP_FLAG,'F')      <> 'T'
+ AND nvl(PRD.off_price_ind,'N')  <> 'Y'
+ AND PRD.BM_DESC       IS NOT NULL
   AND UPPER(PRD.BRAND_NAME) NOT LIKE '%CHANEL%'
   )
 SELECT REPLACE(REPLACE (REPLACE (P.BM_DESC, CHR (10), ' '), CHR (13), ' '), '|', ' '),
   P.GROUP_ID,
   P.DEPARTMENT_ID,
   P.product_url,
-  (
-  CASE
-    WHEN P.TOGGLE_FLAG = 'F'
-    THEN DECODE('o5','mrep.','https://images.saksfifthavenue.com/images/products/','o5.','https://images.saksoff5th.com/images/products/')
-      ||SUBSTR (P.STYL_SEQ_NUM, 1, 2)
-      ||'/'
-      ||SUBSTR (P.STYL_SEQ_NUM, 3, 3)
-      ||'/'
-      ||SUBSTR (P.STYL_SEQ_NUM, 6, 4)
-      ||'/'
-      ||P.STYL_SEQ_NUM
-      ||'/'
-      ||P.STYL_SEQ_NUM
-      ||'R_102x136.jpg'
-    ELSE DECODE('o5.','mrep.','https://image.s5a.com/is/image/saks/','o5.','https://image.s5a.com/is/image/saksoff5th/')
-      ||TRIM(P.STYL_SEQ_NUM)
-      ||'_102x136.jpg'
-  END),
+  p.image_url||'_102x136.jpg',
   TO_CHAR (P.SKU_SALE_PRICE),
   TO_CHAR (P.SKU_LIST_PRICE),
   TO_CHAR (P.ITEM_CST_AMT),
@@ -233,14 +210,13 @@ SELECT REPLACE(REPLACE (REPLACE (P.BM_DESC, CHR (10), ' '), CHR (13), ' '), '|',
 FROM BASE P
 JOIN &1.RR_BM_PRODUCT S
 ON (P.STYL_SEQ_NUM = S.PRD_CODE_LOWER);
-
-COMMIT;
+commit;
 
  INSERT INTO &1.FEED_RR_PRODUCT_DAILY
- SELECT 'Standard Gift Card' BM_DESC,
+SELECT 'Standard Gift Card' BM_DESC,
   P.GROUP_ID,
   P.DEPARTMENT_ID,
-'https://www.saksoff5th.com/main/ProductDetail.jsp?PRODUCT<>prd_id='|| p.prd_id,
+'https://www.saksoff5th.com/main/ProductDetail.jsp?PRODUCT<>prd_id='|| p.PRODUCT_CODE ,
 'https://image.s5a.com/is/image/saksoff5th/'||TRIM(P.product_code) ||'_102x136.jpg' ,
   TO_CHAR (P.SKU_SALE_PRICE),
   TO_CHAR (P.SKU_LIST_PRICE),
@@ -257,9 +233,9 @@ COMMIT;
  TRIM(TO_CHAR(25, '$9,999,999.00')) || ' - ' || TRIM(TO_CHAR(500, '$9,999,999.00')) WAS_PRICE_RANGE,
   TRIM(TO_CHAR(25, '$9,999,999.00')) || ' - ' || TRIM(TO_CHAR(500, '$9,999,999.00')) NOW_PRICE_RANGE,
   0 SALES_FLAG,
-  p.prd_id,
+  p.PRODUCT_CODE prd_id,
   0
-FROM &1.Bi_product P
+FROM O5.Bi_product P
  where p.product_code = '0499535450471'
  and SKU_SALE_PRICE = 500;
 
@@ -439,4 +415,3 @@ SELECT DISTINCT R.ITEM_BM_DESC
 FROM &1.FEED_RR_PRODUCT_DAILY R;
 
 EXIT
-

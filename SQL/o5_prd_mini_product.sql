@@ -27,7 +27,7 @@ MERGE INTO &1.bi_mini_product hst
                    CORP_ANALYSIS_CDE,
                    ANALYSIS_CDE_3,
                    compare_price,
-                                   ORIG_OWN_RTL_DOL,
+                   ORIG_OWN_RTL_DOL,
                   CORP_ITEM_RETL_AMT
               FROM &1.bi_product where deactive_ind='N' and active_ind is not null ) trn
         ON (trn.upc = hst.upc)
@@ -151,7 +151,6 @@ MERGE INTO &1.bi_mini_product hst
      USING (
  SELECT DISTINCT
            oa.PRODUCT_ID AS product_id,
-           oa.primary_parent_color AS color_family,
            oa.BM_DESC AS short_description,
            oa.RETURNABLE AS returnable,
            oa.PERSONALIZABLE AS personalizable,
@@ -162,7 +161,7 @@ MERGE INTO &1.bi_mini_product hst
         ON (trn.product_id = hst.product_code)
  WHEN MATCHED
 THEN
-   UPDATE SET hst.COLOR_FAMILY = trn.color_family,
+   UPDATE SET
                           hst.item_web_description =  substr(trn.short_description, 1, 200),
                           hst.returnable = trn.returnable,
                           hst.personalizable = trn.personalizable,
@@ -170,6 +169,22 @@ THEN
                          hst.readyforprod = trn.readyforprod;
 
 COMMIT;
+
+MERGE INTO &1.bi_mini_product hst
+     USING (
+ SELECT oa.upc,primary_parent_color color_family
+ FROM &1.all_active_pim_sku_attr_&2  oa, &1.bi_mini_product op
+ where oa.upc= op.upc
+ and primary_parent_color is not null
+ and oa.primary_parent_color <> op.COLOR_FAMILY
+ ) trn
+        ON (trn.upc = hst.upc)
+ WHEN MATCHED
+THEN
+   UPDATE SET hst.COLOR_FAMILY = trn.color_family;
+
+COMMIT;
+
 
 
 --First update the pubdate with readyforprod set date
@@ -180,7 +195,7 @@ MERGE INTO &1.bi_mini_product hst
   ( select product_id,max(readyforprod_set_dt) readyforprod_set_dt from &1.READYFORPROD_SORT s
   --,o5.bi_mini_product bp
  -- where s.product_id = bp.product_code
-   group by product_id ) a, mrep.bi_mini_product p
+   group by product_id ) a, &1.bi_mini_product p
    where a.product_id = p.product_code
    and nvl(readyforprod_set_dt,'01-JAN-1999') <> nvl(pub_date,'01-JAN-1999') ) trn
         ON (trn.product_id = hst.product_code)
@@ -192,6 +207,8 @@ THEN
 commit;
 
 --Pubdate upodated with itemsetup task complete date after checking the readyfor prod date.
+--After SFCC datamart tables are not populated when check workflow is only used in reports not in any SDW changes do commenting this
+/*
 MERGE INTO &1.bi_mini_product hst
      USING (select distinct i.svs,Max(p.current_workflow_status)current_workflow_status,Max(trunc(to_date(p.item_set_up_task_complete,'MM/DD/YYYY HH:MI PM')))pub_date from mrch_dm.item@sdwdsg_LT i,mrch_dm.product@sdwdsg_LT p
    where lpad(p.PRODUCT_NO, 13, '0') = replace(i.PRODUCT_NO,CHR(13),'')
@@ -205,6 +222,7 @@ THEN
                                 hst.pub_date=trn.pub_date;
 
 commit;
+*/
 
 
 
@@ -249,7 +267,7 @@ DECLARE
                                      || brand_name,
                                      POWER (2, 16) - 1))
                                   val
-                          FROM O5.bi_product
+                          FROM &1.bi_product
                       GROUP BY item,
                                item_description,
                                pub_date,
@@ -334,16 +352,16 @@ END;
 
 EXEC dbms_output.put_line ('BI_PRODUCT - update procedure completed');
 
-exec  dbms_stats.gather_table_stats('O5','bi_mini_product',estimate_percent=> 100);
+exec  dbms_stats.gather_table_stats('&1','bi_mini_product',estimate_percent=> 100);
 
 --Dropping the indexes for MV
-exec sddw.p_drop_index_on_mv('MV_O5_BI_MINI_PRODUCT');
+exec sddw.p_drop_index_on_mv('&3');
 
 --Refreshing the MV
-exec DBMS_MVIEW.REFRESH('sddw.mv_o5_bi_mini_product','c');
+exec DBMS_MVIEW.REFRESH('sddw.&3','c');
 
 --Recreating the indexes
-CREATE INDEX "SDDW"."IDX_O5_ITEM_IDX_MV" ON "SDDW"."MV_O5_BI_MINI_PRODUCT"
+CREATE INDEX "SDDW"."IDX_&2_ITEM_IDX_MV" ON "SDDW"."&3"
   (
     "ITEM"
   );
