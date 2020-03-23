@@ -151,7 +151,7 @@ SELECT '' PRD_ID,
     ELSE '0'
   END AS OBA_BOO_VAL,
   IS_SHOPTHELOOK AS SHOPLOOK
-FROM all_active_pim_prd_attr_&2 P
+FROM &1.all_active_pim_prd_attr_&2 P
 WHERE P.PRD_STATUS ='Yes';
 
 COMMIT;
@@ -177,7 +177,7 @@ WITH BASE AS
 	prd.product_url,is_egc,
     image_url
   FROM &1_PARTNERS_EXTRACT_WRK PRD,
-    FEED_RR_PRICE_RANGE PR
+    &1.FEED_RR_PRICE_RANGE PR
   WHERE PRD.STYL_SEQ_NUM = PR.PRODUCT_ID
  AND nvl(PRD.is_egc,'F')        <> 'T'
 AND NVL(PRD.GWP_FLAG,'F')      <> 'T'
