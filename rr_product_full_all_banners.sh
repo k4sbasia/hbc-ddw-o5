@@ -45,7 +45,6 @@ export FILE_COUNT='0'
 export TFILE_SIZE='0'
 export SOURCE_COUNT='0'
 export TARGET_COUNT='0'
-export BANNER='&1'
 #######################################################################################
 ##Initialize Email Function
 ################################################################
@@ -127,7 +126,7 @@ fi
 cd DATA
 echo "RR Full catalog feed process started for $BANNER" >${LOG_FILE}
 echo "Creation of the log file started at `date '+%a %b %e %T'`" >>${LOG_FILE}
-sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL} "${SCHEMA}" "$BMCONNECTION" "$PART_TABLE" "$DBCONNECTPRIM" "$REVW_TABLE" "${BANNER}">product_full_${BANNER}.txt
+sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL} "${SCHEMA}" "${BANNER}">product_full_${BANNER}.txt
 SQL_RET_CODE=$?
 echo "Creation of the product data file ended at `date '+%a %b %e %T'`" >>${LOG_FILE}
 wait
@@ -172,7 +171,7 @@ else
 fi 
 #################################################################
 ## second file
-sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL2} "$CLNECONNECTION" >category_full_${BANNER}.txt
+sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL2} "$CLNECONNECTION" "$PIM_DBLINK">category_full_${BANNER}.txt
 SQL_RET_CODE=$?
 echo "Creation of the category data file ended at `date '+%a %b %e %T'`" >>${LOG_FILE}
 wait
@@ -217,7 +216,7 @@ else
 fi 
 #################################################################
 ## third file
-sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL3} "$CLNECONNECTION" >products_in_category_${BANNER}.txt
+sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL3} "$CLNECONNECTION" "${SCHEMA}" "${BANNER}" "$PIM_DBLINK" >products_in_category_${BANNER}.txt
 SQL_RET_CODE=$?
 echo "Creation of the category product data file ended at `date '+%a %b %e %T'`" >>${LOG_FILE}
 wait
@@ -266,7 +265,7 @@ then
 else 
 #################################################################
 ## fourth file
-sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL4}   "${SCHEMA}">product_attribute_${BANNER}.txt
+sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL4}  "${SCHEMA}" "${BANNER}" "$PIM_DBLINK" >product_attribute_${BANNER}.txt
 SQL_RET_CODE=$?
 echo "Creation of the product attribute data file ended at `date '+%a %b %e %T'`" >>${LOG_FILE}
 wait
