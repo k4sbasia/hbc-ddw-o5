@@ -94,14 +94,14 @@ fi
 ############################################################
 if [ "${BANNER}" == "o5" ];
 then
-#export DBCONNECTPRIM="PRVO5_SAKSCUSTOM"
+export DBCONNECTPRIM="PRVO5_SAKSCUSTOM"
 #export CONNECTDW="O5/o5prd@newprdsdw"
 export LOG_FILE="$LOG/${PROCESS}_${BANNER}_log.txt"
 export SCHEMA="o5."
 export PART_TABLE="O5_PARTNERS_EXTRACT_WRK"
 export REVW_TABLE="BV_PRODUCT_REVIEW"
-#export BMCONNECTION="PRDO5_SAKSCUSTOM"
-#export CLNECONNECTION="PRDO5_SAKSCUSTOM"
+export BMCONNECTION="o5PRODSTO_MREP"
+export CLNECONNECTION="o5PRODSTO_MREP"
 #export EXTRACT_SQL='$SQL/rr_product_full_o5_banner.sql'
 export FTP_FILE="product_full_off5th_`date +%Y_%m_%d`.txt"
 export FTP_FILE1="category_full_off5th_`date +%Y_%m_%d`.txt"
