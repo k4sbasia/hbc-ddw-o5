@@ -213,10 +213,10 @@ ON (P.STYL_SEQ_NUM = S.PRD_CODE_LOWER);
 commit;
 
  INSERT INTO &1.FEED_RR_PRODUCT_DAILY
- SELECT 'Standard Gift Card' BM_DESC,
+SELECT 'Standard Gift Card' BM_DESC,
   P.GROUP_ID,
   P.DEPARTMENT_ID,
-'https://www.saksoff5th.com/main/ProductDetail.jsp?PRODUCT<>prd_id='|| p.prd_id,
+'https://www.saksoff5th.com/main/ProductDetail.jsp?PRODUCT<>prd_id='|| p.PRODUCT_CODE ,
 'https://image.s5a.com/is/image/saksoff5th/'||TRIM(P.product_code) ||'_102x136.jpg' ,
   TO_CHAR (P.SKU_SALE_PRICE),
   TO_CHAR (P.SKU_LIST_PRICE),
@@ -233,9 +233,9 @@ commit;
  TRIM(TO_CHAR(25, '$9,999,999.00')) || ' - ' || TRIM(TO_CHAR(500, '$9,999,999.00')) WAS_PRICE_RANGE,
   TRIM(TO_CHAR(25, '$9,999,999.00')) || ' - ' || TRIM(TO_CHAR(500, '$9,999,999.00')) NOW_PRICE_RANGE,
   0 SALES_FLAG,
-  p.prd_id,
+  p.PRODUCT_CODE prd_id,
   0
-FROM &1.Bi_product P
+FROM O5.Bi_product P
  where p.product_code = '0499535450471'
  and SKU_SALE_PRICE = 500;
 
