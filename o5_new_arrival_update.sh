@@ -38,7 +38,6 @@ export TARGET_COUNT='0'
 export SQL0="$SQL/o5_new_arrival_sdw.sql"
 export SQL01="$SQL/o5_new_arrival_sdw_prev.sql"
 export SQL1="$SQL/o5_new_arrival_update.sql"
-export BANNER=$1
 ########################################################################
 ########################################################################
 ##Initialize Email Function
