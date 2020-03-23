@@ -321,12 +321,12 @@ if [ "${BANNER}" == "saks" ];
 then
 tar -cvzf catalog_full_${BANNER}_`date +%Y%m%d`.tar.gz product_full_${BANNER}_`date +%Y%m%d`.txt category_full_${BANNER}_`date +%Y%m%d`.txt products_in_category_${BANNER}__`date +%Y%m%d`.txt
 wait
-#ftp -nv ftp.richrelevance.com<<EOF>> $LOG_FILE
-#user saksftp ko11o1k0l
-#bin
-#put catalog_full_${BANNER}_`date +%Y%m%d`.tar.gz
-#quit
-#EOF
+ftp -nv ftp.richrelevance.com<<EOF>> $LOG_FILE
+user saksftp ko11o1k0l
+bin
+put catalog_full_${BANNER}_`date +%Y%m%d`.tar.gz
+quit
+EOF
 #################################################################
 ##FTP TRANSFER VALIDATION
 #################################################################
@@ -360,6 +360,7 @@ then
  GFILE_NAME=catalog_full_off5th_`date +%Y_%m_%d`.zip
  GFILE_SIZE="`ls -ll ${DATA}/RR_Off5th/$GFILE_NAME |tr -s ' ' '|' |cut -f5 -d'|'`" # size of the file
 fi 
+
 if [ ${GFILE_SIZE} -gt 0 ]
 then
  echo "File zip is valid. so start FTP " >> ${LOG_FILE}
@@ -369,12 +370,12 @@ else
 exit 99	
 fi
 #################################################################
-#ftp -nv ftp.richrelevance.com<<EOF>> $LOG_FILE
-#user saksoff5th ae0ahL3me1Ibu
-#bin
-#put catalog_full_off5th_`date +%Y_%m_%d`.zip
-#quit
-#EOF
+ftp -nv ftp.richrelevance.com<<EOF>> $LOG_FILE
+user saksoff5th ae0ahL3me1Ibu
+bin
+put catalog_full_off5th_`date +%Y_%m_%d`.zip
+quit
+EOF
 #################################################################
 ##FTP TRANSFER VALIDATION
 #################################################################
