@@ -65,12 +65,12 @@ fi
 
 cd $DATA
 #Fetch Order File From Omniture to Local Unix Box
-#ftp -nv ftp2.omniture.com<<EOF
-#user saksdatafeed PFsfelvb
-#binary
-#get $OMNITURE_ORDER_FILE
-#quit
-#EOF
+ftp -nv ftp2.omniture.com<<EOF
+user saksdatafeed PFsfelvb
+binary
+get $OMNITURE_ORDER_FILE
+quit
+EOF
 
 if [ -f $DATA/$OMNITURE_ORDER_FILE ]
 then
