@@ -85,11 +85,11 @@ echo "Finished Onera extracting data at `date '+%a %b %e %T'`" >>${LOG_FILE}
 cd $DATA
 
 dos2unix ${FILE_NAME}
-#sftp saks@feeds-saks.oneracommerce.com  <<end-of-session
-#cd saksoff5th
-#put saks_off5th_onera_product_daily_feed_`date +%Y%m%d`.txt onera_product_daily_feed_`date +%Y%m%d`.txt
-#bye
-#end-of-session
+sftp saks@feeds-saks.oneracommerce.com  <<end-of-session
+cd saksoff5th
+put saks_off5th_onera_product_daily_feed_`date +%Y%m%d`.txt onera_product_daily_feed_`date +%Y%m%d`.txt
+bye
+end-of-session
 
 if [ $? -gt 0 ]
 then
@@ -103,11 +103,11 @@ fi
 gzip ${FILE_NAME}
 
 echo "sftp to internal server" >>${LOG_FILE}
-#sftp -oIdentityFile=/home/cognos/.ssh/vendor_keys/id_saks hbc-safety-stock@sftp2.data.hbc.io<<EOF>> ${LOG_FILE}
-#cd hbc-safety-stock/O5/PRODUCT/
-#put saks_off5th_onera_product_daily_feed_`date +%Y%m%d`.txt.gz
-#quit
-#EOF
+sftp -oIdentityFile=/home/cognos/.ssh/vendor_keys/id_saks hbc-safety-stock@sftp2.data.hbc.io<<EOF>> ${LOG_FILE}
+cd hbc-safety-stock/O5/PRODUCT/
+put saks_off5th_onera_product_daily_feed_`date +%Y%m%d`.txt.gz
+quit
+EOF
 
 if [ -f ${REMOVE_FILE_NAME} ]
 then
