@@ -70,11 +70,11 @@ echo "echosurvey.com PROCESS ended at `date '+%a %b %e %T'`" >>${LOG_FILE}
 #################################################################
 echo "Starting the ftp process to echosurvey.com at `date '+%a %b %e %T %Z %Y'` " >>${LOG_FILE}
 cd $DATA
-#lftp -u HBC-CX,'8mjp4lvp' sftp://filemanager.lrwcx.com<<EOF>>$LOG_FILE
-#cd Invitations_ContactCenter
-#put off5th_data_extract_`date +%m%d%Y`.csv
-#quit
-#EOF
+lftp -u HBC-CX,'8mjp4lvp' sftp://filemanager.lrwcx.com<<EOF>>$LOG_FILE
+cd Invitations_ContactCenter
+put off5th_data_extract_`date +%m%d%Y`.csv
+quit
+EOF
 cd $HOME
 echo "Finished the ftp process to  echosurvey.com at `date '+%a %b %e %T %Z %Y'` " >>${LOG_FILE}
 echo "feed_echosurvey _product process completed at `date '+%a %b %e %T %Z %Y'`" >>${LOG_FILE}
