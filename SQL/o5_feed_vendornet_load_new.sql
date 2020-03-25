@@ -84,31 +84,30 @@ WHEN MATCHED THEN
   
   
   
- MERGE INTO o5.bi_vendornet_prod_new tg USING
-  (SELECT
+ --MERGE INTO o5.bi_vendornet_prod_new tg USING
+  --(SELECT
     /*+ ordered */
-    p.prd_code_lower,
-    oa.oba_int_val dsr_inv_qty
-  FROM martini_main.object_attribute@O5PRIM_MREP oa,
-    martini_main.product@O5PRIM_MREP p
-  WHERE oa.oba_obj_id = p.prd_id
-  AND p.version       =1
-  AND oa.version      =1
-  AND oa.oba_atr_id  IN
-    (SELECT a.atr_id
-    FROM martini_main. attribute@O5PRIM_MREP a
-    WHERE a.atr_nm_lower = 'dropship_ss_reduceinvqty'
-    )
-  ) src ON (tg.product_id = src.prd_code_lower AND add_dt=TRUNC(sysdate))
-WHEN MATCHED THEN
-  UPDATE
-  SET tg.dropship_ss_reduceinvqty = src.dsr_inv_qty;
-  COMMIT;
+   -- p.prd_code_lower,
+    --oa.oba_int_val dsr_inv_qty
+  --FROM martini_main.object_attribute@O5PRIM_MREP oa,
+   -- martini_main.product@O5PRIM_MREP p
+  --WHERE oa.oba_obj_id = p.prd_id
+  --AND p.version       =1
+  --AND oa.version      =1
+  --AND oa.oba_atr_id  IN
+    --(SELECT a.atr_id
+    --FROM martini_main. attribute@O5PRIM_MREP a
+    --WHERE a.atr_nm_lower = 'dropship_ss_reduceinvqty'
+   -- )
+  --) src ON (tg.product_id = src.prd_code_lower AND add_dt=TRUNC(sysdate))
+--WHEN MATCHED THEN
+  --UPDATE
+  --SET tg.dropship_ss_reduceinvqty = src.dsr_inv_qty;
+  --COMMIT;
   
   
-   MERGE INTO o5.bi_vendornet_prod_new tg USING
+/*MERGE INTO o5.bi_vendornet_prod_new tg USING
   (SELECT
-    /*+ ordered */
     p.prd_code_lower,
     oa.oba_int_val dsr_yes_inv_qty
   FROM martini_main.object_attribute@O5PRIM_MREP oa,
@@ -125,12 +124,10 @@ WHEN MATCHED THEN
 WHEN MATCHED THEN
   UPDATE
   SET tg.dropship_yes_inv_qty = src.dsr_yes_inv_qty;
-  COMMIT;
+  COMMIT;   */
   
-  
- MERGE INTO o5.bi_vendornet_prod_new tg USING
+/* MERGE INTO o5.bi_vendornet_prod_new tg USING
   (SELECT
-    /*+ ordered */
     p.prd_code_lower,
     oa.oba_boo_val dsr_ignore_inv_feed
   FROM martini_main.object_attribute@O5PRIM_MREP oa,
@@ -147,7 +144,7 @@ WHEN MATCHED THEN
 WHEN MATCHED THEN
   UPDATE
   SET tg.dropship_ignore_inv_feed = src.dsr_ignore_inv_feed;
-  COMMIT;
+  COMMIT;*/
   
   
   /*unit weight updated*/
@@ -213,22 +210,22 @@ WHEN matched THEN
   UPDATE SET vendorcode = s.vendor_num;
   COMMIT;
   
-truncate table o5.readyforprod_lookup_vendor;
+--truncate table o5.readyforprod_lookup_vendor;
 
-insert into o5.readyforprod_lookup_vendor
-select prd_code, oba_boo_val from martini_main.product@O5PRIM_MREP p, martini_main.object_attribute@O5PRIM_MREP oa
-        where p.prd_id = oa.oba_obj_id
-        and oa.oba_atr_id = '6193548999262905'and prd_status_cd = 'A' and p.version = 1 and oa.version =1;
+--insert into o5.readyforprod_lookup_vendor
+--select prd_code, oba_boo_val from martini_main.product@O5PRIM_MREP p, martini_main.object_attribute@O5PRIM_MREP oa
+  --      where p.prd_id = oa.oba_obj_id
+    --    and oa.oba_atr_id = '6193548999262905'and prd_status_cd = 'A' and p.version = 1 and oa.version =1;
 
-commit;
+--commit;
 
 
 merge into o5.bi_vendornet_prod_new trg
-using (select prd_code, oba_boo_val from o5.readyforprod_lookup_vendor) src
+using (select prd_code, oba_boo_val from o5.all_active_pim_prd_attr_o5 where PRD_READYFORPROD = 'Yes' and PRD_STATUS = 'Yes') src
 on (trg.product_id = src.prd_code and trg.add_dt=TRUNC(sysdate))
 when matched then update set
 trg.readyforprod = src.oba_boo_val;
-commit;  
+commit;
 
   
     EXIT;
