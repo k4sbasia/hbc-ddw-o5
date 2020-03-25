@@ -31,7 +31,9 @@ BEGIN
 EXECUTE IMMEDIATE 'truncate table &1.all_active_pim_prd_attr_&2';
 EXECUTE IMMEDIATE 'truncate table &1.all_active_pim_sku_attr_&2';
 EXECUTE IMMEDIATE 'truncate table &1.all_actv_pim_assortment_&2';
+EXECUTE IMMEDIATE 'truncate table &1.ALL_PRODUCT_ATTR_RR_FEED_&2';
     --Get Product Attributes
+    DBMS_OUTPUT.PUT_LINE('PIM Product ATTRIBUTE Fetch Process Start :  '|| to_char(sysdate,'MM-DD-YYYY HH:MI:SS'));
     INSERT INTO all_active_pim_prd_attr_&2
     (
      PRODUCT_ID ,
@@ -151,6 +153,7 @@ EXECUTE IMMEDIATE 'truncate table &1.all_actv_pim_assortment_&2';
     COMMIT;
     DBMS_OUTPUT.PUT_LINE('PIM Product Attribute Fetch Process End :  '|| to_char(sysdate,'MM-DD-YYYY HH:MI:SS') || ' - ' || nvl((SQL%rowcount),0));
     COMMIT;
+    DBMS_OUTPUT.PUT_LINE('PIM SKU Attribute Fetch Process Start :  '|| to_char(sysdate,'MM-DD-YYYY HH:MI:SS'));
 --Get SKU Attributes
     INSERT INTO all_active_pim_sku_attr_&2
     (
@@ -197,6 +200,7 @@ EXECUTE IMMEDIATE 'truncate table &1.all_actv_pim_assortment_&2';
         FROM all_sku_attributes sku_attr
         GROUP BY upc
     ;
+    DBMS_OUTPUT.PUT_LINE('PIM SKU Attribute Fetch Process ENDED  :  '|| to_char(sysdate,'MM-DD-YYYY HH:MI:SS'));
 --Get Product Assortments
     INSERT INTO all_actv_pim_assortment_&2
     (
@@ -259,7 +263,134 @@ READYFORPRODFOLDER
         WHERE latest_prd_path = 1;
     DBMS_OUTPUT.PUT_LINE('PIM Assortment Fetch Process End :  '|| to_char(sysdate,'MM-DD-YYYY HH:MI:SS') || ' - ' || nvl((SQL%rowcount),0));
     COMMIT;
-
+DBMS_OUTPUT.PUT_LINE('Rich Relavance all product attribite Fetch Process Started  :  '|| to_char(sysdate,'MM-DD-YYYY HH:MI:SS'));
+insert into ALL_PRODUCT_ATTR_RR_FEED_&2
+WITH all_product_attributes AS
+       (SELECT
+               product_id,
+               attribute_name,
+               TRIM(REPLACE(REPLACE(REPLACE(TRANSLATE(attribute_val, 'x'||CHR(10)||CHR(13), 'x'),'|',''),'^',''),'�','')) attribute_val
+        FROM &3
+       WHERE
+       lower(attribute_name) IN  ('backorderable',
+                                'brandname',
+                                'dropship_ind',
+                                'featuredtype',
+                                'gwp_flag',
+                                'item_gender',
+                                'pd_restrictedcountry_text',
+                                'pd_restrictedstate_text',
+                                'personalizable',
+                                'productshortdescription',
+                                'returnable',
+                                'totalreviewcount',
+                                'isdesigneritem',
+                                'isegc',
+                                'isvirtual',
+                                'lifestylecontemporary',
+                                'lifestylemodern',
+                                'lifestylepremier',
+                                'refinementproducttype1',
+                                'refinementproducttype2',
+                                'refinementproducttype3',
+                                'refinementstyle1',
+                                'refinementstyle2',
+                                'refinementstyle3',
+                                'refage',
+                                'refcollection',
+                                'refconcern1',
+                                'refconcern2',
+                                'refconcern3',
+                                'refcoverage',
+                                'refcuff',
+                                'reffinefashion',
+                                'reffinish',
+                                'refgender',
+                                'reflength',
+                                'refmaterial1',
+                                'refmaterial2',
+                                'refmaterial3',
+                                'refoccasion1',
+                                'refoccasion2',
+                                'refpatternprint',
+                                'refrise',
+                                'refspf',
+                                'refscent1',
+                                'refscent2',
+                                'refscent3',
+                                'refsilhouette1',
+                                'refsilhouette2',
+                                'refsilhouette3',
+                                'refskintype',
+                                'refsleevelength',
+                                'refwash',
+                                'refinementfit1',
+                                'refinementfit2',
+                                'refinementheelheight'
+                              )
+             -- and product_id = '0400093605703'
+     AND attribute_val IS NOT NULL
+     )
+      SELECT
+               product_id,
+              MAX(CASE WHEN lower(attribute_name) = 	'brandname'	THEN attribute_val END)  as  brandname,
+MAX(CASE WHEN lower(attribute_name) = 	'dropship_ind'	THEN attribute_val END)  as  dropship_ind,
+MAX(CASE WHEN lower(attribute_name) = 	'featuredtype'	THEN attribute_val END)  as  featuredtype,
+MAX(CASE WHEN lower(attribute_name) = 	'gwp_flag'	THEN attribute_val END)  as  gwp_flag,
+MAX(CASE WHEN lower(attribute_name) = 	'isdesigneritem'	THEN attribute_val END)  as  isdesigneritem,
+MAX(CASE WHEN lower(attribute_name) = 	'isegc'	THEN attribute_val END)  as  isegc,
+MAX(CASE WHEN lower(attribute_name) = 	'isvirtual'	THEN attribute_val END)  as  isvirtual,
+MAX(CASE WHEN lower(attribute_name) = 	'item_gender'	THEN attribute_val END)  as  item_gender,
+MAX(CASE WHEN lower(attribute_name) = 	'lifestylecontemporary'	THEN attribute_val END)  as  lifestylecontemporary,
+MAX(CASE WHEN lower(attribute_name) = 	'lifestylemodern'	THEN attribute_val END)  as  lifestylemodern,
+MAX(CASE WHEN lower(attribute_name) = 	'lifestylepremier'	THEN attribute_val END)  as  lifestylepremier,
+MAX(CASE WHEN lower(attribute_name) = 	'pd_restrictedcountry_text'	THEN attribute_val END)  as  pd_restrictedcountry_text,
+MAX(CASE WHEN lower(attribute_name) = 	'pd_restrictedstate_text'	THEN attribute_val END)  as  pd_restrictedstate_text,
+MAX(CASE WHEN lower(attribute_name) = 	'personalizable'	THEN attribute_val END)  as  personalizable,
+MAX(CASE WHEN lower(attribute_name) = 	'productshortdescription'	THEN attribute_val END)  as  productshortdescription,
+MAX(CASE WHEN lower(attribute_name) = 	'refage'	THEN attribute_val END)  as  refage,
+MAX(CASE WHEN lower(attribute_name) = 	'refcollection'	THEN attribute_val END)  as  refcollection,
+MAX(CASE WHEN lower(attribute_name) = 	'refconcern1'	THEN attribute_val END)  as  refconcern1,
+MAX(CASE WHEN lower(attribute_name) = 	'refconcern2'	THEN attribute_val END)  as  refconcern2,
+MAX(CASE WHEN lower(attribute_name) = 	'refconcern3'	THEN attribute_val END)  as  refconcern3,
+MAX(CASE WHEN lower(attribute_name) = 	'refcoverage'	THEN attribute_val END)  as  refcoverage,
+MAX(CASE WHEN lower(attribute_name) = 	'refcuff'	THEN attribute_val END)  as  refcuff,
+MAX(CASE WHEN lower(attribute_name) = 	'reffinefashion'	THEN attribute_val END)  as  reffinefashion,
+MAX(CASE WHEN lower(attribute_name) = 	'reffinish'	THEN attribute_val END)  as  reffinish,
+MAX(CASE WHEN lower(attribute_name) = 	'refgender'	THEN attribute_val END)  as  refgender,
+MAX(CASE WHEN lower(attribute_name) = 	'refinementfit1'	THEN attribute_val END)  as  refinementfit1,
+MAX(CASE WHEN lower(attribute_name) = 	'refinementfit2'	THEN attribute_val END)  as  refinementfit2,
+MAX(CASE WHEN lower(attribute_name) = 	'refinementheelheight'	THEN attribute_val END)  as  refinementheelheight,
+MAX(CASE WHEN lower(attribute_name) = 	'refinementproducttype1'	THEN attribute_val END)  as  refinementproducttype1,
+MAX(CASE WHEN lower(attribute_name) = 	'refinementproducttype2'	THEN attribute_val END)  as  refinementproducttype2,
+MAX(CASE WHEN lower(attribute_name) = 	'refinementproducttype3'	THEN attribute_val END)  as  refinementproducttype3,
+MAX(CASE WHEN lower(attribute_name) = 	'refinementstyle1'	THEN attribute_val END)  as  refinementstyle1,
+MAX(CASE WHEN lower(attribute_name) = 	'refinementstyle2'	THEN attribute_val END)  as  refinementstyle2,
+MAX(CASE WHEN lower(attribute_name) = 	'refinementstyle3'	THEN attribute_val END)  as  refinementstyle3,
+MAX(CASE WHEN lower(attribute_name) = 	'reflength'	THEN attribute_val END)  as  reflength,
+MAX(CASE WHEN lower(attribute_name) = 	'refmaterial1'	THEN attribute_val END)  as  refmaterial1,
+MAX(CASE WHEN lower(attribute_name) = 	'refmaterial2'	THEN attribute_val END)  as  refmaterial2,
+MAX(CASE WHEN lower(attribute_name) = 	'refmaterial3'	THEN attribute_val END)  as  refmaterial3,
+MAX(CASE WHEN lower(attribute_name) = 	'refoccasion1'	THEN attribute_val END)  as  refoccasion1,
+MAX(CASE WHEN lower(attribute_name) = 	'refoccasion2'	THEN attribute_val END)  as  refoccasion2,
+MAX(CASE WHEN lower(attribute_name) = 	'refpatternprint'	THEN attribute_val END)  as  refpatternprint,
+MAX(CASE WHEN lower(attribute_name) = 	'refrise'	THEN attribute_val END)  as  refrise,
+MAX(CASE WHEN lower(attribute_name) = 	'refscent1'	THEN attribute_val END)  as  refscent1,
+MAX(CASE WHEN lower(attribute_name) = 	'refscent2'	THEN attribute_val END)  as  refscent2,
+MAX(CASE WHEN lower(attribute_name) = 	'refscent3'	THEN attribute_val END)  as  refscent3,
+MAX(CASE WHEN lower(attribute_name) = 	'refsilhouette1'	THEN attribute_val END)  as  refsilhouette1,
+MAX(CASE WHEN lower(attribute_name) = 	'refsilhouette2'	THEN attribute_val END)  as  refsilhouette2,
+MAX(CASE WHEN lower(attribute_name) = 	'refsilhouette3'	THEN attribute_val END)  as  refsilhouette3,
+MAX(CASE WHEN lower(attribute_name) = 	'refskintype'	THEN attribute_val END)  as  refskintype,
+MAX(CASE WHEN lower(attribute_name) = 	'refsleevelength'	THEN attribute_val END)  as  refsleevelength,
+MAX(CASE WHEN lower(attribute_name) = 	'refspf'	THEN attribute_val END)  as  refspf,
+MAX(CASE WHEN lower(attribute_name) = 	'refwash'	THEN attribute_val END)  as  refwash,
+MAX(CASE WHEN lower(attribute_name) = 	'returnable'	THEN attribute_val END)  as  returnable,
+MAX(CASE WHEN lower(attribute_name) = 	'totalreviewcount'	THEN attribute_val END)  as  totalreviewcount,
+MAX(CASE WHEN lower(attribute_name) = 	'backorderable'	THEN attribute_val END)  as  backorderable
+   FROM all_product_attributes
+       GROUP BY product_id
+    ;    
     DBMS_OUTPUT.PUT_LINE('PIM SKU Attribute Fetch Process End :  '|| to_char(sysdate,'MM-DD-YYYY HH:MI:SS') || ' - ' || nvl((SQL%rowcount),0));
     COMMIT;
 END;

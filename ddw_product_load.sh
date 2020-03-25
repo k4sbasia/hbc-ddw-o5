@@ -58,6 +58,7 @@ export PIM_SKU_ATTR_TAB="pim_ab_O5_sku_attr_data"
 export PIM_WEB_FOLDER_TAB="pim_ab_o5_web_folder_data"
 export PIM_ASRT_PRD_ASSGM="pim_ab_o5_bm_asrt_prd_assgn"
 export PIM_FOLDER_ATTR_DATA="pim_ab_o5_folder_attr_data"
+export OMS_RFS_TAB="OMS_RFS_O5_STG"
 export PIM_DBLINK="PIM_READ"
 fi
 #################################################################
@@ -70,7 +71,7 @@ echo "ddw_product_load build Process started at `date '+%a %b %e %T'`" >${LOG_FI
 #########################################################################
 #  Run the sql script that performs the product info extract
 #################################################################
-sqlplus -s -l  $CONNECTDW @${SQL}/${PROCESS}.sql "${SCHEMA}" "${BANNER}" "${PIM_DBLINK}" >> ${LOG_FILE}
+sqlplus -s -l  $CONNECTDW @${SQL}/${PROCESS}.sql "${SCHEMA}" "${BANNER}" "${PIM_DBLINK}" "${OMS_RFS_TAB}"  >> ${LOG_FILE}
 echo "ddw_product_load PROCESS ended at `date '+%a %b %e %T'`" >>${LOG_FILE}
 #################################################################
 ################################################################

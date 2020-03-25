@@ -3,7 +3,7 @@ MERGE INTO saks_custom.prd_hier_price_status hst
    USING (SELECT DISTINCT sku_code, upc_code, price_type, department_id,
                           department_name, class_id, GROUP_ID, group_name,
                           division_id, division_name, vendor_id
-                     FROM o5.prd_hier_price_status@mrep) trn
+                     FROM &1.prd_hier_price_status@mrep) trn
    ON (hst.upc_code = trn.upc_code)
    WHEN MATCHED THEN
       UPDATE

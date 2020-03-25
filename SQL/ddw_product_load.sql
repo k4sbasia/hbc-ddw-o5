@@ -68,6 +68,35 @@ BEGIN
     FROM &1.V_ACTIVE_PRODUCT_&2  prd;
     COMMIT;
 
+    INSERT INTO &1.all_active_product_sku_&2
+    (skn_no,upc,product_code,add_dt)
+    SELECT
+        p.skn_no,
+        p.upc,
+        p.product_code,
+        sysdate
+    FROM
+        (
+            SELECT
+                *
+            FROM
+                &1.all_active_pim_sku_attr_&2
+            WHERE
+                sku_status = 'Yes'
+        ) s,
+        &1.&4 p
+    WHERE
+        s.upc = lpad(p.upc, 13, '0')
+        AND EXISTS (
+            SELECT
+                1
+            FROM
+                &1.all_active_product_&2 prd
+            WHERE
+                prd.prd_code_lower = p.product_code
+        );
+        commit;
+
 EXCEPTION
 WHEN OTHERS
 THEN

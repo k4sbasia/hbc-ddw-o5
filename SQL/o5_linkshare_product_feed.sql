@@ -4,7 +4,7 @@ set linesize 10000
 set pagesize 0
 set sqlprompt ''
 set heading off
-SELECT 'HDR'||'|'||'38801'||'|'||'SAKSOFF5TH'||'|'||TO_DATE(SYSDATE,'YYYY-MM-DD/HH:MI:SS') FROM DUAL;
+SELECT 'HDR'||'|'||'38801'||'|'||'&5'||'|'||TO_DATE(SYSDATE,'YYYY-MM-DD/HH:MI:SS') FROM DUAL;
 
 SELECT
 UPC||'|'||
@@ -39,11 +39,11 @@ STYL_SEQ_NUM||'|'||
 'Y' ||'|'||
 'USD'||'|'||
 '' ||'|'||
-replace(O5.F_GET_ALT_IMAGE_URL (STYL_SEQ_NUM),'300x400','486x648')
+replace(&1.F_GET_ALT_IMAGE_URL (STYL_SEQ_NUM),'300x400','486x648')
 from
-&1.O5_PARTNERS_EXTRACT_WRK  where wh_sellable_qty > 0;
+&1.&3  where wh_sellable_qty > 0;
 
 select 'TRL' ||'|'||count(distinct upc)
-FROM &1.O5_PARTNERS_EXTRACT_WRK  where wh_sellable_qty > 0;
+FROM &1.&3  where wh_sellable_qty > 0;
 
 exit;
