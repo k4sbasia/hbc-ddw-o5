@@ -158,33 +158,6 @@ fi
 sleep ${SLEEP_TIME}
 done
 #################################################################
-echo -e "Refreshing the saks_custom.reviews table in production at `date '+%a %b %e %T'`\n" >>${LOG_FILE}
-#################################################################
-#sqlplus -s -l  $CONNECTDWXML @${SQL}/${SQL2}.sql "${PRODSTO_DB_LINK}" "${PRIMSTO_DB_LINK}" "${SCHEMA}" >> ${LOG_FILE}
-#################################################################
-echo -e "Finished Refreshing the saks_custom.reviews table in production at `date '+%a %b %e %T'`\n" >>${LOG_FILE}
-#################################################################
-###Refresh the jsp page for saks ##
-#################################################################
-cd $HOME
-echo -e "Started Refreshing the JSP  at `date '+%a %b %e %T'`\n" >>${LOG_FILE}
-##wget http://hd1pxx21lx.digital.hbc.com:7010/main/productreview/ProductReviewCacheRefresh.jsp>> ${LOG_FILE}
-wait
-#########################################################################
-## Do the MVIEW refresh and endeca review partial
-########################################################################
-echo -e "Starting the MVIEW refresh at `date '+%a %b %e %T'`\n">>${LOG_FILE}
-BEFORE_COUNT=`sqlplus -s $CONNECTDW <<EOF
-set heading off
-select count(*) from saks_custom.reviews@${PRODSTO_DB_LINK};
-quit;
-EOF`
-echo -e "Starting Endeca review partial at `date '+%a %b %e %T'`\n" >>${LOG_FILE}
-ssh -n endadmin@hd1putl22lx.digital.hbc.com '/home/endadmin/endeca/apps/saks/control/partial_update_reviews.sh'
-wait
-echo -e "Finished the endeca review partial at `date '+%a %b %e %T'`\n" >>${LOG_FILE}
-########################################################################
-#################################################################
 echo -e "PRODUCT_REVIEW_RATING LOAD PROCESS ended at `date '+%a %b %e %T'`\n" >>${LOG_FILE}
 ################################################################
 # Check for errors
