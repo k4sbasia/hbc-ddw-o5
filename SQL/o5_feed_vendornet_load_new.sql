@@ -63,19 +63,9 @@ COMMIT;
 
 MERGE INTO o5.bi_vendornet_prod_new tg USING
 (SELECT
-  /*+ ordered */
-  p.prd_code_lower,
-  oa.oba_int_val leaddays
-FROM martini_main.object_attribute@O5PRIM_MREP oa,
-  martini_main.product@O5PRIM_MREP p
-WHERE oa.oba_obj_id = p.prd_id
-AND p.version       =1
-AND oa.version      =1
-AND oa.oba_atr_id  IN
-  (SELECT a.atr_id
-  FROM martini_main. attribute@O5PRIM_MREP a
-  WHERE a.atr_nm_lower = 'dropship_leaddays'
-  )
+  product_id prd_code_lower,
+  dropship_leaddays leaddays
+FROM o5.all_active_pim_prd_attr_o5
 ) src ON (tg.product_id = src.prd_code_lower AND add_dt=TRUNC(sysdate))
 WHEN MATCHED THEN
   UPDATE
@@ -221,10 +211,10 @@ WHEN matched THEN
 
 
 merge into o5.bi_vendornet_prod_new trg
-using (select prd_code, oba_boo_val from o5.all_active_pim_prd_attr_o5 where PRD_READYFORPROD = 'Yes' and PRD_STATUS = 'Yes') src
+using (select product_id prd_code from o5.all_active_pim_prd_attr_o5 where PRD_READYFORPROD = 'Yes' and PRD_STATUS = 'Yes') src
 on (trg.product_id = src.prd_code and trg.add_dt=TRUNC(sysdate))
 when matched then update set
-trg.readyforprod = src.oba_boo_val;
+trg.readyforprod = 'T';
 commit;
 
   

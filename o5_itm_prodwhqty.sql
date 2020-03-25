@@ -24,18 +24,18 @@ null PO_CANCEL_DATE,
 null PO_DETAIL_STATUS_CODE,
 null PO_SHIP_DATE,
 null PO_STATUS_CODE,
-lpad(i.upc_code,13,'0') UPC,
-i.WH_BACKORDER_QTY,
+p.upc UPC,
+0 WH_BACKORDER_QTY,
 i.WH_PO_DATE,
 i.WH_PO_NUMBER,
 case when in_stock_sellable_qty >= in_store_qty then (in_stock_sellable_qty-in_store_qty)
 else in_stock_sellable_qty end
 From o5.inventory i,
 o5.bi_product p
-where p.upc = lpad(i.upc_code,13,0) and 
-p.sku = lpad(i.sku_code,13,0) 
+where
+p.sku = i.SKN_NO 
 and 
-(i.in_stock_sellable_qty  > 0 or i.WH_BACKORDER_QTY>0)
+(i.in_stock_sellable_qty  > 0)
 ;
 
 commit;
