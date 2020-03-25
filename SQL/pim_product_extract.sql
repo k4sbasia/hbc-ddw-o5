@@ -69,7 +69,8 @@ EXECUTE IMMEDIATE 'truncate table &1.ALL_PRODUCT_ATTR_RR_FEED_&2';
    PD_RESTRICTEDWARNING_TEXT ,
    PD_RESTRICTEDSTATE_TEXT ,
    PD_RESTRICTEDSHIPTYPE_TEXT,
-   CountryOfOrigin
+   CountryOfOrigin,
+   DROPSHIP_LEADDAYS
      )
         WITH all_product_attributes AS
        (
@@ -109,7 +110,8 @@ EXECUTE IMMEDIATE 'truncate table &1.ALL_PRODUCT_ATTR_RR_FEED_&2';
    'SL_entity',
    'waitlist',
    'Zoom',
-   'CountryOfOrigin')
+   'CountryOfOrigin',
+   'DropShip_LeadDays')
      AND attribute_val IS NOT NULL
        )
        SELECT
@@ -146,7 +148,8 @@ EXECUTE IMMEDIATE 'truncate table &1.ALL_PRODUCT_ATTR_RR_FEED_&2';
                MAX(CASE WHEN attribute_name = 'PD_RestrictedWarning_Text' THEN attribute_val END) AS PD_RestrictedWarning_Text,
                 MAX(CASE WHEN attribute_name = 'PD_RestrictedState_Text' THEN attribute_val END) PD_RestrictedState_Text,
                 MAX(CASE WHEN attribute_name = 'PD_RestrictedShipType_Text' THEN attribute_val END) AS PD_RestrictedShipType_Text,
-                MAX(CASE WHEN attribute_name = 'CountryOfOrigin' THEN attribute_val END) AS CountryOfOrigin
+                MAX(CASE WHEN attribute_name = 'CountryOfOrigin' THEN attribute_val END) AS CountryOfOrigin,
+                MAX(CASE WHEN attribute_name = 'DropShip_LeadDays' THEN attribute_val END) AS DropShip_LeadDays
    FROM all_product_attributes
        GROUP BY product_id
     ;
@@ -390,7 +393,7 @@ MAX(CASE WHEN lower(attribute_name) = 	'totalreviewcount'	THEN attribute_val END
 MAX(CASE WHEN lower(attribute_name) = 	'backorderable'	THEN attribute_val END)  as  backorderable
    FROM all_product_attributes
        GROUP BY product_id
-    ;    
+    ;
     DBMS_OUTPUT.PUT_LINE('PIM SKU Attribute Fetch Process End :  '|| to_char(sysdate,'MM-DD-YYYY HH:MI:SS') || ' - ' || nvl((SQL%rowcount),0));
     COMMIT;
 END;
