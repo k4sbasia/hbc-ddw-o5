@@ -9,7 +9,7 @@ REM
 REM  CODE HISTORY: Name                         Date            Description
 REM                -----------------            ----------      ----------------
 REM                 Jayanthi            08/26/2015        Created
-REM ############################################################################
+REM ######################################################################
 set echo off
 set feedback on
 set linesize 10000
