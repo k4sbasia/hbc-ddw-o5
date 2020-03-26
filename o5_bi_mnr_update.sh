@@ -35,7 +35,6 @@ export FILE_COUNT='0'
 export TFILE_SIZE='0'
 export SOURCE_COUNT='0'
 export TARGET_COUNT='0'
-export PROCESS_SQL='o5_bi_mnr_update2'
 export SLEEP_TIME=300
 export SLEEP_CYCLES=20
 export RUN_SUBJECT="${PROCESS} has started."
@@ -90,9 +89,6 @@ echo -e "Starting o5_bi_mnr_update.sql execution ">>${LOG_FILE}
 sqlplus -s -l  $CONNECTDW @${SQL}/${PROCESS}.sql "$SCHEMA" "$BANNER" "$PIM_DBLINK" >> ${LOG_FILE}
 echo -e "Ended execution of o5_bi_mnr_update.sql  ">>${LOG_FILE}
 ##################################################################
-echo -e "Starting o5_bi_mnr_update2.sql execution ">>${LOG_FILE}
-sqlplus -s -l  $CONNECTDW @${SQL}/${PROCESS_SQL}.sql "$SCHEMA" "$BANNER" "$PIM_DBLINK" >> ${LOG_FILE}
-echo -e "Ended execution of o5_bi_mnr_update2.sql ">>${LOG_FILE}
 #################################################################
 ##Update Runstats Finish
 #################################################################
@@ -114,4 +110,3 @@ else
 echo -e "${PROCESS} completed without errors."
 echo -e "${PROCESS} completed without errors.\n" >> ${LOG_FILE}
 fi
-exit 0
