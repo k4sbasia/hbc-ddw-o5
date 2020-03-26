@@ -16,7 +16,7 @@
 #####
 #####
 #############################################################################################################################
-. $HOME/initvars
+. $HOME/params.conf o5
 export PROCESS='o5_manifest_load'
 export SQL=$HOME/SQL
 export LOG=$HOME/LOG
@@ -40,6 +40,7 @@ export SLEEP_SUBJECT="${PROCESS} is sleeping."
 export CONTROL_FILE="$CTL/${PROCESS}.ctl"
 export CTL_LOG="$LOG/${PROCESS}_ctl.log"
 export BAD_FILE="$LOG/${PROCESS}_bad.bad"
+export BANNER=$1
 ################################################################
 ##Initialize Email Function
 ################################################################
@@ -51,6 +52,15 @@ function send_email {
  done
 }
 echo -e "manifest load started at `date '+%a %b %e %T'`\n" >${LOG_FILE}
+if [ "${BANNER}" == "s5a" ];
+then
+export LOG_FILE="$LOG/${PROCESS}_${BANNER}_log.txt"
+export SCHEMA="mrep."
+fi
+if [ "${BANNER}" == "o5" ];
+then
+export SCHEMA="o5."
+fi
 ##Update Runstats Start
 #################################################################
 sqlplus -s -l  $CONNECTDW <<EOF> ${LOG}/${PROCESS}_runstats_start.log @${SQL}/runstats_start.sql "$JOB_NAME" "$SCRIPT_NAME" "$SFILE_SIZE" "$FILE_NAME" "$LOAD_COUNT" "$FILE_COUNT" "$TFILE_SIZE" "$SOURCE_COUNT" "$TARGET_COUNT"
@@ -72,7 +82,7 @@ sqlldr $CONNECTDW CONTROL=$CONTROL_FILE LOG=$CTL_LOG BAD=$BAD_FILE DATA=$FILE_NA
 ##DB Insert SQL
 #################################################################
 echo -e "Starting o5_manifest_load execution ">>${LOG_FILE}
-sqlplus -s -l  $CONNECTDW @${SQL}/${PROCESS}.sql >> ${LOG_FILE}
+sqlplus -s -l  $CONNECTDW @${SQL}/${PROCESS}.sql "${SCHEMA}" "${BANNER}" >> ${LOG_FILE}
 echo -e "Ended execution of manifestload ">>${LOG_FILE}
 #################################################################
 ##Update Runstats Finish
