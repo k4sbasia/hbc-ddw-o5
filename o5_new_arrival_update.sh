@@ -1,29 +1,29 @@
 #!/usr/bin/ksh
 #############################################################################################################################
-#####                           SAKS Direct 
+#####                           SAKS Direct
 #############################################################################################################################
 #####
 #####   PROGRAM NAME : new_arrival_update.sh
 #####
 #####   DESCRIPTION  : This script does the following
 #####                              1. Calls procedure  "P_PARTIAL_UPDATE_NEW_ARRIVAL" in variuos enviroments (prodsto, stgdb, primsto)
-#####                               
+#####
 #####
 #####
 #####   CODE HISTORY :  Name                Date            Description
 #####                ------------          ----------      ------------
 #####
-#####               Liya Aizenberg         04/28/2016        Created 
+#####               Liya Aizenberg         04/28/2016        Created
 #####
 #####
 #############################################################################################################################
 . $HOME/params.conf o5
 ################################################################
 ##Control File Variables
-#export ENV=$1
+export BANNER=$1
 export SQL=$HOME/SQL
 export LOG=$HOME/LOG
-export PROCESS="o5_new_arrival_update_${ENV}"
+export PROCESS="o5_new_arrival_update_${BANNER}"
 export LOG_FILE="$LOG/${PROCESS}_log.txt"
 export BAD_SUBJECT="${PROCESS} failed"
 export JOB_NAME="${PROCESS}"
@@ -36,8 +36,7 @@ export TFILE_SIZE='0'
 export SOURCE_COUNT='0'
 export TARGET_COUNT='0'
 export SQL0="$SQL/o5_new_arrival_sdw.sql"
-export SQL01="$SQL/o5_new_arrival_sdw_prev.sql"
-export SQL1="$SQL/o5_new_arrival_update.sql"
+
 ########################################################################
 ########################################################################
 ##Initialize Email Function
@@ -76,57 +75,17 @@ export PIM_DBLINK="PIM_READ"
 fi
 ######################################################################
 ##Runstats for job
+echo "${PROCESS} Started." >> ${LOG_FILE}
 #####################################################################
 sqlplus -s -l  $CONNECTDW <<EOF>${LOG}/${PROCESS}_runstats_start.log @${SQL}/runstats_start.sql "$JOB_NAME" "$SCRIPT_NAME" "$SFILE_SIZE" "$FILE_NAME" "$LOAD_COUNT" "$FILE_COUNT" "$TFILE_SIZE" "$SOURCE_COUNT" "$TARGET_COUNT"
 EOF
-#####################################################################
-##Update Environments 
-####################################################################
-##if [ "$ENV" = "o5_preview" ]; then
-##            SCHEMA="endeca_saks_custom_cis."; export SCHEMA
-##            DBLINK="PRVO5_MREP"; export DBLINK
-##			SCHEMAETL="saks_custom."
-##fi
-##if [ "$ENV" = "o5_stqa" ]; then
-##            SCHEMA="endeca_saks_custom_cis."; export SCHEMA
-##            DBLINK="QAO5_MREP"; export DBLINK
-##fi
-##if [ "$ENV" = "o5_prod" ]; then
-##            SCHEMA="endeca_saks_custom."; export SCHEMA
- ##           DBLINK="PRODO5_MREP"; export DBLINK
-##			SCHEMAETL="saks_custom."
-##fi
-##SDW
 
-#if [ "$ENV" = "o5_preview" ]; then
-sqlplus -s -l  $CONNECTDW <<EOF>${LOG_FILE} @${SQL01} "$SCHEMA" "$BANNER"
-EOF
-#sqlplus -s -l  $CONNECTDW <<EOF>>${LOG_FILE} @${SQL1} "$DBLINK" "$SCHEMAETL"
-#EOF
-#fi
-
-if [ "$ENV" = "o5_stqa" ]; then
-#sqlplus -s -l  $CONNECTDW <<EOF>${LOG_FILE} @${SQL01} "$DBLINK" "$SCHEMA"
-#EOF
-echo "commented in STQA this code as it updates the common table used in prod" > ${LOG_FILE}
-fi
-
-#if [ "$ENV" = "o5_prod" ]; then
 sqlplus -s -l  $CONNECTDW <<EOF>${LOG_FILE} @${SQL0} "$SCHEMA" "$BANNER"
 EOF
-#sqlplus -s -l  $CONNECTDW <<EOF>>${LOG_FILE} @${SQL1} "$DBLINK" "$SCHEMAETL"
-#EOF
-#fi
-
-##per ENV: preview, QA, PROD
-
-#sqlplus -s -l  $CONNECTDW <<EOF>>${LOG_FILE} @${SQL1} "$DBLINK" "$SCHEMA"
-#EOF
-#wait
-
+echo "${PROCESS} SQL completed" >> ${LOG_FILE}
 #################################################################
 ##Update Runstats Finish
-################################################################# 
+#################################################################
 sqlplus -s -l  $CONNECTDW<<EOF>${LOG}/${PROCESS}_runstats_finish.log @${SQL}/runstats_end.sql "$JOB_NAME" "$SCRIPT_NAME" "$SFILE_SIZE" "$FILE_NAME" "$LOAD_COUNT" "$FILE_COUNT" "$TFILE_SIZE" "$SOURCE_COUNT" "$TARGET_COUNT"
 EOF
 #################################################################
@@ -143,4 +102,3 @@ else
 echo "${PROCESS} completed without errors."
 echo "${PROCESS} completed without errors.\n" >> ${LOG_FILE}
 fi
-exit 0

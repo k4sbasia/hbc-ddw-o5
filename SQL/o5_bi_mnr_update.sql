@@ -1,3 +1,14 @@
+WHENEVER OSERROR EXIT FAILURE
+WHENEVER SQLERROR EXIT FAILURE
+SET ECHO OFF
+SET FEEDBACK OFF
+SET LINESIZE 10000
+SET PAGESIZE 0
+SET SQLPROMPT ''
+SET ECHO OFF
+SET TIMING ON
+SET HEADING OFF
+SET SERVEROUTPUT ON
 --Order info update from sddw
 --Modified by Rajesh on 3/15/2011 to add employee_ind,cancelreason,international
 --Modified by Jayanthi on 09/06 to add fashion_fix_item field in the bi_mnr_orders table
@@ -39,18 +50,23 @@ MERGE INTO &1.bi_mnr_orders hst
                           s.ship_state, s.ship_zipcode,
                           s.promo_id promotion_code,
                           s.sl_return_dte return_date,
-                         ( case when s.ordline_status = 'R' then 
-                          to_char(s.sl_return_dte,'YYYYMMDD') ||'-0'||s.STORENUM 
-                          else null 
+                         ( case when s.ordline_status = 'R' then
+                          to_char(s.sl_return_dte,'YYYYMMDD') ||'-0'||s.STORENUM
+                          else null
                           end
                           )return_dateline,
                           s.employee_ind,
                           s.cancelreason,
                           international_ind,
                           p.fashionfix_ind,
-                          c.addr3 company_name, 
+                          c.addr3 company_name,
                           s.fullfilllocation,
-                          s.tax_on_shipping
+                          s.tax_on_shipping,
+                          s.GIFT_WRAP_FEE,
+                          s.tracking_number,
+                          s.SAKSFIRST_IND,
+                          s.LINEPROMO_AMT,
+                          s.LINE_TAX
                      FROM &1.bi_sale s,
                           &1.bi_customer c,
                           &1.bi_product p
@@ -98,7 +114,12 @@ MERGE INTO &1.bi_mnr_orders hst
              hst.fashion_fix_item=trn.fashionfix_ind,
              hst.company_name=trn.company_name,
              hst.fullfilllocation = trn.fullfilllocation,
-             hst.tax_on_shipping=trn.tax_on_shipping
+             hst.tax_on_shipping=trn.tax_on_shipping,
+             hst.GIFT_WRAP_FEE = trn.GIFT_WRAP_FEE,
+             hst.tracking_number = trn.tracking_number,
+             hst.saks_first_customer = trn.SAKSFIRST_IND,
+             hst.savings=trn.LINEPROMO_AMT,
+             hst.line_tax=trn.line_tax
    WHEN NOT MATCHED THEN
       INSERT (order_header, linenum, order_number, customer_name,
               customer_number, created_on, modified_on, billing_address1,
@@ -109,7 +130,7 @@ MERGE INTO &1.bi_mnr_orders hst
               shipping_address2, ship_city, ship_state, ship_zipcode,
               promotion_code, return_date,return_dateline,international,
               employee,cancelreason,fashion_fix_item,company_name,fullfilllocation
-              ,tax_on_shipping)
+              ,tax_on_shipping,GIFT_WRAP_FEE ,tracking_number,saks_first_customer,savings,line_tax)
       VALUES (trn.order_header, trn.linenum, trn.order_number,
               trn.customer_name, trn.customer_number, trn.created_on,
               trn.modified_on, trn.billing_address1, trn.billing_address2,
@@ -120,7 +141,7 @@ MERGE INTO &1.bi_mnr_orders hst
               trn.shipping_address1, trn.shipping_address2, trn.ship_city,
               trn.ship_state, trn.ship_zipcode, trn.promotion_code, trn.return_date,trn.return_dateline,
               trn.international_ind,trn.employee_ind,trn.cancelreason,trn.fashionfix_ind,trn.company_name, trn.fullfilllocation
-              ,trn.tax_on_shipping);
+              ,trn.tax_on_shipping,trn.GIFT_WRAP_FEE,trn.tracking_number ,trn.SAKSFIRST_IND,trn.LINEPROMO_AMT,trn.line_tax );
 COMMIT ;
 --Call Center merge
 
@@ -156,23 +177,52 @@ SELECT DISTINCT cc.ordernum order_number, cc.case_id case_number,
               trn.last_modified, trn.modified_by, trn.issue);
 COMMIT ;
 
--- add return flag
- MERGE INTO  &1.bi_mnr_orders hst
- USING  (
-SELECT LINENUM,  FULLFILLLOCATION
- FROM   SDDW.mv_bi_sale
- WHERE  FULLFILLLOCATION = 'RETURN'
- AND    LINENUM IS NOT NULL
- AND (
-        (ORDERDATE BETWEEN TRUNC (SYSDATE) - 1 AND TRUNC (SYSDATE))
- OR     (LASTCHANGEDATE BETWEEN TRUNC (SYSDATE) - 1 AND TRUNC (SYSDATE)
-    ))
-  ) trn
- ON 
- (trn.linenum = hst.linenum)
- WHEN MATCHED THEN
- UPDATE SET hst.fullfilllocation = trn.fullfilllocation;
- 
+MERGE INTO &1.bi_mnr_orders hst
+   USING (SELECT DISTINCT os.orderdet linenum,
+                         max(sku_size_desc) sizez,
+                         max(sku_color) color
+          FROM   &1.bi_sale os,
+           &1.all_active_pim_sku_attr_&2 s
+          WHERE  OS.PRODUCT_ID = s.upc
+         AND    ((os.orderdate BETWEEN TRUNC (SYSDATE) - 1 AND TRUNC (SYSDATE))
+      OR     (os.ordline_modifydate BETWEEN TRUNC (SYSDATE) - 1 AND TRUNC (SYSDATE)))
+          GROUP BY os.orderdet
+          ) trn
+   ON (hst.linenum = trn.linenum)
+   WHEN MATCHED THEN UPDATE
+         SET hst.color = trn.color,
+             hst.sizez = trn.sizez;
 COMMIT ;
- 
+
+exec sddw.p_drop_INDEX_ON_MV('MV_O5_BI_MNR_ORDERS');
+
+--Refresh MV
+EXEC DBMS_MVIEW.REFRESH ('SDDW.MV_O5_BI_MNR_ORDERS','F');
+
+--Create Indexes on MV
+CREATE INDEX "SDDW"."MV_O5_MNR_LINENUM_IDX" ON "SDDW"."MV_O5_BI_MNR_ORDERS"
+  (
+    "LINENUM"
+  );
+
+CREATE INDEX "SDDW"."MV_O5_MNR_ORDERDATE_IDX" ON "SDDW"."MV_O5_BI_MNR_ORDERS"
+  (
+    "CREATED_ON"
+  );
+
+CREATE INDEX "SDDW"."MV_O5_MNR_ORDER_NUMBER_IDX" ON "SDDW"."MV_O5_BI_MNR_ORDERS"
+  (
+    "ORDER_NUMBER"
+  );
+
+CREATE INDEX "SDDW"."MV_O5_IDX_PRODUCT_CODE" ON "SDDW"."MV_O5_BI_MNR_ORDERS"
+  (
+    "PRODUCT_CODE"
+  );
+
+CREATE INDEX "SDDW"."MV_O5_IDX_RETURN_DT_LINE" ON "SDDW"."MV_O5_BI_MNR_ORDERS"
+  (
+    "RETURN_DATELINE"
+  );
+
 exit;
