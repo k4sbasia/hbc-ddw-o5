@@ -5,11 +5,14 @@ SET FEEDBACK OFF
 SET LINESIZE 10000
 SET PAGESIZE 0
 SET SQLPROMPT ''
+SET ECHO OFF
+SET TIMING ON
 SET HEADING OFF
+SET SERVEROUTPUT ON
 --Order info update from sddw
 --Modified by Rajesh on 3/15/2011 to add employee_ind,cancelreason,international
 --Modified by Jayanthi on 09/06 to add fashion_fix_item field in the bi_mnr_orders table
-MERGE INTO bi_mnr_orders hst
+MERGE INTO &1.bi_mnr_orders hst
    USING (SELECT DISTINCT s.orderhdr order_header, s.orderdet linenum,
                           s.ordernum order_number,
                           c.firstname || ' ' || c.lastname customer_name,
@@ -64,9 +67,9 @@ MERGE INTO bi_mnr_orders hst
                           s.SAKSFIRST_IND,
                           s.LINEPROMO_AMT,
                           s.LINE_TAX
-                     FROM bi_sale s,
-                          bi_customer c,
-                          bi_product p
+                     FROM &1.bi_sale s,
+                          &1.bi_customer c,
+                          &1.bi_product p
                     WHERE s.createfor = c.customer_id
                       AND s.bm_skuid(+) = p.bm_skuid
                       AND (   (s.orderdate BETWEEN TRUNC (SYSDATE) - 1
@@ -221,7 +224,5 @@ CREATE INDEX "SDDW"."MV_O5_IDX_RETURN_DT_LINE" ON "SDDW"."MV_O5_BI_MNR_ORDERS"
   (
     "RETURN_DATELINE"
   );
-
-exit;
 
 exit;

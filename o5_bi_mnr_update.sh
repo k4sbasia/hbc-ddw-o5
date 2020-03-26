@@ -85,7 +85,7 @@ EOF
 #################################################################
 ##DB SQL
 #################################################################
-echo -e "Starting o5_bi_mnr_update.sql execution ">>${LOG_FILE}
+echo -e "Starting o5_bi_mnr_update.sql execution ">${LOG_FILE}
 sqlplus -s -l  $CONNECTDW @${SQL}/${PROCESS}.sql "$SCHEMA" "$BANNER" "$PIM_DBLINK" >> ${LOG_FILE}
 echo -e "Ended execution of o5_bi_mnr_update.sql  ">>${LOG_FILE}
 ##################################################################
