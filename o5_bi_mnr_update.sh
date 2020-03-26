@@ -104,7 +104,7 @@ then
 echo -e "${PROCESS} failed. Please investigate"
 echo -e "${PROCESS} failed. Please investigate\n" >> ${LOG_FILE}
 export SUBJECT=${BAD_SUBJECT}
-#send_email
+exit 99
 #mv "${LOG_FILE}" "${LOG_FILE}.`date +%Y%m%d`"
 else
 echo -e "${PROCESS} completed without errors."
