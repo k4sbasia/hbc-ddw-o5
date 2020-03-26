@@ -67,20 +67,20 @@ echo "Finished o5 extracting data at `date '+%a %b %e %T'`" >>${LOG_FILE}
 ################################################################
 ##FTP file to ftp.saksdirect.com
 echo "Started copying the data to filerepo at `date '+%a %b %e %T'`" >>${LOG_FILE}
-#cp $DATA/.lstrans_cancels_US_`date +%Y%m%d`_OFF /home/ftservice/OUTGOING/LinkShare_OFF5TH/Linkshare_OFF5TH_US/.lstrans_cancels_`date +%Y%m%d`_OFF 
+cp $DATA/.lstrans_cancels_US_`date +%Y%m%d`_OFF /home/ftservice/OUTGOING/LinkShare_OFF5TH/Linkshare_OFF5TH_US/.lstrans_cancels_`date +%Y%m%d`_OFF 
 wait
 echo "Finished copying the data to filerepo at `date '+%a %b %e %T'`" >>${LOG_FILE}
 ###############################################################
 ##invoke the perl script to process the file which is moved to filerepo server
 ###############################################################
-#ssh -l ftservice filerepo.saksdirect.com '/home/ftservice/OUTGOING/LinkShare_OFF5TH/Linkshare_OFF5TH_US/run_lstrans.pl /home/ftservice/OUTGOING/LinkShare_OFF5TH/Linkshare_OFF5TH_US/'
+ssh -l ftservice filerepo.saksdirect.com '/home/ftservice/OUTGOING/LinkShare_OFF5TH/Linkshare_OFF5TH_US/run_lstrans.pl /home/ftservice/OUTGOING/LinkShare_OFF5TH/Linkshare_OFF5TH_US/'
 wait
 ################################################################
 echo "Finished Extracting data  at `date '+%a %b %e %T'`" >>${LOG_FILE}
 #audit Email
 #################################################################
 sqlplus -s -l  $CONNECTDW @${AUDIT_SQL} >$LOG/o5_link_share_return_audit.log
-#cat $LOG/o5_link_share_return_audit.log | mailx -s  "Off 5th Link Share Return processed on `date +%Y%m%d`" hbcdigtialdatamanagement@hbc.com AffiliateTeamList@s5a.com ls-saks@linkshare.com
+cat $LOG/o5_link_share_return_audit.log | mailx -s  "Off 5th Link Share Return processed on `date +%Y%m%d`" hbcdigtialdatamanagement@hbc.com AffiliateTeamList@s5a.com ls-saks@linkshare.com
 #################################################################
 #################################################################
 ##Update Runstats Finish
