@@ -9,7 +9,7 @@ SET HEADING OFF
 --Order info update from sddw
 --Modified by Rajesh on 3/15/2011 to add employee_ind,cancelreason,international
 --Modified by Jayanthi on 09/06 to add fashion_fix_item field in the bi_mnr_orders table
-MERGE INTO &1.bi_mnr_orders hst
+MERGE INTO bi_mnr_orders hst
    USING (SELECT DISTINCT s.orderhdr order_header, s.orderdet linenum,
                           s.ordernum order_number,
                           c.firstname || ' ' || c.lastname customer_name,
@@ -62,12 +62,11 @@ MERGE INTO &1.bi_mnr_orders hst
                           s.GIFT_WRAP_FEE,
                           s.tracking_number,
                           s.SAKSFIRST_IND,
-                          s.PROMO_ID,
                           s.LINEPROMO_AMT,
                           s.LINE_TAX
-                     FROM &1.bi_sale s,
-                          &1.bi_customer c,
-                          &1.bi_product p
+                     FROM bi_sale s,
+                          bi_customer c,
+                          bi_product p
                     WHERE s.createfor = c.customer_id
                       AND s.bm_skuid(+) = p.bm_skuid
                       AND (   (s.orderdate BETWEEN TRUNC (SYSDATE) - 1
@@ -116,7 +115,6 @@ MERGE INTO &1.bi_mnr_orders hst
              hst.GIFT_WRAP_FEE = trn.GIFT_WRAP_FEE,
              hst.tracking_number = trn.tracking_number,
              hst.saks_first_customer = trn.SAKSFIRST_IND,
-             hst.promotion_code = trn.PROMO_ID,
              hst.savings=trn.LINEPROMO_AMT,
              hst.line_tax=trn.line_tax
    WHEN NOT MATCHED THEN
@@ -129,7 +127,7 @@ MERGE INTO &1.bi_mnr_orders hst
               shipping_address2, ship_city, ship_state, ship_zipcode,
               promotion_code, return_date,return_dateline,international,
               employee,cancelreason,fashion_fix_item,company_name,fullfilllocation
-              ,tax_on_shipping,GIFT_WRAP_FEE ,tracking_number,saks_first_customer,promotion_code,savings,line_tax)
+              ,tax_on_shipping,GIFT_WRAP_FEE ,tracking_number,saks_first_customer,savings,line_tax)
       VALUES (trn.order_header, trn.linenum, trn.order_number,
               trn.customer_name, trn.customer_number, trn.created_on,
               trn.modified_on, trn.billing_address1, trn.billing_address2,
@@ -140,7 +138,7 @@ MERGE INTO &1.bi_mnr_orders hst
               trn.shipping_address1, trn.shipping_address2, trn.ship_city,
               trn.ship_state, trn.ship_zipcode, trn.promotion_code, trn.return_date,trn.return_dateline,
               trn.international_ind,trn.employee_ind,trn.cancelreason,trn.fashionfix_ind,trn.company_name, trn.fullfilllocation
-              ,trn.tax_on_shipping,trn.GIFT_WRAP_FEE,trn.tracking_number ,trn.tracking_number,trn.SAKSFIRST_IND,trn.LINEPROMO_AMT,trn.line_tax );
+              ,trn.tax_on_shipping,trn.GIFT_WRAP_FEE,trn.tracking_number ,trn.SAKSFIRST_IND,trn.LINEPROMO_AMT,trn.line_tax );
 COMMIT ;
 --Call Center merge
 
