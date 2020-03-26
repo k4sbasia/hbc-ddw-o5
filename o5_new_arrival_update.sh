@@ -36,6 +36,7 @@ export TFILE_SIZE='0'
 export SOURCE_COUNT='0'
 export TARGET_COUNT='0'
 export SQL0="$SQL/o5_new_arrival_sdw.sql"
+export BANNER=$1
 ########################################################################
 ########################################################################
 ##Initialize Email Function
