@@ -1,9 +1,18 @@
+WHENEVER OSERROR EXIT FAILURE
+WHENEVER SQLERROR EXIT FAILURE
+SET ECHO OFF
+SET FEEDBACK OFF
+SET LINESIZE 10000
+SET PAGESIZE 0
+SET SQLPROMPT ''
+SET HEADING OFF
+
 TRUNCATE TABLE &1.t_new_arrival_date_update_rfp;
 DROP  INDEX &1.IDX_NEW_ARRIVAL_ITEM_RFP;
 
 MERGE INTO &1.t_new_arrival_date_update_rfp a USING
  (SELECT DISTINCT p.PRODUCT_ID item_id,
-				 NVL(READYFORPROD_TIMER,TRUNC(r.readyforprod_set_dt)) readyforprod_date,
+				 NVL(trunc(to_date(READYFORPROD_TIMER, 'MM/DD/YYYY HH:MI PM')),TRUNC(r.readyforprod_set_dt)) readyforprod_date,
                  SYSDATE tstamp,
                  'F' pre_order_flag
            FROM
