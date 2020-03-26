@@ -20,10 +20,10 @@
 . $HOME/params.conf o5
 ################################################################
 ##Control File Variables
-#export ENV=$1
+export BANNER=$1
 export SQL=$HOME/SQL
 export LOG=$HOME/LOG
-export PROCESS="o5_new_arrival_update_${ENV}"
+export PROCESS="o5_new_arrival_update_${BANNER}"
 export LOG_FILE="$LOG/${PROCESS}_log.txt"
 export BAD_SUBJECT="${PROCESS} failed"
 export JOB_NAME="${PROCESS}"
@@ -36,7 +36,7 @@ export TFILE_SIZE='0'
 export SOURCE_COUNT='0'
 export TARGET_COUNT='0'
 export SQL0="$SQL/o5_new_arrival_sdw.sql"
-export BANNER=$1
+
 ########################################################################
 ########################################################################
 ##Initialize Email Function
