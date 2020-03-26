@@ -17,7 +17,7 @@
 #####
 #############################################################################################################################
 ################################################################
-. $HOME/initvars
+. $HOME/params.conf o5
 #export PROCESS='o5_feed_vendornet_load'
 export PROCESS='o5_feed_vendornet_load_new'
 export SQL=$HOME/SQL
