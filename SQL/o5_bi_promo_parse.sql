@@ -28,7 +28,7 @@ SELECT DISTINCT    ordernum
                 || '||||||||||||'
            FROM (
              SELECT orderhdr, ordernum,
-                                    promo_id
+                                    promo_id oba_str_val
                                FROM &1.bi_sale
                               WHERE  orderdate > SYSDATE - 14)
 ;
