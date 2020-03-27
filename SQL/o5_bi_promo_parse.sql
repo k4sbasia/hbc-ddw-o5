@@ -29,7 +29,7 @@ SELECT DISTINCT    ordernum
            FROM (
              SELECT orderhdr, ordernum,
                                     promo_id
-                               FROM o5.bi_sale
+                               FROM &1.bi_sale
                               WHERE  orderdate > SYSDATE - 14)
 ;
 commit ;

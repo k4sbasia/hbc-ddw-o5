@@ -19,7 +19,7 @@
 #####
 #############################################################################################################################
 ################################################################
-. $HOME/initvars
+. $HOME/params.conf o5
 ################################################################
 ###extract promo, orders from bi sale and build sddw promo sale table
 ################################################################
@@ -41,6 +41,7 @@ export SOURCE_COUNT='0'
 export TARGET_COUNT='0'
 export SQL1='o5_bi_promo_parse'
 export SQL2='o5_bi_promo_update'
+export BANNER=$1
 ########################################################################
 echo -e "BI_PROMO_PROCESS started at `date '+%a %b %e %T'`\n" >${LOG_FILE}
 ########################################################################
@@ -53,6 +54,14 @@ function send_email {
  cat ${LOG_FILE}|mailx -s "${SUBJECT}" $address
  done
 }
+if [ "${BANNER}" == "saks" ]
+then
+export SCHEMA="mrep."
+fi
+if [ "${BANNER}" == "o5" ]
+then
+export SCHEMA="o5."
+fi
 #################################################################
 #################################################################
 ##Update Runstats Start
@@ -64,7 +73,7 @@ EOF
 #################################################################
 echo -e "extract and parse o5 promo id from bi sale"
 echo -e "Creation of the data file started at `date '+%a %b %e %T'`\n" >>${LOG_FILE}
-sqlplus -s -l  $CONNECTDW @${SQL}/${SQL1}.sql >$DATA/o5_bi_promo.txt
+sqlplus -s -l  $CONNECTDW @${SQL}/${SQL1}.sql "${SCHEMA}" >$DATA/o5_bi_promo.txt
 echo -e "Creation of the data file ended at `date '+%a %b %e %T'`\n" >>${LOG_FILE}
 ################################################################
 #################################################################

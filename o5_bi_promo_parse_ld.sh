@@ -18,7 +18,7 @@
 #####
 #####
 #############################################################################################################################
-. $HOME/initvars
+. $HOME/params.conf o5
 ################################################################
 ##Control File Variables
 export SQL=$HOME/SQL
@@ -39,6 +39,7 @@ export FILE_COUNT=0
 export TFILE_SIZE=0
 export SOURCE_COUNT=0
 export TARGET_COUNT=0
+export BANNER=$1
 ########################################################################
 echo -e "BI_PROMO_PARSE_ID PROCESS started at `date '+%a %b %e %T'`\n" >${LOG_FILE}
 ########################################################################
@@ -51,6 +52,14 @@ function send_email {
  cat ${LOG_FILE}|mailx -s "${SUBJECT}" $address
  done
 }
+if [ "${BANNER}" == "saks" ]
+then
+export SCHEMA="mrep."
+fi
+if [ "${BANNER}" == "o5" ]
+then
+export SCHEMA="o5."
+fi
 #################################################################
 ##Update Runstats Start
 #################################################################
