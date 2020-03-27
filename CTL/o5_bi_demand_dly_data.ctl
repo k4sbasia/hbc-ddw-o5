@@ -1,0 +1,14 @@
+load data
+truncate into table O5.BI_PSA_DEMAND_EXT 
+fields terminated by ','
+TRAILING NULLCOLS
+(DATEKEY "to_date(:datekey,'yyyy-mm-dd')",
+ DEPARTMENT_ID,
+ CLASS_ID CHAR,
+ DEMAND_QTY,
+ DEMAND_DOLLARS,
+ CANCEL_QTY,
+ CANCEL_DOLLARS,
+ BACKORDER_QTY,
+ BACKORDER_DOLLARS
+)
