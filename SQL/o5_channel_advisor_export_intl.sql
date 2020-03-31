@@ -1,9 +1,11 @@
-SET echo OFF
-SET feedback OFF
-SET linesize 10000
-SET pagesize 0
-SET sqlprompt ''
-SET heading OFF
+set serverout off
+SET ECHO OFF
+SET FEEDBACK OFF
+SET LINESIZE 10000
+SET PAGESIZE 0
+SET SQLPROMPT ''
+SET HEADING OFF
+SET VERIFY OFF
 select
  'Product_Id'
        || '|'

@@ -1,9 +1,11 @@
-set echo off
-set feedback off
-set linesize 10000
-set pagesize 0
-set sqlprompt ''
-set heading off
+set serverout off
+SET ECHO OFF
+SET FEEDBACK OFF
+SET LINESIZE 10000
+SET PAGESIZE 0
+SET SQLPROMPT ''
+SET HEADING OFF
+SET VERIFY OFF
 SELECT
 UPC||'|'||
 replace(MREP.CHAR_REPLACE_NEW(SKU_DESC), '|', ' ') ||'|'||
@@ -25,4 +27,3 @@ from
 where wh_sellable_qty >0
 ;
 exit
-
