@@ -1,11 +1,11 @@
-#!/usr/bin/ksh 
+#!/usr/bin/ksh
 #############################################################################################################################
 #####     			SAKS INC.
 #############################################################################################################################
 #####
 #####   PROGRAM NAME : o5_prodsnet.sh
 #####
-#####   DESCRIPTION  : This script does the following 
+#####   DESCRIPTION  : This script does the following
 #####				   1. Calls the sql script that deletes the cancelled products from bi_sale table
 #####
 #####
@@ -33,7 +33,7 @@ export BAD_FILE="$DATA/${PROCESS}.bad"
 export BAD_SUBJECT="${PROCESS} failed"
 export FILE_NAME="${DATA}/OFF5THCTL.dat"
 export JOB_NAME="${PROCESS}"
-export SCRIPT_NAME="${PROCESS}" 
+export SCRIPT_NAME="${PROCESS}"
 export SFILE_SIZE='0'
 export LOAD_COUNT='0'
 export FILE_COUNT='0'
@@ -42,7 +42,7 @@ export SOURCE_COUNT='0'
 export TARGET_COUNT='0'
 ########################################################################
 ##Initialize Email Function
-######################################################################## 
+########################################################################
 function send_email {
  CURRENT_TIME=`date +"%m/%d/%Y-%H:%M:%S"`
  cat $HOME/email_distribution_list.txt|grep '^9'|while read group address
@@ -86,10 +86,9 @@ echo -e "${PROCESS} failed. Please investigate"
 echo -e "${PROCESS} failed. Please investigate\n" >> ${LOG_FILE}
 export SUBJECT=${BAD_SUBJECT}
 #send_email
+exit 99
 else
 echo -e "${PROCESS} completed without errors."
 echo -e "${PROCESS} completed without errors.\n" >> ${LOG_FILE}
 #send_email
 fi
-exit 0
-
