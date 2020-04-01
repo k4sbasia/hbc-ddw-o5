@@ -92,7 +92,8 @@ WHERE
     a.folder_path = b.folder_path
     AND a.folder_path = c.folder_path
      -- and a.folder_path = '/Assortments/SaksMain/ShopCategory/Women/Apparel/Coats'
-    AND status_cd = 'A';
+    AND status_cd = 'A'
+	 AND c.product_code IS NOT null;
   
 COMMIT;
 
