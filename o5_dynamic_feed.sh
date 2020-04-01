@@ -76,14 +76,14 @@ EOF
 ###################################################################
  echo "Going to do price file check in $CONNECTDW" > ${LOG_FILE}
 ####################################################################################
-while true ;
-do
-PRICE_FILE_CHECK
-echo "$DONE_PROCESS_CHECK for check" >>${LOG_FILE}
-echo -e "***********process completion Check Started  `date +%m/%d/%Y-%H:%M:%S`\n">>${LOG_FILE}
-if [ $DONE_PROCESS_CHECK -gt 0 ]
-then
-    echo -e "AMS prices published and process is starting `date +%m/%d/%Y-%H:%M:%S`\n">>${LOG_FILE}
+#while true ;
+#do
+#PRICE_FILE_CHECK
+#echo "$DONE_PROCESS_CHECK for check" >>${LOG_FILE}
+#echo -e "***********process completion Check Started  `date +%m/%d/%Y-%H:%M:%S`\n">>${LOG_FILE}
+#if [ $DONE_PROCESS_CHECK -gt 0 ]
+#then
+    #echo -e "AMS prices published and process is starting `date +%m/%d/%Y-%H:%M:%S`\n">>${LOG_FILE}
 sqlplus -s -l $CONNECTDW @SQL/${PROCESS}_load.sql >> ${LOG_FILE}
 retcode=$?
 if [ $retcode -ne 0 ]
