@@ -75,12 +75,12 @@ then
         echo "Incorrect data in the feed file, ${FILE_NAME}. Please investigate"
         echo "Incorrect data in the feed file, ${FILE_NAME}. Please investigate" >> ${LOG_FILE}
         exit 99
-#else
-#lftp -u top_e6576e32-7716-4913-a425-8b898c67b5ef,'b4cecb1c-8e8d-4888-923e-dc5a251563e6' sftp://data-sftp.criteo.com<<EOF>>${LOG_FILE}
-#cd Off5th
-#put $FILE_NAME
-#quit
-#EOF
+else
+lftp -u top_e6576e32-7716-4913-a425-8b898c67b5ef,'b4cecb1c-8e8d-4888-923e-dc5a251563e6' sftp://data-sftp.criteo.com<<EOF>>${LOG_FILE}
+cd Off5th
+put $FILE_NAME
+quit
+EOF
 fi
 cd $HOME
 echo "Finished the ftp process to Bloomreach and hooklogic  at `date '+%a %b %e %T %Z %Y'` " >>${LOG_FILE}
