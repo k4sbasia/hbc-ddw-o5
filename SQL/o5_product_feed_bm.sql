@@ -130,9 +130,9 @@ EXEC DBMS_OUTPUT.PUT_LINE ('Preparing O5.O5_SR_PRODUCTS_BM started at '||to_char
 INSERT INTO o5.O5_SR_PRODUCTS_BM
 SELECT SKU.PRODUCT_CODE PRD_ID,
   pa.Product_id PRODUCT_CODE,
-  pa.Colorization_Ind COLOR_IND,
   S.skn_no SKN,
   LPAD(sku.upc,13,'0') sku_CODE,
+  pa.Colorization_Ind COLOR_IND,
   pa.purchase_restriction AS PURCH_RES,
    ASRT.SBA_PATH,
   NVL(S.in_stock_sellable_qty, 0)  AS WH_SELLABLE_QTY
@@ -141,8 +141,8 @@ JOIN o5.inventory S ON s.SKN_NO =sku.PRODUCT_CODE
 JOIN o5.all_active_pim_prd_attr_o5 pa ON pa.PRODUCT_ID =sku.upc
 JOIN O5.O5_WEB_ASSORTMENTS ASRT ON (ASRT.PRD_ID        = SKU.PRODUCT_CODE)
 WHERE
-NVL(S.in_stock_sellable_qty, 0) > 0
-AND pa.Product_id='0400090425329' ;
+NVL(S.in_stock_sellable_qty, 0) > 0 
+;
 
 COMMIT;
 
