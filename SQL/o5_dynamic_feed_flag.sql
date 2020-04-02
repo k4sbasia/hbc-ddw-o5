@@ -58,7 +58,7 @@ AS CLOB INDENT SIZE = 5--.EXTRACT ('/*').getclobVal ()
                                 XMLELEMENT ("custom-attribute",
                                             XMLATTRIBUTES ('isClearance' as "attribute-id"),NVL(sp.isClearance,'false')),
                                 XMLELEMENT ("custom-attribute",
-                                            XMLATTRIBUTES ('isFinalSale' as "attribute-id"),NVL(sp.isFinalSale,'false'))
+                                            XMLATTRIBUTES ('isFinalSale' as "attribute-id"),NVL(sp.ISFINALSALE,'false'))
                                             )
                                             )
                                             ),
@@ -68,13 +68,13 @@ AS CLOB INDENT SIZE = 5--.EXTRACT ('/*').getclobVal ()
                     XMLATTRIBUTES (skn as "product-id"),
                     XMLELEMENT ("custom-attributes",
                                 XMLELEMENT ("custom-attribute",
-                                            XMLATTRIBUTES ('isClearance' as "attribute-id"),NVL(si.isClearance,'false'))
+                                            XMLATTRIBUTES ('isClearance' as "attribute-id"),NVL(si.isClearance,'false')),
                                 XMLELEMENT ("custom-attribute",
                                             XMLATTRIBUTES ('isFinalSale' as "attribute-id"),NVL(si.isFinalSale,'false'))
                                             )
                                             ) )
                             from
-                            (select product_id,skn,max(isSale) isSale, max(isClearance) isClearance, max(DYN_FLAG_CHG_DT) DYN_FLAG_CHG_DT
+                            (select product_id,skn,max(isFinalSale) isFinalSale, max(isClearance) isClearance, max(DYN_FLAG_CHG_DT) DYN_FLAG_CHG_DT
                               from o5.SFCC_PROD_SKU_DYN_FLAGS si where sp.PRDUCT_CODE=si.product_id and si.skn is not null group by product_id, skn) si
 
                   )
