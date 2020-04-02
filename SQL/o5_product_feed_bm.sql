@@ -99,27 +99,27 @@ COMMIT;
 
 EXEC DBMS_OUTPUT.PUT_LINE ('Preparing O5.O5_WEB_ASSORTMENTS completed at '||to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 
-TRUNCATE TABLE O5.O5_SR_ASSORTMENTS;
+--TRUNCATE TABLE O5.O5_SR_ASSORTMENTS;
 
-COMMIT;
+--COMMIT;
 
-EXEC DBMS_OUTPUT.PUT_LINE ('Preparing O5.O5_SR_ASSORTMENTS started at '||to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
+--EXEC DBMS_OUTPUT.PUT_LINE ('Preparing O5.O5_SR_ASSORTMENTS started at '||to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 
-INSERT INTO O5.O5_SR_ASSORTMENTS
-SELECT ps.PRODUCT_CODE PRD_ID,
-  PRD.Product_id PRODUCT_CODE,
-  prd.Colorization_Ind COLOR_IND,
-  ASRT.SBA_PATH
-FROM o5.all_active_pim_prd_attr_o5 prd
-JOIN o5.all_active_product_sku_o5 ps ON ps.upc=prd.PRODUCT_ID 
-JOIN o5.all_active_pim_prd_attr_o5 ATR ON  ATR.Product_id = prd.Product_id
-JOIN O5.O5_WEB_ASSORTMENTS ASRT ON (ASRT.PRD_ID        = ps.PRODUCT_CODE)
-WHERE ATR.PRD_READYFORPROD = 'Yes'
-AND PRD.PRD_STATUS  = 'Yes' ;
+--INSERT INTO O5.O5_SR_ASSORTMENTS
+--SELECT ps.PRODUCT_CODE PRD_ID,
+--  PRD.Product_id PRODUCT_CODE,
+--  prd.Colorization_Ind COLOR_IND,
+ -- ASRT.SBA_PATH
+--FROM o5.all_active_pim_prd_attr_o5 prd
+--JOIN o5.all_active_product_sku_o5 ps ON ps.upc=prd.PRODUCT_ID 
+--JOIN o5.all_active_pim_prd_attr_o5 ATR ON  ATR.Product_id = prd.Product_id
+--JOIN O5.O5_WEB_ASSORTMENTS ASRT ON (ASRT.PRD_ID        = ps.PRODUCT_CODE)
+--WHERE ATR.PRD_READYFORPROD = 'Yes'
+--AND PRD.PRD_STATUS  = 'Yes' ;
 
-COMMIT;
+--COMMIT;
 
-EXEC DBMS_OUTPUT.PUT_LINE ('Preparing O5.O5_SR_ASSORTMENTS completed at '||to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
+--EXEC DBMS_OUTPUT.PUT_LINE ('Preparing O5.O5_SR_ASSORTMENTS completed at '||to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 
 TRUNCATE TABLE o5.O5_SR_PRODUCTS_BM;
 
@@ -128,21 +128,21 @@ COMMIT;
 EXEC DBMS_OUTPUT.PUT_LINE ('Preparing O5.O5_SR_PRODUCTS_BM started at '||to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 
 INSERT INTO o5.O5_SR_PRODUCTS_BM
-SELECT BP.PRD_ID,
-  BP.PRODUCT_CODE,
+SELECT SKU.PRODUCT_CODE PRD_ID,
+  pa.Product_id PRODUCT_CODE,
+  pa.Colorization_Ind COLOR_IND,
   S.skn_no SKN,
   LPAD(sku.upc,13,'0') sku_CODE,
-BP.COLOR_IND,
   pa.purchase_restriction AS PURCH_RES,
-  BP.SBA_PATH,
+   ASRT.SBA_PATH,
   NVL(S.in_stock_sellable_qty, 0)  AS WH_SELLABLE_QTY
 FROM o5.all_active_product_sku_o5 SKU
 JOIN o5.inventory S ON s.SKN_NO =sku.PRODUCT_CODE 
 JOIN o5.all_active_pim_prd_attr_o5 pa ON pa.PRODUCT_ID =sku.upc
-JOIN o5.O5_SR_ASSORTMENTS BP ON (BP.PRD_ID   = SKU.PRODUCT_CODE )
+JOIN O5.O5_WEB_ASSORTMENTS ASRT ON (ASRT.PRD_ID        = SKU.PRODUCT_CODE)
 WHERE
 NVL(S.in_stock_sellable_qty, 0) > 0
-;
+AND pa.Product_id='0400090425329' ;
 
 COMMIT;
 
