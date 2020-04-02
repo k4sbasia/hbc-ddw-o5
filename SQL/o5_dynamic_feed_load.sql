@@ -125,7 +125,7 @@ UPDATE O5.SFCC_PROD_PRODUCT_DATA set isSale='false', isClearance='false'--,isNew
     --         v_coll_itm_prc_typ(v_coll(indx).item_id):= v_coll(indx).PRC_typ_cd;
     --        END LOOP;
 
-            UPDATE SFCC_PROD_PRODUCT_DATA set isclearance= CASE WHEN v_coll(indx).ISCLEARANCE='true'  AND v_coll(indx).IN_STOCK ='1' AND v_coll(indx).sku_status='Yes' THEN 'true' else isclearance END
+            UPDATE O5.SFCC_PROD_PRODUCT_DATA set isclearance= CASE WHEN v_coll(indx).ISCLEARANCE='true'  AND v_coll(indx).IN_STOCK ='1' AND v_coll(indx).sku_status='Yes' THEN 'true' else isclearance END
             where PRDUCT_CODE=v_coll(indx).PRODUCT_ID ;
 
             COMMIT;
