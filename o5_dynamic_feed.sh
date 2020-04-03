@@ -93,7 +93,7 @@ then
 else
         echo "Product data loaded for the process ${PROCESS} is complete" >> ${LOG_FILE}
 fi
-sqlplus -s -l $CONNECTPDWOPXML @SQL/${PROCESS}_flag.sql ${DATE} >> ${LOG_FILE}
+sqlplus -s -l $CONNECTDWXML @SQL/${PROCESS}_flag.sql ${DATE} >> ${LOG_FILE}
 #sqlplus -s -l $CONNECTPRODSDWXML @SQL/${PROCESS}_flag_parent.sql ${DATE} >> ${LOG_FILE} #commented as change to process at variant level inplace
 retcode=$?
 if [ $retcode -ne 0 ]
