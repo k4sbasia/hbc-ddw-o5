@@ -109,7 +109,7 @@ UPDATE &1.stg_omniture_simon_ord_data t1
    SET sent_status = 'Y'
  WHERE sent_status = 'N'
    AND EXISTS (SELECT 1
-                 FROM stg_simon_order_data_ship t2
+                 FROM &1.stg_simon_order_data_ship t2
                 WHERE t2."Saks OFF 5TH Order number" = t1.order_id);
 DBMS_OUTPUT.PUT_LINE('Orders Marked Processed for Date :' || SYSDATE || ':' || sql%ROWCOUNT);
 COMMIT;
