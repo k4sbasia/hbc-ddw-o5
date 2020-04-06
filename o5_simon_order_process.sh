@@ -50,7 +50,7 @@ echo "Process $PROCESS started at `date '+%a %b %e %T'`" > ${LOG_FILE}
 if [ $file_process_mn -eq "01" ]
 then
 	echo "Month Begining, Run the Monthly Report for Shipped and return Transactions." >> ${LOG_FILE}
-	sqlplus -s $CONNECTO5STATS12C @${SQL_FILE_5} "${SCHEMA}">> ${FILE_MONTHLY_NAME}
+	sqlplus -s $CONNECTDW @${SQL_FILE_5} "${SCHEMA}">> ${FILE_MONTHLY_NAME}
     if [ `egrep -c "^ERROR|ORA-|not found|SP2-0|^553" ${FILE_MONTHLY_NAME}` -ne 0 ]
     then
         echo "${PROCESS} failed while generating Monthly Report. Please investigate" >> ${LOG_FILE}
@@ -82,7 +82,7 @@ fi
 
 echo "Load $OMNITURE_ORDER_FILE File into DB. ">> ${LOG_FILE}
 
-sqlldr $CONNECTO5STATS12C CONTROL=$CTL_FILE DATA=$DATA/$OMNITURE_ORDER_FILE LOG=$LOG/${PROCESS}_loader.log BAD=$DATA/${PROCESS}_loader.bad ERRORS=10
+sqlldr $CONNECTDW CONTROL=$CTL_FILE DATA=$DATA/$OMNITURE_ORDER_FILE LOG=$LOG/${PROCESS}_loader.log BAD=$DATA/${PROCESS}_loader.bad ERRORS=10
 retcode=`echo $?`
 case "$retcode" in
         0) echo "SQL*Loader execution successful" >> ${LOG_FILE};;
@@ -96,13 +96,13 @@ echo "SQL Loader Returin Code : $retcode ">> ${LOG_FILE}
 echo "Started Processing $OMNITURE_ORDER_FILE File. ">> ${LOG_FILE}
 
 #Run SQL to find the Shipped and Returned Order
-sqlplus -s $CONNECTO5STATS12C @${SQL_FILE_1} "${SCHEMA}" "${BANNER}">> ${LOG_FILE}
+sqlplus -s $CONNECTDW @${SQL_FILE_1} "${SCHEMA}" "${BANNER}">> ${LOG_FILE}
 
 #Generate the Order Shipped, Returned and Cancelled Orders
 echo "Generating $FILE_NAME File. ">> ${LOG_FILE}
-sqlplus -s -l $CONNECTO5STATS12C @${SQL_FILE_2} "${SCHEMA}" > ${FILE_NAME}
+sqlplus -s -l $CONNECTDW @${SQL_FILE_2} "${SCHEMA}" > ${FILE_NAME}
 #Create PII Data for Shipped Orders
-sqlplus -s $CONNECTO5STATS12C @${SQL_FILE_4} "${SCHEMA}" > ${FILE_NAME_1}
+sqlplus -s $CONNECTDW @${SQL_FILE_4} "${SCHEMA}" > ${FILE_NAME_1}
 
 if [ -f $FILE_NAME ] && [ -f $FILE_NAME_1 ]
 then
@@ -120,7 +120,7 @@ else
 fi
 #exit 99
 echo "Post Process Orders. ">> ${LOG_FILE}
-sqlplus -s $CONNECTO5STATS12C @${SQL_FILE_3} "${SCHEMA}">> ${LOG_FILE}
+sqlplus -s $CONNECTDW @${SQL_FILE_3} "${SCHEMA}">> ${LOG_FILE}
 
 if [ `egrep -c "^ERROR|ORA-|not found|SP2-0|^553" ${LOG_FILE}` -ne 0 ]
 then
