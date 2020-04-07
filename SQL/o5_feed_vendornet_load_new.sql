@@ -109,7 +109,6 @@ WHEN MATCHED THEN
    /*UPDATE COLOR & SIZE*/
    MERGE INTO o5.bi_vendornet_prod_new trg USING
  (SELECT UPC sku_code_lower,
-
    SKU_COLOR color,
    sku_size_desc sizes
  FROM o5.all_active_pim_sku_attr_o5
