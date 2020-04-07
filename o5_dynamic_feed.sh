@@ -103,16 +103,16 @@ then
 else
         echo "flag data created for the process ${PROCESS} is complete" >> ${LOG_FILE}
 fi
-#comented because this sql is not ready yet - 01.04.2020
-#sqlplus -s -l $CONNECTPDWOPXML @SQL/${PROCESS}_cat.sql ${DATE} >> ${LOG_FILE}
-#retcode=$?
-#if [ $retcode -ne 0 ]
-#then
-#        echo "SQL Error in category data for process ${PROCESS}...Please check" >> ${LOG_FILE}
-#        exit 99
-#else
-#        echo "category data created for the process ${PROCESS} is complete" >> ${LOG_FILE}
-#fi
+
+sqlplus -s -l $CONNECTPDWOPXML @SQL/${PROCESS}_cat.sql ${DATE} >> ${LOG_FILE}
+retcode=$?
+if [ $retcode -ne 0 ]
+then
+        echo "SQL Error in category data for process ${PROCESS}...Please check" >> ${LOG_FILE}
+        exit 99
+else
+        echo "category data created for the process ${PROCESS} is complete" >> ${LOG_FILE}
+fi
 scp cognos@hd1prc15na.digital.hbc.com:/oracle/EXPORTS/dataservices/${FLAGS_FILE_NAME} DATA/
 retcode=$?
 if [ $retcode -ne 0 ]
