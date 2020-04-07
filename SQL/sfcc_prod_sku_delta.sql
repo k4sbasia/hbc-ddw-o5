@@ -9,13 +9,13 @@ WHENEVER OSERROR  EXIT FAILURE
 WHENEVER SQLERROR EXIT FAILURE
          DECLARE
     CURSOR cur IS
-        select pd.PRODUCT_ID,pd.UPC,Decode(pd.attribute_name,'Size','Siz',pd.attribute_name) attribute_name,pd.ATTRIBUTE_VAL,ps.UPC upc_sf 
+        select pd.PRODUCT_ID,pd.UPC,Decode(pd.attribute_name,'Size','Siz',pd.attribute_name) attribute_name,pd.ATTRIBUTE_VAL,ps.UPC upc_sf
         from pim_exp_bm.PIM_AB_O5_SKU_ATTR_DATA@pim_read  pd,o5.SFCC_PROD_SKU_DYN_FLAGS ps
         where
         attribute_name in ('status',
 'Color',
 'Size')
-        and  pd.PRODUCT_ID in (select PRODUCT_ID from  pim_exp_bm.PIM_AB_O5_SKU_ATTR_DATA@pim_read WHERE (ADD_DT >= (select last_run_on from JOB_STATUS where process_name='SFCC_LOAD') OR MODIFY_DT >= (select last_run_on from JOB_STATUS where process_name='SFCC_LOAD')  )
+        and  pd.PRODUCT_ID in (select PRODUCT_ID from  pim_exp_bm.PIM_AB_O5_SKU_ATTR_DATA@pim_read WHERE (ADD_DT >= (select last_run_on from O5.JOB_STATUS where process_name='SFCC_LOAD') OR MODIFY_DT >= (select last_run_on from O5.JOB_STATUS where process_name='SFCC_LOAD')  )
 -- where skn_no in (select skn from BAY_DS.bi_sku_inventory i where i.skn=sa.SKN_NO and i.qty >0) --98103
 )
         and pd.UPC=ps.UPC(+)
@@ -124,7 +124,7 @@ BEGIN
 
 
              END IF;
-             
+
 
               IF v_curr_upc=v_coll(indx).UPC
               THEN
@@ -213,7 +213,7 @@ LOOP
 FETCH cur BULK COLLECT INTO v_coll LIMIT 50000;
 EXIT WHEN v_coll.count = 0;
 FORALL indx IN v_coll.first..v_coll.last
-UPDATE SFCC_PROD_SKU_DYN_FLAGS set SKN= v_coll(indx).SKN_NO 
+UPDATE SFCC_PROD_SKU_DYN_FLAGS set SKN= v_coll(indx).SKN_NO
                                   , PIM_CHG_DT=  SYSDATE
 where UPC=v_coll(indx).UPC and NVL(SKN,'1111111')<>v_coll(indx).SKN_NO ;
 
