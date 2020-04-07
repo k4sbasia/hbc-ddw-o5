@@ -104,7 +104,7 @@ else
         echo "flag data created for the process ${PROCESS} is complete" >> ${LOG_FILE}
 fi
 
-sqlplus -s -l $CONNECTPDWOPXML @SQL/${PROCESS}_cat.sql ${DATE} >> ${LOG_FILE}
+sqlplus -s -l $CONNECTDWXML @SQL/${PROCESS}_cat.sql ${DATE} >> ${LOG_FILE}
 retcode=$?
 if [ $retcode -ne 0 ]
 then
