@@ -190,6 +190,38 @@ END;
 /
 
 
+      DECLARE
+CURSOR cur IS
+        select ps.upc,rf.SKN_NO
+        from o5.SFCC_PROD_SKU_DYN_FLAGS ps , O5.OMS_RFS_O5_STG rf
+        where
+         ps.UPC=lpad(rf.upc,13,0)
+         and rf.UPC=rf.REORDER_UPC_NO
+        --and ps.PRDUCT_CODE is null
+        --and pd.product_id in ('0400093552329','0400093571631','0400091183658')
+        order by UPC
+              ;
+TYPE v_typ IS
+TABLE OF cur%rowtype;
+v_coll     v_typ;
+
+TYPE v_itm_prc_typ IS TABLE OF VARCHAR2(20) INDEX BY VARCHAR2(30);
+v_coll_itm_prc_typ v_itm_prc_typ;
+BEGIN
+OPEN cur;
+LOOP
+FETCH cur BULK COLLECT INTO v_coll LIMIT 50000;
+EXIT WHEN v_coll.count = 0;
+FORALL indx IN v_coll.first..v_coll.last
+UPDATE SFCC_PROD_SKU_DYN_FLAGS set SKN= v_coll(indx).SKN_NO 
+                                  , PIM_CHG_DT=  SYSDATE
+where UPC=v_coll(indx).UPC and NVL(SKN,'1111111')<>v_coll(indx).SKN_NO ;
+
+COMMIT;
+
+END LOOP;
+END;
+/
 
 exec dbms_stats.gather_table_stats('O5','SFCC_PROD_SKU_DYN_FLAGS');
     exit;
