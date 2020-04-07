@@ -1,4 +1,4 @@
-#!/usr/bin/ksh
+#!/bin/bash
 #############################################################################################################################
 #####                           SAKS INC.
 #############################################################################################################################
@@ -58,7 +58,7 @@ echo "BI_Vendornet_extract_load Process started at `date '+%a %b %e %T'`" >${LOG
 #################################################################
 #  Run the sql script that performs the data load
 #################################################################
-sqlplus -s -l  $CONNECTO5 @${SQL}/${PROCESS}.sql >> ${LOG_FILE}
+sqlplus -s -l  $CONNECTDW @${SQL}/${PROCESS}.sql >> ${LOG_FILE}
 wait
 #################################################################
 # Check for the data load
@@ -74,7 +74,7 @@ echo "SUCCESS - bi_vendornet_data_load  `date '+%a %b %e %T %Z %Y'` " >>${LOG_FI
 fi
 #################################################################
 echo "Starting  data extract `date '+%a %b %e %T %Z %Y'`\n " >>${LOG_FILE}
-sqlplus -s -l  $CONNECTO5 @${SQL}/${EXTR_SQL}.sql  > ${DATA_FILE}
+sqlplus -s -l  $CONNECTDW @${SQL}/${EXTR_SQL}.sql  > ${DATA_FILE}
 wait
 TARGET_COUNT="`wc -l $DATA_FILE|tr -s ' ' '|' |cut -f1 -d'|'`"
 #################################################################
@@ -90,32 +90,6 @@ cd  Live/DS/Products
 put dropship_extract_o5.txt
 quit
 EOF
-
-#LFTP_RET_CODE=1
-#while [ $LFTP_RET_CODE -eq 0 ]; do
-#lftp -u SaksFifthAve,'dnihyYek?0' sftp://prd-transfer.vendornet.com<<EOF>>${LOG_FILE}
-#wait
-#cd  Live/DS/Products
-#wait
-#put dropship_extract_o5.txt
-#wait
-#quit
-#EOF
-#LFTP_RET_CODE=$?
-#done
-#echo "SFTP process completed" >> ${LOG_FILE}
-#################################################################
-##LFTP ERROR VALIDATION
-#################################################################
-#if [ ${LFTP_RET_CODE} -eq 0 ]
-#then
-#        echo "LFTP completed at `date '+%a %b %e %T'`" >>${LOG_FILE}
-#else
-#        echo "Aborting: Error in LFPT at `date '+%a %b %e %T'`" >>${LOG_FILE}
-#        send_delay_email
-#		echo "Dropship Saks O5 Process file transferred failed, Please check" | mailx -s "Saks O5 Vendor Dropship file failed to transfer" -r SAKS_VENDORNET@HBC.com -a harsh_desai@s5a.com hbcdigitaldatamanagement@saksinc.com
-#        exit 99
-#fi
 
 cd $HOME
 echo "Finished the ftp process to vendornet at `date '+%a %b %e %T %Z %Y'` " >>${LOG_FILE}
@@ -137,5 +111,5 @@ else
 export SUBJECT="SUCCESS: VENDORNET data extract process completed"
 echo "${PROCESS} completed without errors."
 echo "${PROCESS} completed without errors." >> ${LOG_FILE}
-#send_email
+exit 0
 fi
