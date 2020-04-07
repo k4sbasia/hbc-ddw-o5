@@ -83,7 +83,7 @@ SELECT '<?xml version="1.0" encoding="UTF-8"?>'||
 FROM all_dynamic_assignment
 --WHERE category_id IS NOT NULL
  ;
-DBMS_XSLPROCESSOR.clob2file(xml_item, 'DATASERVICE', 'dynamic_categories_feed_bay_'||'&1'||'.xml', nls_charset_id('AL32UTF8'));
+DBMS_XSLPROCESSOR.clob2file(xml_item, 'DATASERVICE', 'dynamic_categories_feed_o5_'||'&1'||'.xml', nls_charset_id('AL32UTF8'));
 END;
 /
 
