@@ -76,13 +76,13 @@ EOF
 ###################################################################
  echo "Going to do price file check in $CONNECTDW" > ${LOG_FILE}
 ####################################################################################
-#while true ;
-#do
-#PRICE_FILE_CHECK
-#echo "$DONE_PROCESS_CHECK for check" >>${LOG_FILE}
-#echo -e "***********process completion Check Started  `date +%m/%d/%Y-%H:%M:%S`\n">>${LOG_FILE}
-#if [ $DONE_PROCESS_CHECK -gt 0 ]
-#then
+while true ;
+do
+PRICE_FILE_CHECK
+echo "$DONE_PROCESS_CHECK for check" >>${LOG_FILE}
+echo -e "***********process completion Check Started  `date +%m/%d/%Y-%H:%M:%S`\n">>${LOG_FILE}
+if [ $DONE_PROCESS_CHECK -gt 0 ]
+then
     #echo -e "AMS prices published and process is starting `date +%m/%d/%Y-%H:%M:%S`\n">>${LOG_FILE}
 sqlplus -s -l $CONNECTDW @SQL/${PROCESS}_load.sql >> ${LOG_FILE}
 retcode=$?
@@ -103,16 +103,16 @@ then
 else
         echo "flag data created for the process ${PROCESS} is complete" >> ${LOG_FILE}
 fi
-#comented because this sql is not ready yet - 01.04.2020
-#sqlplus -s -l $CONNECTPDWOPXML @SQL/${PROCESS}_cat.sql ${DATE} >> ${LOG_FILE}
-#retcode=$?
-#if [ $retcode -ne 0 ]
-#then
-#        echo "SQL Error in category data for process ${PROCESS}...Please check" >> ${LOG_FILE}
-#        exit 99
-#else
-#        echo "category data created for the process ${PROCESS} is complete" >> ${LOG_FILE}
-#fi
+
+sqlplus -s -l $CONNECTPDWOPXML @SQL/${PROCESS}_cat.sql ${DATE} >> ${LOG_FILE}
+retcode=$?
+if [ $retcode -ne 0 ]
+then
+        echo "SQL Error in category data for process ${PROCESS}...Please check" >> ${LOG_FILE}
+        exit 99
+else
+        echo "category data created for the process ${PROCESS} is complete" >> ${LOG_FILE}
+fi
 scp cognos@hd1prc15na.digital.hbc.com:/oracle/EXPORTS/dataservices/${FLAGS_FILE_NAME} DATA/
 retcode=$?
 if [ $retcode -ne 0 ]
@@ -139,8 +139,8 @@ echo -e  "Number of Products to update flags :$FILE_COUNT assignments: $FILE_COU
 cd ${DATA}
 zip -9 ${FLAGS_FILE_ZIP} ${FLAGS_FILE_NAME}
 zip -9 ${CAT_FILE_ZIP} ${CAT_FILE_NAME}
-sftp -o "IdentityFile=~/.ssh/ddw-prd-bay-non" sftp_prd_bay_non_wuser@sftp.integration.awshbc.io <<< "put ${DATA}/${FLAGS_FILE_ZIP} o5-inbound/catalog/products"
-sftp -o "IdentityFile=~/.ssh/ddw-prd-bay-non" sftp_prd_bay_non_wuser@sftp.integration.awshbc.io <<< "put ${DATA}/${CAT_FILE_ZIP} o5-inbound/catalog/assignments"
+sftp -o "IdentityFile=~/.ssh/${SFCC_NON_KEY}" ${SFCC_NON_USER}@sftp.integration.awshbc.io <<< "put ${DATA}/${FLAGS_FILE_ZIP} sfcc-inbound/catalog/products"
+sftp -o "IdentityFile=~/.ssh/${SFCC_NON_KEY}" ${SFCC_NON_USER}@sftp.integration.awshbc.io <<< "put ${DATA}/${CAT_FILE_ZIP} sfcc-inbound/catalog/assignments"
 sqlplus -S $CONNECTDW<<EOF
 UPDATE   JOB_STATUS set last_run_on =LAST_COMPLETED_TIME,  LAST_COMPLETED_TIME= sysdate where process_name='O5_DYNAMIC';
 UPDATE   JOB_STATUS set last_run_on =LAST_COMPLETED_TIME,  LAST_COMPLETED_TIME= sysdate where process_name='O5_DYNAMIC_ASSGN';
