@@ -43,7 +43,21 @@ export FILE_COUNT=0
 export TFILE_SIZE=0
 export SOURCE_COUNT=0
 export TARGET_COUNT=0
-
+############################################################
+if [ "${BANNER}" == "s5a" ];
+then
+export LOG_FILE="$LOG/${PROCESS}_${BANNER}_log.txt"
+export SCHEMA="mrep."
+export BANNER="saks"
+fi
+#############################################################
+########    OFF5TH BANNER    ###############################
+############################################################
+if [ "${BANNER}" == "o5" ];
+then
+export SCHEMA="o5."
+export BANNER="o5"
+fi
 ########################################################################
 echo "${PROCESS} to produce data files for Onera started at `date '+%a %b %e %T'`" >${LOG_FILE}
 ########################################################################
@@ -63,7 +77,7 @@ EOF
 ###################################################################
 echo "Started extract data at `date '+%a %b %e %T'`" >>${LOG_FILE}
 #################################################################
-sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL1} "${SCHEMA}" "${BANNER}">${FILE_NAME}
+sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL1} "${SCHEMA}" "${BANNER}" >${FILE_NAME}
 ###################################################################
 echo "End extract data at `date '+%a %b %e %T'`" >>${LOG_FILE}
 #################################################################
@@ -95,10 +109,6 @@ if [ $? -gt 0 ]
 then
   mailx -s "WARNING: ${FILE_NAME} did not ftp'ed to Onera" hbcdigtialdatamanagement@hbc.com
 fi
-
-
-
-
 
 gzip ${FILE_NAME}
 

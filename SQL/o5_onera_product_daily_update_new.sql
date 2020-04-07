@@ -13,14 +13,14 @@ REM  CODE HISTORY: Name                         Date            Description
 REM                -----------------          ----------      --------------------------
 REM                Harsh Desai               09/05/2018        Created
 REM ############################################################################
-set linesize 1000
-set heading off
-set echo off
-set feedback off
-set pagesize 0
-set trimspool on
 set serverout on
-
+SET ECHO OFF
+SET FEEDBACK OFF
+SET LINESIZE 10000
+SET PAGESIZE 0
+SET SQLPROMPT ''
+SET HEADING OFF
+SET VERIFY OFF
 SELECT  '"UPC' ||'","'||
         'VENDOR_ID' ||'","'||
         'DIVISION_ID' ||'","'||
@@ -41,10 +41,8 @@ SELECT  '"UPC' ||'","'||
         'BOPUS_ELIGIBILITY' ||'","'||
 		'DROPSHIP_IND'||'","'||
         'ACTIVE_FLAG"'
-FROM dual;
-
-SELECT distinct '"'|| CASE  WHEN (LENGTH(TO_CHAR(P.UPC))<12)  THEN LPAD(TO_CHAR(P.UPC), 12,0)
-    WHEN (LENGTH(TO_CHAR(P.UPC))=13)   THEN REGEXP_REPLACE(TO_CHAR(P.UPC),'^0')
+ FROM dual;
+SELECT distinct '"'|| CASE  WHEN (LENGTH(TO_CHAR(P.UPC))<12)  THEN LPAD(TO_CHAR(P.UPC), 12,0)  WHEN (LENGTH(TO_CHAR(P.UPC))=13)   THEN REGEXP_REPLACE(TO_CHAR(P.UPC),'^0')
     ELSE TO_CHAR(P.UPC)  END
             ||'","'||
             TRIM(P.VENDOR_ID) ||'","'||
@@ -72,8 +70,6 @@ FROM    &1.bi_product p,&1.oms_rfs_o5_stg o, &1.all_active_pim_sku_attr_&2 s
              and to_number(p.upc) = o.upc
              and o.upc = s.upc
 			 and o.upc = o.reorder_upc_no
-             
-             
 ;
 
 quit;
