@@ -91,32 +91,37 @@ WHEN MATCHED THEN
   COMMIT;
 
 
- MERGE INTO o5.bi_vendornet_prod_new trg USING
+  MERGE INTO o5.bi_vendornet_prod_new trg USING
   (SELECT product_id prd_code_lower,
-    PRD_READYFORPROD short_desc
+    case when PRD_READYFORPROD= 'Yes' then 'T' else 'F' end READYFORPROD ,
+    bm_desc
   FROM
-    o5.all_active_pim_prd_attr_o5) hst ON (trg.product_id = hst.prd_code_lower AND add_dt=TRUNC(sysdate))
+    o5.all_active_pim_prd_attr_o5
+    ) hst ON (trg.product_id = hst.prd_code_lower AND add_dt=TRUNC(sysdate))
 WHEN MATCHED THEN
   UPDATE
-  SET trg.sku_description = hst.short_desc;
+  SET trg.readyforprod = hst.READYFORPROD,
+    trg.sku_description =  bm_desc
+  ;
   COMMIT;
 
 
    /*UPDATE COLOR & SIZE*/
-  MERGE INTO o5.bi_vendornet_prod_new trg USING
-  (SELECT UPC sku_code_lower,
-    SKU_COLOR color,
-    SIZE2_DESCRIPTION sizes
-  FROM o5.all_active_pim_sku_attr_o5
-  ) hst ON (regexp_replace(trg.upc,'^0*') = hst.sku_code_lower AND add_dt=TRUNC(sysdate))
+   MERGE INTO o5.bi_vendornet_prod_new trg USING
+ (SELECT UPC sku_code_lower,
+
+   SKU_COLOR color,
+   sku_size_desc sizes
+ FROM o5.all_active_pim_sku_attr_o5
+ ) hst ON (regexp_replace(trg.upc,'^0*') = hst.sku_code_lower AND add_dt=TRUNC(sysdate))
 WHEN MATCHED THEN
-  UPDATE
-  SET trg.sku_description=trg.sku_description
-    || ' / '
-    ||hst.color
-    ||' / '
-    ||hst.sizes;
-  COMMIT;
+ UPDATE
+ SET trg.sku_description=trg.sku_description
+   || ' / '
+   ||hst.color
+   ||' / '
+   ||hst.sizes;
+ COMMIT;
 
   /*UPDATE VENDORCODE WITH 7 digit number*/
   merge INTO o5.bi_vendornet_prod_new t USING
@@ -133,12 +138,5 @@ WHEN matched THEN
   UPDATE SET vendorcode = s.vendor_num;
   COMMIT;
 
-
-merge into o5.bi_vendornet_prod_new trg
-using (select product_id prd_code from o5.all_active_pim_prd_attr_o5 where PRD_READYFORPROD = 'Yes' and PRD_STATUS = 'Yes') src
-on (trg.product_id = src.prd_code and trg.add_dt=TRUNC(sysdate))
-when matched then update set
-trg.readyforprod = 'T';
-commit;
 
 EXIT;
