@@ -71,22 +71,29 @@ for f in $(find ${DATA} -maxdepth 1 -iname ${DELTA_FILE_NAME}*.csv -printf "%f\n
 echo $f >> ${LOG_FILE}
 PRCSD=`sqlplus -s $CONNECTDW <<EOF
 set heading off
-select PRRCSD from O5.FILE_PROCESS_STATUS WHERE PROCESS_NAME='INV_LOAD' and FILE_NAME='${f}';
+select count(*) from O5.FILE_PROCESS_STATUS WHERE PROCESS_NAME='SUBS_LOAD' and FILE_NAME='${f}';
 quit;
 EOF`
-if [ $PRCSD -eq 'C' ]
+if [ $PRCSD = '0' ]
 then
   sqlplus -s -l $CONNECTDW<<EOF>>${LOG_FILE}
-    WHENEVER SQLERROR EXIT SQL.SQLCODE
-    WHENEVER OSERROR EXIT
-    set echo off
-    set heading off
-    set feedback off
-    set verify off
-    insert into O5.FILE_PROCESS_STATUS(PROCESS_NAME ,FILE_NAME) VALUES ('INV_LOAD','${f}');
-    quit;
-    EOF
-echo sqlldr $CONNECTDW CONTROL=$CTL/${PROCESS}.ctl LOG=$LOG/${PROCESS}.log BAD=$DATA/${PROCESS}.bad DATA=${DATA}/${f} ERRORS=999999 SKIP=1
+  WHENEVER SQLERROR EXIT FAILURE
+  WHENEVER OSERROR EXIT FAILURE
+  set echo off
+  set heading off
+  set feedback off
+  set verify off
+  insert into O5.FILE_PROCESS_STATUS(PROCESS_NAME ,FILE_NAME) VALUES ('SUBS_LOAD','${f}');
+  commit;
+  EOF
+  retcode=$?
+  if [ $retcode -ne 0 ]
+  then
+          echo "SQL Error in inserting a row in the FILE_PROCESS_STATUS table for the process ${PROCESS}...Please check" >> ${LOG_FILE}
+  else
+          echo "Insert of a row in FILE_PROCESS_STATUS table for the process ${PROCESS} is complete" >> ${LOG_FILE}
+  fi
+echo sqlldr $CONNECTDW CONTROL=$CTL/${PROCESS}.ctl LOG=$LOG/${PROCESS}.log BAD=$DATA/${PROCESS}.bad DATA=${DATA}/${f} ERRORS=999999 SKIP=1 >> ${LOG_FILE}
 sqlldr $CONNECTDW CONTROL=$CTL/${PROCESS}.ctl LOG=$LOG/${PROCESS}.log BAD=$DATA/${PROCESS}.bad DATA=${DATA}/${f} ERRORS=999999 SKIP=1
 retcode=`echo $?`
   case "$retcode" in
@@ -107,7 +114,6 @@ retcode=`echo $?`
       fi
 #################################################################
 sqlplus -s -l $CONNECTDW <<EOF>> ${LOG_FILE} @$SQL/${PROCESS}.sql "bay_ds." >> ${LOG_FILE}
-EOF
 retcode=$?
 if [ $retcode -ne 0 ]
 then
@@ -117,15 +123,15 @@ else
         echo "Email Opt In data from ${DELTA_FILE_NAME} processed successfully" >> ${LOG_FILE}
 fi
 sqlplus -s -l $CONNECTDW<<EOF>>${LOG_FILE}
-  WHENEVER SQLERROR EXIT SQL.SQLCODE
-  WHENEVER OSERROR EXIT
-  set echo off
-  set heading off
-  set feedback off
-  set verify off
-  UPDATE O5.FILE_PROCESS_STATUS SET PRRCSD='C' WHERE PROCESS_NAME='INV_LOAD' AND FILE_NAME ='${f}');
-  quit;
-  EOF
+WHENEVER SQLERROR EXIT FAILURE
+WHENEVER OSERROR EXIT FAILURE
+set echo off
+set heading off
+set feedback off
+set verify off
+UPDATE O5.FILE_PROCESS_STATUS SET PRRCSD='C' WHERE PROCESS_NAME='SUBS_LOAD' AND FILE_NAME ='${f}';
+commit;
+EOF
 fi
 done
 #################################################################
