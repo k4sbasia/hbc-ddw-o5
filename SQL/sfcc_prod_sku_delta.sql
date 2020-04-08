@@ -213,7 +213,7 @@ LOOP
 FETCH cur BULK COLLECT INTO v_coll LIMIT 50000;
 EXIT WHEN v_coll.count = 0;
 FORALL indx IN v_coll.first..v_coll.last
-UPDATE SFCC_PROD_SKU_DYN_FLAGS set SKN= v_coll(indx).SKN_NO
+UPDATE O5.SFCC_PROD_SKU_DYN_FLAGS set SKN= v_coll(indx).SKN_NO
                                   , PIM_CHG_DT=  SYSDATE
 where UPC=v_coll(indx).UPC and NVL(SKN,'1111111')<>v_coll(indx).SKN_NO ;
 
