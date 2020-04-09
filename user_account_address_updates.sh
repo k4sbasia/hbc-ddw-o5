@@ -55,7 +55,7 @@ EOF
 ################################################################
 ################################################################
 echo "START Customer updates  for $BANNER `date +%Y%m%d` "  >> ${LOG_FILE}
-sqlplus -S $CONNECTDW @${SCRIPT_NAME} "${BANNER}" "${EDATA_EXCHANGE_SCHEMA}" "${SCHEMA}">>${LOG_FILE}
+sqlplus -S $CONNECTUSER @${SCRIPT_NAME} "${BANNER}" "${EDATA_EXCHANGE_SCHEMA}" "${SCHEMA}">>${LOG_FILE}
 echo "END Customer updates for $BANNER `date +%Y%m%d` "  >> ${LOG_FILE}
 ################################################################
 ##Bad Records Check
