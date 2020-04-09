@@ -318,7 +318,7 @@ SELECT
   WHERE CP.EMAIL_ADDRESS IS NOT NULL
   and addr_default_type = 'Y'
   and CP.ADDRESS_OPT_IND = 'A'
-  and cp.banner_id = 4;
+  and cp.banner_id = 8;
   TYPE CUST_REC_TYPE IS
         TABLE OF C1%rowtype;
          v_coll_CUST_REC_TYPE   CUST_REC_TYPE;
