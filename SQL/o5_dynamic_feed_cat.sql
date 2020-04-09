@@ -61,7 +61,7 @@ SELECT '<?xml version="1.0" encoding="UTF-8"?>'||
       XMLELEMENT(
           "catalog",
           XMLATTRIBUTES(
-              'storefront-bay' AS "catalog-id",
+              'storefront-o5a' AS "catalog-id",
               'http://www.demandware.com/xml/impex/catalog/2006-10-31' AS "xmlns"),
       XMLAGG(
        XMLELEMENT ("category-assignment",

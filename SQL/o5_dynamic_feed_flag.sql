@@ -49,7 +49,7 @@ AS CLOB INDENT SIZE = 5--.EXTRACT ('/*').getclobVal ()
         XMLELEMENT(
             "catalog",
             XMLATTRIBUTES(
-                'master-bay' AS "catalog-id",
+                'master-o5a' AS "catalog-id",
                 'http://www.demandware.com/xml/impex/catalog/2006-10-31' AS "xmlns"
             ),   xmlagg(
                 XMLELEMENT ("product",
