@@ -34,7 +34,13 @@ AS
 (
 SELECT DISTINCT prduct_code product_id,CASE WHEN isclearance = 'true' THEN 1584570370926
                                        ELSE NULL
-                                       END AS category_id
+                                       END AS ICF, 
+									   CASE WHEN dfs_flag = 'Y' THEN 1586293950803
+                                       ELSE NULL
+                                       END AS DFS, 
+									   CASE WHEN isnew = 'true' THEN 1586293950803
+                                       ELSE NULL
+                                       END AS INF,dfs_flag
        FROM O5.sfcc_prod_product_data sp
        where
       ( (exists  (select 'X' from  O5.SFCC_PROD_SKU_DYN_FLAGS si where sp.PRDUCT_CODE=si.product_id and
@@ -60,6 +66,10 @@ SELECT '<?xml version="1.0" encoding="UTF-8"?>'||
       XMLAGG(
        XMLELEMENT ("category-assignment",
                    XMLATTRIBUTES (1584570370926 AS "category-id", product_id AS "product-id", 'delete' as "mode"))
+                   ),
+      XMLAGG(Case when dfs_flag = 'N' THEN 
+	   XMLELEMENT ("category-assignment",
+                   XMLATTRIBUTES (1586293950803 AS "category-id",  product_id  AS "product-id", 'delete' as "mode") ) END
                    )
 --                   ,
 --                  XMLAGG(
@@ -73,9 +83,15 @@ SELECT '<?xml version="1.0" encoding="UTF-8"?>'||
 --                   )
                    ,
                   XMLAGG(
-                        CASE WHEN category_id IS NOT NULL THEN
+                        CASE WHEN ICF IS NOT NULL THEN
                                    XMLELEMENT ("category-assignment",
-                                           XMLATTRIBUTES (category_id AS "category-id", product_id AS "product-id"))
+                                           XMLATTRIBUTES (ICF AS "category-id", product_id AS "product-id"))
+                               ELSE NULL            END
+                               ),
+                  XMLAGG(
+                        CASE WHEN DFS IS NOT NULL THEN
+                                   XMLELEMENT ("category-assignment",
+                                           XMLATTRIBUTES (DFS AS "category-id", product_id AS "product-id"))
                                ELSE NULL            END
                                )
                    )) AS CLOB INDENT SIZE = 5)
