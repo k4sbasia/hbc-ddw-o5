@@ -56,7 +56,7 @@ WHENEVER SQLERROR EXIT FAILURE
    BEGIN
 
 	    SELECT cast(sysdate AS date) INTO v_FLAG_CHG_DT FROM dual;
-		
+
 
 	   	OPEN existing;
 		LOOP
@@ -133,6 +133,37 @@ UPDATE O5.SFCC_PROD_PRODUCT_DATA set isSale='false', isClearance='false'--,isNew
             END LOOP;
           END;
       /
+
+			DECLARE
+		         CURSOR cur IS
+		     select sp.PRDUCT_CODE , sp.ISNEW, CASE WHEN to_date(sp.PUBLISH_DT,'MM/DD/YYYY') >= trunc(sysdate-8) THEN 'true' ELSE 'false' END DERIVED_NEW
+		              from O5.SFCC_PROD_PRODUCT_DATA   sp
+		              where (sp.ISNEW = 'true' or  to_date(sp.PUBLISH_DT,'MM/DD/YYYY') >= trunc(sysdate-8))
+		              ;
+		                 TYPE v_typ IS
+		             TABLE OF cur%rowtype;
+		                 v_coll     v_typ;
+
+		            TYPE v_itm_prc_typ IS TABLE OF VARCHAR2(20) INDEX BY VARCHAR2(30);
+		        v_coll_itm_prc_typ v_itm_prc_typ;
+		           BEGIN
+		               OPEN cur;
+		         LOOP
+		             FETCH cur BULK COLLECT INTO v_coll LIMIT 50000;
+		              EXIT WHEN v_coll.count = 0;
+		             FORALL indx IN v_coll.first..v_coll.last
+		     --        LOOP
+		     --         v_coll_itm_prc_typ(v_coll(indx).item_id):= v_coll(indx).PRC_typ_cd;
+		     --        END LOOP;
+
+		             UPDATE O5.SFCC_PROD_PRODUCT_DATA set isNEW=  v_coll(indx).DERIVED_NEW, DYN_FLAG_CHG_DT=SYSDATE
+		             where PRDUCT_CODE=v_coll(indx).PRDUCT_CODE ;
+
+		             COMMIT;
+
+		             END LOOP;
+		           END;
+		       /			
 
 exec dbms_stats.gather_table_stats('O5','SFCC_PROD_PRODUCT_DATA');
 
