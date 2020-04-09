@@ -16,7 +16,7 @@
 #############################################################################################################################
 ################################################################
 . $HOME/initvars
-export PROCESS='o5_edb_bm_extract_status_update'
+export PROCESS='o5_edb_extract_status_update_sfcc'
 export SQL=$HOME/SQL
 export LOG=$HOME/LOG
 export DATA=$HOME/DATA
@@ -56,7 +56,7 @@ update o5.edb_sub_status
 set last_extract_time = curr_extract_time,
 curr_extract_time = sysdate
 ;
-commit; 
+commit;
 select * from o5.edb_sub_status;
 quit;
 EOF`

@@ -1,6 +1,6 @@
 #!/usr/bin/ksh
 #-----------------------------------------------------------------------
-#####	NAME	     : o5_edb_process_sub_delta.sh 
+#####	NAME	     : o5_edb_process_sub_delta.sh
 #####   DESCRIPTION  : This script does the following
 #####                              1. This script Processes Subscribtions (delta)
 #####
@@ -13,7 +13,7 @@
 #####
 #############################################################################################################################
 ################################################################
-. $HOME/initvars
+. $HOME/params.conf o5
 ################################################################
 ##Control File Variables
 export PROCESS='o5_edb_process_sub_delta'
@@ -21,7 +21,7 @@ export LOG=$HOME/LOG
 export LOG_FILE="${LOG}/${PROCESS}_log.txt"
 export BAD_SUBJECT="${PROCESS} failed"
 export JOB_NAME="${PROCESS}"
-export SCRIPT_NAME="${PROCESS}" 
+export SCRIPT_NAME="${PROCESS}"
 export SFILE_SIZE='0'
 export FILE_NAME='0'
 export BATCHFILE="$LOG/o5_edb_batch_nextval.txt"
@@ -30,7 +30,7 @@ export LOAD_COUNT='0'
 export FILE_COUNT='0'
 export TFILE_SIZE='0'
 export SOURCE_COUNT='0'
-export TARGET_COUNT='0' 
+export TARGET_COUNT='0'
 export SQL="$HOME/SQL"
 ############change this connection is test################
 ################################################################

@@ -15,7 +15,7 @@
 #############################################################################################################################
 ################################################################
 
-. $HOME/initvars
+. $HOME/params.conf o5
 ################################################################
 ##Control File Variables
 export PROCESS='o5_edb_export_delta'
@@ -23,14 +23,14 @@ export LOG=$HOME/LOG
 export LOG_FILE="${LOG}/${PROCESS}_log.txt"
 export BAD_SUBJECT="${PROCESS} failed"
 export JOB_NAME="${PROCESS}"
-export SCRIPT_NAME="${PROCESS}" 
+export SCRIPT_NAME="${PROCESS}"
 export SFILE_SIZE='0'
 export FILE_NAME='0'
 export LOAD_COUNT='0'
 export FILE_COUNT='0'
 export TFILE_SIZE='0'
 export SOURCE_COUNT='0'
-export TARGET_COUNT='0' 
+export TARGET_COUNT='0'
 export SQL="$HOME/SQL"
 export SQLSUB="${PROCESS}_sub_spool"
 
