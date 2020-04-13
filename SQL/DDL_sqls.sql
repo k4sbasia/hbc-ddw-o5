@@ -1,5 +1,11 @@
 --USer account
 
+---Edata_exchange:
+
+create index idx_user_addre_id1 on CUSTOMER_PROFILE_STAGE_O5_S5A ( EMAIL_ADDRESS,nvl(ZIPCODE,'00000'), NVL(ZIP4,'00000') )
+
+
+--O5
 
   CREATE TABLE "CUSTOMER_PROFILE_STAGE_HISTORY"
    (	"CUSTOMER_ID" VARCHAR2(50 BYTE),
@@ -184,6 +190,8 @@ drop table USER_ADDRESS
 	  REFERENCES "O5"."USER_ACCOUNT" ("USA_EMAIL") ENABLE
    )
   TABLESPACE "O5_DATA" ;
+
+  create index idx_user_addre_id2 on USER_ADDRESS ( USA_EMAIL,nvl(USA_ZIPCODE,'00000'), NVL(USA_ZIP4,'00000') )
 
   grant all on USER_ADDRESS to dm_user;
 grant all on USER_ACCOUNT to dm_user;
