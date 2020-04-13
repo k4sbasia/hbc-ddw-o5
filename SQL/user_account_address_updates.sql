@@ -22,7 +22,7 @@ DECLARE
     FROM &2.CUSTOMER_PROFILE_STAGE_O5_S5A CP
     left join &3.user_account a on  upper(CP.EMAIL_ADDRESS) = a.usa_email
     WHERE CP.EMAIL_ADDRESS    IS NOT NULL
-  and cp.banner_id = 8
+  and cp.banner_id = 7
     ;
 TYPE CUST_REC_TYPE
 IS
@@ -318,7 +318,7 @@ SELECT
   WHERE CP.EMAIL_ADDRESS IS NOT NULL
   and addr_default_type = 'Y'
   and CP.ADDRESS_OPT_IND = 'A'
-  and cp.banner_id = 8;
+  and cp.banner_id = 7;
   TYPE CUST_REC_TYPE IS
         TABLE OF C1%rowtype;
          v_coll_CUST_REC_TYPE   CUST_REC_TYPE;
