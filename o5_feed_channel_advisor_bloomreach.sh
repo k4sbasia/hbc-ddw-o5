@@ -16,7 +16,8 @@
 #####
 #####
 #############################################################################################################################
-. $HOME/initvars
+. $HOME/params.conf o5
+export BANNER=$1
 ################################################################
 ##Control File Variables
 export SQL=$HOME/SQL
@@ -96,6 +97,7 @@ echo "${PROCESS} failed. Please investigate"
 echo "${PROCESS} failed. Please investigate" >> ${LOG_FILE}
 export SUBJECT=${BAD_SUBJECT}
 #send_email
+exit 99
 else
 echo "${PROCESS} completed without errors."
 echo "${PROCESS} completed without errors." >> ${LOG_FILE}
@@ -103,5 +105,6 @@ echo "${PROCESS} completed without errors." >> ${LOG_FILE}
 #################################################################
 sqlplus -s -l  $CONNECTDW<<EOF>${LOG}/${PROCESS}_runstats_finish.log @${SQL}/runstats_end.sql "$JOB_NAME" "$SCRIPT_NAME" "$SFILE_SIZE" "$FILE_NAME" "$LOAD_COUNT" "$FILE_COUNT" "$TFILE_SIZE" "$SOURCE_COUNT" "$TARGET_COUNT"
 EOF
+exit 0
 #################################################################
 fi
