@@ -59,7 +59,7 @@ BEGIN
                   v_coll_CUST_REC_TYPE(indx).CREATE_DT CREATE_DT,
                   v_coll_CUST_REC_TYPE(indx).MODIFY_DT MODIFY_DT
                 FROM DUAL where v_coll_CUST_REC_TYPE(indx).USA_EMAIL is NULL
-                ) CP ON (upper(UA.USA_EMAIL) = CP.EMAIL_ADDRESS AND UA.USA_ID = CP.CUSTOMER_ID)
+                ) CP ON (UA.USA_EMAIL = CP.EMAIL_ADDRESS AND UA.USA_ID = CP.CUSTOMER_ID)
 				  WHEN NOT MATCHED THEN
                 INSERT
                   (
