@@ -15,13 +15,13 @@ select UPC||'|'||
     SKU_SIZE1_DESC||'|'||
     NULL||'|'||
     SKU_COLOR||'|'||
-    case when itm_gender = '1' then 'Not Applicable'
-        when  itm_gender = '2' then 'Men'
-        when  itm_gender = '3' then 'Women'
-        when  itm_gender = '4' then 'Unisex'
-        when  itm_gender = '5' then 'Kids'
-        when  itm_gender = '6' then 'Pets'
-        else itm_gender
+    case when item_gender = '1' then 'Not Applicable'
+        when  item_gender = '2' then 'Men'
+        when  item_gender = '3' then 'Women'
+        when  item_gender = '4' then 'Unisex'
+        when  item_gender = '5' then 'Kids'
+        when  item_gender = '6' then 'Pets'
+        else item_gender
         end
     ||'|'||
      NULL ||'|'||
