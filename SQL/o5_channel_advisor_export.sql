@@ -228,13 +228,13 @@ SELECT fcae.manufacturer_part#
     || '|'
     || CASE WHEN clearance_type = 'C' THEN 'Y' ELSE 'N' END
     || '|'
-    || case when itm_gender = '1' then 'Not Applicable'
-        when  itm_gender = '2' then 'Men'
-        when  itm_gender = '3' then 'Women'
-        when  itm_gender = '4' then 'Unisex'
-        when  itm_gender = '5' then 'Kids'
-        when  itm_gender = '6' then 'Pets'
-        else itm_gender
+    || case when item_gender = '1' then 'Not Applicable'
+        when  item_gender = '2' then 'Men'
+        when  item_gender = '3' then 'Women'
+        when  item_gender = '4' then 'Unisex'
+        when  item_gender = '5' then 'Kids'
+        when  item_gender = '6' then 'Pets'
+        else item_gender
         end
     || '|'
     || CASE WHEN nvl(fcae.sale_price,0) = 0 OR t2.item_cst_amt IS NULL THEN 0
