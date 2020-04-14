@@ -6,7 +6,7 @@ SET SQLPROMPT ''
 SET HEADING OFF
 WHENEVER OSERROR EXIT FAILURE
 
-DECLARE 
+DECLARE
 BEGIN
     FOR r1 IN (
         WITH inv AS (
@@ -99,12 +99,12 @@ SELECT
     ||nvl(replace(replace(t5.folder_path,'/assortments/saksmain/shopcategory/',''),'/','>'),'Saks OFF 5TH')
     || '~'
     || CASE
-        WHEN t1.itm_gender = 1 THEN 'unisex'
-        WHEN t1.itm_gender = 2 THEN 'male'
-        WHEN t1.itm_gender = 3 THEN 'female'
-        WHEN t1.itm_gender = 4 THEN 'unisex'
-        WHEN t1.itm_gender = 5 THEN 'unisex '
-        WHEN t1.itm_gender = 6 THEN 'unisex'
+        WHEN t1.itm_gender = '1' THEN 'unisex'
+        WHEN t1.itm_gender = '2' THEN 'male'
+        WHEN t1.itm_gender = '3' THEN 'female'
+        WHEN t1.itm_gender = '4' THEN 'unisex'
+        WHEN t1.itm_gender = '5' THEN 'unisex '
+        WHEN t1.itm_gender = '6' THEN 'unisex'
         ELSE 'unisex'
     END
     || '~'
@@ -117,7 +117,7 @@ JOIN (SELECT DISTINCT product_code, skn_no, upc, MAX(item_cst_amt) AS item_cst_a
        GROUP BY product_code, skn_no, upc) t2 ON t1.manufacturer_part# = t2.product_code AND to_number(t1.sku_number) = t2.upc
 LEFT JOIN (SELECT max(SD_PIP_TEXT) offer_tag,ITEM_ID as product_code from &1.v_sd_price_o5
 where SD_PIP_TEXT is not null
-group by ITEM_ID) t4 on t2.product_code = t4.product_code  
+group by ITEM_ID) t4 on t2.product_code = t4.product_code
 LEFT JOIN (select product_id AS PRODUCT_CODE, max(lower(folder_path)) AS folder_path from &1.all_actv_pim_assortment_o5
             WHERE folderactive= 'T' and readyforprodfolder= 'T'
                 and folder_path like ('/Assortments/SaksMain/ShopCategory%')
