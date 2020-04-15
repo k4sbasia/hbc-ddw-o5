@@ -14,7 +14,7 @@
 #####
 ##################################################################################################################################
 set -x
-. $HOME/params.conf bay
+. $HOME/params.conf o5
 ################################################################
 ##Control File Variables
 export SQL=$HOME/SQL
@@ -142,8 +142,9 @@ zip -9 ${CAT_FILE_ZIP} ${CAT_FILE_NAME}
 sftp -o "IdentityFile=~/.ssh/${SFCC_NON_KEY}" ${SFCC_NON_USER}@sftp.integration.awshbc.io <<< "put ${DATA}/${FLAGS_FILE_ZIP} sfcc-inbound/catalog/products"
 sftp -o "IdentityFile=~/.ssh/${SFCC_NON_KEY}" ${SFCC_NON_USER}@sftp.integration.awshbc.io <<< "put ${DATA}/${CAT_FILE_ZIP} sfcc-inbound/catalog/assignments"
 sqlplus -S $CONNECTDW<<EOF
-UPDATE   JOB_STATUS set last_run_on =LAST_COMPLETED_TIME,  LAST_COMPLETED_TIME= sysdate where process_name='O5_DYNAMIC';
-UPDATE   JOB_STATUS set last_run_on =LAST_COMPLETED_TIME,  LAST_COMPLETED_TIME= sysdate where process_name='O5_DYNAMIC_ASSGN';
+UPDATE   O5.JOB_STATUS set last_run_on =LAST_COMPLETED_TIME,  LAST_COMPLETED_TIME= sysdate where process_name='SFCC_DYNAMIC';
+UPDATE   O5.JOB_STATUS set last_run_on =LAST_COMPLETED_TIME,  LAST_COMPLETED_TIME= sysdate where process_name='SFCC_DYNAMIC_ASSGN';
+UPDATE   O5.JOB_STATUS set last_run_on =LAST_COMPLETED_TIME,  LAST_COMPLETED_TIME= sysdate where process_name='SFCC_LOAD';
 COMMIT;
 quit;
 EOF
