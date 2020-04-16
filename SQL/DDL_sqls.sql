@@ -196,3 +196,16 @@ drop table USER_ADDRESS
   grant all on USER_ADDRESS to dm_user;
 grant all on USER_ACCOUNT to dm_user;
 grant all on USER_ACCOUNT_EXCEPTION to dm_user;
+
+  --
+  create or replace Function F_GET_ALT_IMAGE_URL (styl_seq_num  varchar2) return varchar2
+is
+v_out varchar2(32000) default null;
+begin
+ select alt_image_url  into v_out from o5.image_alt_o5
+ where product_id = styl_seq_num;
+ return rtrim(v_out);
+  exception
+when others then null;
+return sqlerrm;
+End;
