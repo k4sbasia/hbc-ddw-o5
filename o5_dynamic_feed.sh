@@ -43,6 +43,7 @@ export TARGET_COUNT=0
 export ENV=$1
 export load_type=$2
 export SLEEP_TIME=120
+export RUN_DATE_EXPR="TO_DATE('`date +"%Y%m%d"`','YYYYMMDD')"
 echo "Started Job :: ${PROCESS} " >${LOG_FILE}
 ################################################################
 ##Initialize Email Function
@@ -64,7 +65,8 @@ set pagesize 0
 set sqlprompt ''
 set heading off
 set trimspool on
-select ${DW_USER}price_load.fileCheck${load_type} from dual;
+select count(*) from EDATA_EXCHANGE.job_status where upper(system) = 'AMS'
+and process_name = '$process_name' and trunc(run_date) = trunc(${RUN_DATE_EXPR}) and process_status = 'Completed';
 quit;
 EOF`"
 }
@@ -85,7 +87,6 @@ if [ $DONE_PROCESS_CHECK -gt 0 ]
 then
     #echo -e "AMS prices published and process is starting `date +%m/%d/%Y-%H:%M:%S`\n">>${LOG_FILE}
 sqlplus -s -l $CONNECTDW @SQL/${PROCESS}_load.sql >> ${LOG_FILE}
-sqlplus -s -l $CONNECTPIM @SQL/${PROCESS}_isnew_load.sql >> ${LOG_FILE}
 retcode=$?
 if [ $retcode -ne 0 ]
 then
@@ -93,6 +94,15 @@ then
         exit 99
 else
         echo "Product data loaded for the process ${PROCESS} is complete" >> ${LOG_FILE}
+fi
+sqlplus -s -l $CONNECTPIM @SQL/${PROCESS}_isnew_load.sql >> ${LOG_FILE}
+retcode=$?
+if [ $retcode -ne 0 ]
+then
+        echo "SQL Error in assortment data for process ${PROCESS}...Please check" >> ${LOG_FILE}
+        exit 99
+else
+        echo "Assortment data loaded for the process ${PROCESS} is complete" >> ${LOG_FILE}
 fi
 sqlplus -s -l $CONNECTDWXML @SQL/${PROCESS}_flag.sql ${DATE} >> ${LOG_FILE}
 #sqlplus -s -l $CONNECTPRODSDWXML @SQL/${PROCESS}_flag_parent.sql ${DATE} >> ${LOG_FILE} #commented as change to process at variant level inplace
