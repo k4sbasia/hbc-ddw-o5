@@ -58,8 +58,6 @@ AS CLOB INDENT SIZE = 5--.EXTRACT ('/*').getclobVal ()
                                 XMLELEMENT ("custom-attribute",
                                             XMLATTRIBUTES ('isClearance' as "attribute-id"),NVL(sp.isClearance,'false')),
                                 XMLELEMENT ("custom-attribute",
-                                            XMLATTRIBUTES ('isFinalSale' as "attribute-id"),NVL(sp.ISFINALSALE,'false')),
-                                XMLELEMENT ("custom-attribute",
                                             XMLATTRIBUTES ('isNew' as "attribute-id"),NVL(sp.isNew,'false')),
                                 XMLELEMENT ("custom-attribute",
                                             XMLATTRIBUTES ('Waitlist' as "attribute-id"),NVL(sp.isWaitlist,'false'))
