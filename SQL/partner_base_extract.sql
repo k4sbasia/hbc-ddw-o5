@@ -243,12 +243,12 @@ INSERT INTO &2.image_alt_&1
 SELECT
              REGEXP_REPLACE(a.PRODUCT_CODE,'[^[:digit:]]','') product_code,
                                 LISTAGG(
-                                case when '_&1' = 'o5'
+                                case when '&1' = 'o5'
                                 then 'https://image.s5a.com/is/image/saksoff5th/'
                                 else
                                 'https://image.s5a.com/is/image/saks/'
                                 end
-                                || a.product_code||'_300x400.jpg',',') WITHIN GROUP(ORDER BY product_code) AS alt_image_url,
+                                || img.asset_id ||'_300x400.jpg',',') WITHIN GROUP(ORDER BY product_code) AS alt_image_url,
                                 SYSDATE
                             FROM
                                 &2.&4 a

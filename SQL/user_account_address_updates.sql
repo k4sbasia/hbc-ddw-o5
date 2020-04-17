@@ -22,7 +22,7 @@ DECLARE
     FROM &2.CUSTOMER_PROFILE_STAGE_O5_S5A CP
     left join &3.user_account a on  upper(CP.EMAIL_ADDRESS) = a.usa_email
     WHERE CP.EMAIL_ADDRESS    IS NOT NULL
-  and cp.banner_id = 8
+  and cp.banner_id = 7
     ;
 TYPE CUST_REC_TYPE
 IS
@@ -59,7 +59,7 @@ BEGIN
                   v_coll_CUST_REC_TYPE(indx).CREATE_DT CREATE_DT,
                   v_coll_CUST_REC_TYPE(indx).MODIFY_DT MODIFY_DT
                 FROM DUAL where v_coll_CUST_REC_TYPE(indx).USA_EMAIL is NULL
-                ) CP ON (upper(UA.USA_EMAIL) = CP.EMAIL_ADDRESS AND UA.USA_ID = CP.CUSTOMER_ID)
+                ) CP ON (UA.USA_EMAIL = CP.EMAIL_ADDRESS AND UA.USA_ID = CP.CUSTOMER_ID)
 				  WHEN NOT MATCHED THEN
                 INSERT
                   (
@@ -318,7 +318,7 @@ SELECT
   WHERE CP.EMAIL_ADDRESS IS NOT NULL
   and addr_default_type = 'Y'
   and CP.ADDRESS_OPT_IND = 'A'
-  and cp.banner_id = 4;
+  and cp.banner_id = 7;
   TYPE CUST_REC_TYPE IS
         TABLE OF C1%rowtype;
          v_coll_CUST_REC_TYPE   CUST_REC_TYPE;

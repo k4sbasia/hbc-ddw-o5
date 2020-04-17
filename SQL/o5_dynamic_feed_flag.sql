@@ -49,7 +49,7 @@ AS CLOB INDENT SIZE = 5--.EXTRACT ('/*').getclobVal ()
         XMLELEMENT(
             "catalog",
             XMLATTRIBUTES(
-                'master-bay' AS "catalog-id",
+                'master-o5a' AS "catalog-id",
                 'http://www.demandware.com/xml/impex/catalog/2006-10-31' AS "xmlns"
             ),   xmlagg(
                 XMLELEMENT ("product",
@@ -60,7 +60,9 @@ AS CLOB INDENT SIZE = 5--.EXTRACT ('/*').getclobVal ()
                                 XMLELEMENT ("custom-attribute",
                                             XMLATTRIBUTES ('isFinalSale' as "attribute-id"),NVL(sp.ISFINALSALE,'false')),
                                 XMLELEMENT ("custom-attribute",
-                                            XMLATTRIBUTES ('isNew' as "attribute-id"),NVL(sp.isNew,'false'))
+                                            XMLATTRIBUTES ('isNew' as "attribute-id"),NVL(sp.isNew,'false')),
+                                XMLELEMENT ("custom-attribute",
+                                            XMLATTRIBUTES ('Waitlist' as "attribute-id"),NVL(sp.isWaitlist,'false'))
                                             )
                                             )
                                             ),
@@ -72,7 +74,7 @@ AS CLOB INDENT SIZE = 5--.EXTRACT ('/*').getclobVal ()
                                 XMLELEMENT ("custom-attribute",
                                             XMLATTRIBUTES ('isClearance' as "attribute-id"),NVL(si.isClearance,'false')),
                                 XMLELEMENT ("custom-attribute",
-                                            XMLATTRIBUTES ('isFinalSale' as "attribute-id"),NVL(si.isFinalSale,'false'))
+                                            XMLATTRIBUTES ('FinalSale' as "attribute-id"),NVL(si.isFinalSale,'false'))
                                             )
                                             ) )
                             from

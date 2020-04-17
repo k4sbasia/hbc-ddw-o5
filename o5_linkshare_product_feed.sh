@@ -66,6 +66,7 @@ export PIM_WEB_FOLDER_TAB="pim_ab_o5_web_folder_data"
 export PIM_ASRT_PRD_ASSGM="pim_ab_o5_bm_asrt_prd_assgn"
 export PIM_FOLDER_ATTR_DATA="pim_ab_o5_folder_attr_data"
 export PIM_DBLINK="PIM_READ"
+export BANNER_HEADER="SAKSOFF5TH"
 fi
 #################################################################
 ##Update Runstats Start
@@ -76,8 +77,8 @@ sqlplus -s -l  $CONNECTDW <<EOF> ${LOG}/${PROCESS}_runstats_start.log @${SQL}/ru
 EOF
 ########################################################################################
 echo "Running the script to extract data started at `date '+%a %b %e %T'`" >${LOG_FILE}
-sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL}  "$SCHEMA" "$BANNER" "$PART_TABLE" "$PIM_DBLINK" >$FILE_NAME
-sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL2} "$SCHEMA" "$BANNER" "$PART_TABLE" "$PIM_DBLINK" >$FILE_NAME2
+sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL}  "$SCHEMA" "$BANNER" "$PART_TABLE" "$PIM_DBLINK" "$BANNER_HEADER" >$FILE_NAME
+sqlplus -s -l  $CONNECTDW @${EXTRACT_SQL2} "$SCHEMA" "$BANNER" "$PART_TABLE" "$PIM_DBLINK" "$BANNER_HEADER">$FILE_NAME2
 wait
 echo "Completed the  product extract  at `date '+%a %b %e %T'`" >>${LOG_FILE}
 ########################################################################################

@@ -117,8 +117,8 @@ then
 else
 echo "Posting files to s3 bucket http://s3.amazonaws.com/facebook-hbc " >>${LOG_FILE}
 cd $HOME
-#export HTTPS_PROXY=http://proxy.saksdirect.com:80
-#/home/cognos/upload_file.py --file o5a/off5th_facebook_feed.tsv --bucket_name facebook-hbc  >> ${LOG_FILE}
+export HTTPS_PROXY=http://proxy.saksdirect.com:80
+/home/cognos/upload_file.py --file o5a/off5th_facebook_feed.tsv --bucket_name facebook-hbc  >> ${LOG_FILE}
 fi
 cd $HOME
 echo "Saks Product feed to facebook process completed at `date '+%a %b %e %T %Z %Y'`" >>${LOG_FILE}

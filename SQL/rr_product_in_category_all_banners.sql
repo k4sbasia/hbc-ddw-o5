@@ -15,17 +15,17 @@ REM                -----------------            ----------      ----------------
 REM                Unknown                      Unknown         Created
 REM                Rajesh Mathew                        07/14/2010              Modified
 REM ############################################################################
-set echo off
-set feedback off
-set linesize 10000
-set pagesize 0
-set sqlprompt ''
-set heading off
-set trimspool on
-set serverout on
 WHENEVER OSERROR EXIT FAILURE
 WHENEVER SQLERROR EXIT FAILURE
-set verify off
+set serverout off
+SET ECHO OFF
+SET FEEDBACK OFF
+SET LINESIZE 10000
+SET PAGESIZE 0
+SET SQLPROMPT ''
+SET HEADING OFF
+SET VERIFY OFF
+
 select 'category_id'||'|'||'product_id' from dual;
 SELECT fld.folder_id || '|' || prd.product_id
   FROM &2.all_actv_pim_assortment_&3 prd
