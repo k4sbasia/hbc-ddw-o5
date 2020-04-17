@@ -8,5 +8,4 @@ trailing nullcols
 ,product_skus
 ,phone_number char "REGEXP_REPLACE(:phone_number,'[^0-9]+', '')"
 ,add_date
-
 )

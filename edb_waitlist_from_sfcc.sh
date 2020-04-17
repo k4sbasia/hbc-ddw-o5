@@ -53,7 +53,14 @@ function send_email {
 ########Run the stats####################################################################
 sqlplus -s -l $CONNECTDW <<EOF> ${LOG}/${PROCESS}_runstats_start.log @${SQL}/runstats_start.sql "$JOB_NAME" "$SCRIPT_NAME" "$SFILE_SIZE" "$FILE_NAME" "$LOAD_COUNT" "$FILE_COUNT" "$TFILE_SIZE" "$SOURCE_COUNT" "$TARGET_COUNT"
 EOF
-
+if [ "${BANNER}" == "saks" ]
+then
+        SCHEMA="mrep."
+        LINK="'https://image.s5a.com/is/image/saks/'"
+else
+        SCHEMA="o5."
+        LINK="'https://image.s5a.com/is/image/saksoff5th/'"
+fi
 #################################################################
 echo -e "${PROCESS} process started at `date '+%a %b %e %T'`\n" >${LOG_FILE}
 #################################################################
@@ -71,7 +78,7 @@ for f in $(find ${DATA} -maxdepth 1 -iname ${DELTA_FILE_NAME}*.csv -printf "%f\n
 echo $f >> ${LOG_FILE}
 PRCSD=`sqlplus -s $CONNECTDW <<EOF
 set heading off
-select count(*) from O5.FILE_PROCESS_STATUS WHERE PROCESS_NAME='WAITLIST_LOAD' and FILE_NAME='${f}';
+select count(*) from ${SCHEMA}FILE_PROCESS_STATUS WHERE PROCESS_NAME='WAITLIST_LOAD' and FILE_NAME='${f}';
 quit;
 EOF`
 if [ $PRCSD = '0' ]
@@ -83,7 +90,7 @@ set echo off
 set heading off
 set feedback off
 set verify off
-insert into O5.FILE_PROCESS_STATUS(PROCESS_NAME ,FILE_NAME) VALUES ('WAITLIST_LOAD','${f}');
+insert into ${SCHEMA}FILE_PROCESS_STATUS(PROCESS_NAME ,FILE_NAME) VALUES ('WAITLIST_LOAD','${f}');
 commit;
 EOF
 retcode=$?
@@ -113,7 +120,13 @@ retcode=`echo $?`
               mv $DATA/${f} $DATA/ARCHIVE
       fi
 #################################################################
-sqlplus -s -l $CONNECTDW <<EOF>> ${LOG_FILE} @$SQL/${PROCESS}.sql "bay_ds." >> ${LOG_FILE}
+## 3 Execute prep procedure  and populate original edb_stage_dw_waitlist_wrk table
+#################################################################
+sqlplus -s -l  $CONNECTDW<<EOF>>${LOG_FILE}
+exec ${SCHEMA}p_waitlist_data_prep_sfcc;
+show errors;
+exit;
+EOF
 retcode=$?
 if [ $retcode -ne 0 ]
 then
@@ -129,7 +142,7 @@ set echo off
 set heading off
 set feedback off
 set verify off
-UPDATE O5.FILE_PROCESS_STATUS SET PRRCSD='C' WHERE PROCESS_NAME='SUBS_LOAD' AND FILE_NAME ='${f}';
+UPDATE ${SCHEMA}FILE_PROCESS_STATUS SET PRRCSD='C' WHERE PROCESS_NAME='SUBS_LOAD' AND FILE_NAME ='${f}';
 commit;
 EOF
 fi
