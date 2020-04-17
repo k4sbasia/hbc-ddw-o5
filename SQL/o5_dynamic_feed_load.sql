@@ -63,7 +63,7 @@ COMMIT;
    BEGIN
 
 	    SELECT cast(sysdate AS date) INTO v_FLAG_CHG_DT FROM dual;
-		
+
 
 	   	OPEN existing;
 		LOOP
@@ -161,14 +161,14 @@ CURSOR cur_old IS
 	SELECT DISTINCT prduct_code product_code, dfs_flag,publish_dt
 		FROM o5.SFCC_PROD_PRODUCT_DATA where dfs_flag = 'Y'
 		 AND TO_DATE (publish_dt, 'MM/DD/YYYY') < SYSDATE - 30;
-		 
+
 TYPE v_typ_new IS
     TABLE OF cur_new%rowtype;
         v_coll_new     v_typ_new;
 
 TYPE v_typ_old IS
     TABLE OF cur_old%rowtype;
-        v_coll_old     v_typ_old;        
+        v_coll_old     v_typ_old;
 
 BEGIN
   SELECT cast(sysdate AS date) INTO v_FLAG_CHG_DT FROM dual;
@@ -178,7 +178,7 @@ BEGIN
     FETCH cur_old BULK COLLECT INTO v_coll_old LIMIT 50000;
      EXIT WHEN v_coll_old.count = 0;
     FORALL indx IN v_coll_old.first..v_coll_old.last
-    UPDATE O5.SFCC_PROD_PRODUCT_DATA 
+    UPDATE O5.SFCC_PROD_PRODUCT_DATA
 	set  dfs_flag= 'N',
 	DYN_FLAG_CHG_DT = CASE WHEN dfs_flag is null then v_FLAG_CHG_DT WHEN v_coll_old(indx).dfs_flag <> 'N' THEN v_FLAG_CHG_DT  else DYN_FLAG_CHG_DT end
     where PRDUCT_CODE=v_coll_old(indx).product_code ;
@@ -186,18 +186,18 @@ BEGIN
 
     COMMIT;
 
-    END LOOP; 
+    END LOOP;
     END;
-    
+
 OPEN cur_new;
 LOOP
     FETCH cur_new BULK COLLECT INTO v_coll_new LIMIT 50000;
      EXIT WHEN v_coll_new.count = 0;
-     
+
     FORALL indx IN v_coll_new.first..v_coll_new.last
-    UPDATE O5.SFCC_PROD_PRODUCT_DATA 
-	set  dfs_flag= 'Y', --DYN_FLAG_CHG_DT =  v_FLAG_CHG_DT, 
-	DYN_FLAG_CHG_DT = CASE WHEN dfs_flag is null then v_FLAG_CHG_DT WHEN v_coll_new(indx).dfs_flag <> 'Y' THEN v_FLAG_CHG_DT  else DYN_FLAG_CHG_DT end 
+    UPDATE O5.SFCC_PROD_PRODUCT_DATA
+	set  dfs_flag= 'Y', --DYN_FLAG_CHG_DT =  v_FLAG_CHG_DT,
+	DYN_FLAG_CHG_DT = CASE WHEN dfs_flag is null then v_FLAG_CHG_DT WHEN v_coll_new(indx).dfs_flag <> 'Y' THEN v_FLAG_CHG_DT  else DYN_FLAG_CHG_DT end
     where PRDUCT_CODE=v_coll_new(indx).product_code ;
 
     COMMIT;
@@ -234,7 +234,7 @@ END;
     --        END LOOP;
 
             UPDATE O5.SFCC_PROD_PRODUCT_DATA p set isNEW=  v_coll(indx).DERIVED_NEW, DYN_FLAG_CHG_DT=SYSDATE
-            where PRDUCT_CODE=v_coll(indx).PRDUCT_CODE 
+            where PRDUCT_CODE=v_coll(indx).PRDUCT_CODE
             AND NVL(p.isnew,'XXXX')<> v_coll(indx).DERIVED_NEW;
 
             COMMIT;
@@ -242,6 +242,44 @@ END;
             END LOOP;
           END;
       /
+
+			-----------------Added for isWaitlist calculation----------------------------
+
+			         DECLARE
+			 v_FLAG_CHG_DT DATE;
+			        CURSOR cur IS
+							select sp.PRDUCT_CODE, CASE WHEN sp.WAITLIST='T' AND NVL(sd.wh_sellable_qty,0)>0 THEN 'true' ELSE 'false' END IS_WAITLIST
+		                             from o5.SFCC_PROD_PRODUCT_DATA sp INNER JOIN (select sd.PRODUCT_ID, SUM(NVL(wh_sellable_qty,0)) wh_sellable_qty from o5.BI_DATE_ITM_FACT di LEFT JOIN o5.SFCC_PROD_SKU_DYN_FLAGS sd
+		                             ON    di.ITM_UPC_NUM=sd.UPC AND  di.ACTV_DT >= trunc(sysdate -60) group by  sd.PRODUCT_ID ) sd
+		                             ON sd.PRODUCT_ID=sp.PRDUCT_CODE
+		                            Where (sp.WAITLIST  ='T' or sp.isWaitlist='true');
+			                TYPE v_typ IS
+			            TABLE OF cur%rowtype;
+			                v_coll     v_typ;
+
+			           TYPE v_itm_prc_typ IS TABLE OF VARCHAR2(20) INDEX BY VARCHAR2(30);
+			       v_coll_itm_prc_typ v_itm_prc_typ;
+			          BEGIN
+
+			  SELECT sysdate  INTO v_FLAG_CHG_DT FROM dual;
+			              OPEN cur;
+			        LOOP
+			            FETCH cur BULK COLLECT INTO v_coll LIMIT 50000;
+			             EXIT WHEN v_coll.count = 0;
+			            FORALL indx IN v_coll.first..v_coll.last
+			    --        LOOP
+			    --         v_coll_itm_prc_typ(v_coll(indx).item_id):= v_coll(indx).PRC_typ_cd;
+			    --        END LOOP;
+
+			            UPDATE O5.SFCC_PROD_PRODUCT_DATA p set isWAITLIST=  v_coll(indx).IS_WAITLIST, DYN_FLAG_CHG_DT=SYSDATE
+			            where PRDUCT_CODE=v_coll(indx).PRDUCT_CODE
+			            AND NVL(p.isWAITLIST,'XXXX')<> v_coll(indx).IS_WAITLIST;
+
+			            COMMIT;
+
+			            END LOOP;
+			          END;
+			      /
 
 exec dbms_stats.gather_table_stats('O5','SFCC_PROD_PRODUCT_DATA');
 

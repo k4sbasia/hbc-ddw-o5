@@ -173,3 +173,4 @@ exit 1
 else
 echo -e "${PROCESS} completed without errors."
 echo -e "${PROCESS} completed without errors." >> ${LOG_FILE}
+fi
