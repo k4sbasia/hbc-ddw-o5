@@ -63,7 +63,7 @@ SELECT '<?xml version="1.0" encoding="UTF-8"?>'||
               'http://www.demandware.com/xml/impex/catalog/2006-10-31' AS "xmlns"),
       XMLAGG(
        XMLELEMENT ("category-assignment",
-                   XMLATTRIBUTES (1584570370926 AS "category-id", product_id AS "product-id", 'delete' as "mode"))
+                   XMLATTRIBUTES (1584570370926 AS "category-id", a.product_id AS "product-id", 'delete' as "mode"))
                    ),
       XMLAGG(
        XMLELEMENT ("category-assignment",
@@ -95,7 +95,7 @@ SELECT '<?xml version="1.0" encoding="UTF-8"?>'||
                    ),
       XMLAGG(Case when dfs_flag = 'N' THEN 
 	   XMLELEMENT ("category-assignment",
-                   XMLATTRIBUTES (1586293950803 AS "category-id",  product_id  AS "product-id", 'delete' as "mode") ) END
+                   XMLATTRIBUTES (1586293950803 AS "category-id", a.product_id  AS "product-id", 'delete' as "mode") ) END
                    )
 --                   ,
 --                  XMLAGG(
@@ -111,13 +111,13 @@ SELECT '<?xml version="1.0" encoding="UTF-8"?>'||
                   XMLAGG(
                         CASE WHEN ICF IS NOT NULL THEN
                                    XMLELEMENT ("category-assignment",
-                                           XMLATTRIBUTES (ICF AS "category-id", product_id AS "product-id"))
+                                           XMLATTRIBUTES (ICF AS "category-id", a.product_id AS "product-id"))
                                ELSE NULL            END
                                ),
                   XMLAGG(
                         CASE WHEN DFS IS NOT NULL THEN
                                    XMLELEMENT ("category-assignment",
-                                           XMLATTRIBUTES (DFS AS "category-id", product_id AS "product-id"))
+                                           XMLATTRIBUTES (DFS AS "category-id", a.product_id AS "product-id"))
                                ELSE NULL            END
                                ),
                   XMLAGG(
@@ -176,7 +176,7 @@ SELECT '<?xml version="1.0" encoding="UTF-8"?>'||
                                )
                    )) AS CLOB INDENT SIZE = 5)
                    into xml_item
-FROM all_dynamic_assignment,isnewflags  b where a.product_id = b.product_id(+)
+FROM all_dynamic_assignment a,isnewflags  b where a.product_id = b.product_id(+)
 --WHERE category_id IS NOT NULL
  ;
 DBMS_XSLPROCESSOR.clob2file(xml_item, 'DATASERVICE', 'dynamic_categories_feed_o5_'||'&1'||'.xml', nls_charset_id('AL32UTF8'));
