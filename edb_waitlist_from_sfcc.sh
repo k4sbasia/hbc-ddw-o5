@@ -65,7 +65,7 @@ fi
 echo -e "${PROCESS} process started at `date '+%a %b %e %T'`\n" >${LOG_FILE}
 #################################################################
 cd $DATA
-sftp -o "IdentityFile=~/.ssh/${SFCC_PII_KEY}" ${SFCC_PII_USER}@sftp.integration.awshbc.io <<< "get ${SFCC_subscriptions_dir}/${DELTA_FILE_NAME}*.csv"
+sftp -o "IdentityFile=~/.ssh/${SFCC_PII_KEY}" ${SFCC_PII_USER}@sftp.integration.awshbc.io <<< "get ${SFCC_waitlist_dir}/${DELTA_FILE_NAME}*.csv"
 
 #### Fetch Email Opt data delta feed from SFCC sftp #####
 ####
