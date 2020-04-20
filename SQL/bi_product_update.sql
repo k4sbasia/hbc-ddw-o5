@@ -7,8 +7,10 @@ set heading off
 set trimspool on
 set timing on
 WHENEVER SQLERROR EXIT SQL.SQLCODE;
+ALTER SESSION ENABLE PARALLEL DML;
 -- Need to add columns given to  for oms_rfs_o5_stg
-EXEC dbms_output.put_line ('MERGE 1 BI_PRODUCT Started');
+EXEC DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '||TO_CHAR(SYSDATE,'MM-DD-YYYY HH:MI:SS')||' Product Attribute Rows '|| NVL((SQL%rowcount),0)|| ' copied');
+
 DECLARE
     CURSOR cur IS
         SELECT
@@ -36,7 +38,7 @@ DECLARE
     v_err_cnt NUMBER;
    bi_product_failure EXCEPTION;
 BEGIN
-select RUN_ID_SEQ.nextval  INTO v_run_id from dual;
+select o5.RUN_ID_SEQ.nextval  INTO v_run_id from dual;
     OPEN cur;
     LOOP
         FETCH cur BULK COLLECT INTO v_coll LIMIT 50000;
@@ -386,7 +388,7 @@ FROM
    bi_product_failure EXCEPTION;
 BEGIN
 
-select RUN_ID_SEQ.nextval  INTO v_run_id from dual;
+select o5.RUN_ID_SEQ.nextval  INTO v_run_id from dual;
     OPEN cur;
     LOOP
         FETCH cur BULK COLLECT INTO v_coll LIMIT 50000;
@@ -493,7 +495,7 @@ ComplexSwatch from o5.all_active_pim_sku_attr_o5
    bi_product_failure EXCEPTION;
 BEGIN
 
-select RUN_ID_SEQ.nextval  INTO v_run_id from dual;
+select o5.RUN_ID_SEQ.nextval  INTO v_run_id from dual;
     OPEN cur;
     LOOP
         FETCH cur BULK COLLECT INTO v_coll LIMIT 50000;
@@ -712,7 +714,7 @@ UPDATE o5.bi_product t1
 		 AND t2.upc = t2.reorder_upc_no);
 COMMIT;
 
-UPDATE   JOB_STATUS set last_run_on =LAST_COMPLETED_TIME,  LAST_COMPLETED_TIME= sysdate where process_name='o5a_ITEM_SETUP';
+UPDATE   o5.JOB_STATUS set last_run_on =LAST_COMPLETED_TIME,  LAST_COMPLETED_TIME= sysdate where process_name='BI_PRODUCT_UPDT';
 
 
 show errors;
