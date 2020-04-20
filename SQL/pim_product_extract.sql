@@ -226,7 +226,7 @@ READYFORPRODFOLDER
                 substr(sys_connect_by_path(fl.LABEL,'~'),2) AS path_label,
                 LEVEL
             FROM &5 fl
-            START WITH fl.folder_parent_id = 1464881062518
+            START WITH fl.folder_parent_id = 1408474395181059
             CONNECT BY PRIOR fl.folder_id = fl.folder_parent_id
             AND fl.folder_path LIKE '/Assortments/SaksMain/ShopCategory%'
 --Below Change to get the Missing and Accurate Folder Path for all the products
