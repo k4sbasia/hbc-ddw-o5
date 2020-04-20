@@ -32,19 +32,16 @@ export PRODUCT_FEED_BM='o5_product_feed_bm.sql'
 export PRODUCT_FEED_DW='o5_product_feed_dw.sql'
 export PRODUCT_FEED_NAME='o5_shoprunner_product_feed.xml'
 export PRODUCT_FILE_NAME="OFF5TH_${FILEDATE}_product-feed.xml"
-
 export SFILE_SIZE=0
 export LOAD_COUNT=0
 export FILE_COUNT=0
 export TFILE_SIZE=0
 export SOURCE_COUNT=0
 export TARGET_COUNT=0
-
 export DMUSER='sroff5th'
 export DMPWD='J3hP4mjNWtd'
 export TARGET_LOC="Inbox"
 export DMHOST='sftp.off5th.shoprunner.net'
-
 export BADDRESS='hbcdigitaldatamanagement@saksinc.com'
 export BSUBJECT="UPSTREAM COMMERCE FEED DELAYED"
 export BBODY="Upstream commerce product feed is delayed and we are looking into it. Thanks"
@@ -70,22 +67,6 @@ function send_delay_email {
 sqlplus -s -l $CONNECTDW <<EOF>${LOG}/${PROCESS}_runstats_start.log @${SQL}/runstats_start.sql "$JOB_NAME" "$SCRIPT_NAME" "$SFILE_SIZE" "$FILE_NAME" "$LOAD_COUNT" "$FILE_COUNT" "$TFILE_SIZE" "$SOURCE_COUNT" "$TARGET_COUNT"
 EOF
 ###################################################################
-echo "Started preparing data from blue martini at `date '+%a %b %e %T'`" >${LOG_FILE}
- sqlplus -s -l $CONNECT_O5_SAKS_CUSTOM_PRD @${SQL}/${PRODUCT_FEED_BM} >>${LOG_FILE}
- SQL_RET_CODE=$?
-echo "Finished preparing data from blue martini at `date '+%a %b %e %T'`" >>${LOG_FILE}
-################################################################
-#SQL ERROR VALIDATION
-################################################################
-if [ ${SQL_RET_CODE} -eq 0  ]
- then
- 	echo "Finished preparing data from BM successfully at `date '+%a %b %e %T'`" >>${LOG_FILE}
- else
-	echo "Aborting: Error in ${PRODUCT_FEED_BM} at `date '+%a %b %e %T'`" >>${LOG_FILE}
-	send_delay_email
-	exit 99
-fi
-################################################################
 echo "Started preparing data from DW at `date '+%a %b %e %T'`" >>${LOG_FILE}
  sqlplus -s -l $CONNECTDWXML @${SQL}/${PRODUCT_FEED_DW} >>${LOG_FILE}
  SQL_RET_CODE=$?
@@ -139,11 +120,11 @@ if [ ${TFILE_SIZE} -gt 209715200 ]
 then
 echo "Starting SFTP process " >> ${LOG_FILE}
 wait
-#lftp -u ${DMUSER},${DMPWD} sftp://${DMHOST}<<EOF>>${LOG_FILE}
-#cd ${TARGET_LOC}
-#put ${PRODUCT_FILE_NAME}
-#quit
-#EOF
+lftp -u ${DMUSER},${DMPWD} sftp://${DMHOST}<<EOF>>${LOG_FILE}
+cd ${TARGET_LOC}
+put ${PRODUCT_FILE_NAME}
+quit
+EOF
 LFTP_RET_CODE=$?
 echo "SFTP process completed" >> ${LOG_FILE}
 #################################################################
@@ -183,5 +164,5 @@ then
 	exit 99
 else
 	echo "${PROCESS} completed without errors." >> ${LOG_FILE}
+  exit 0
 fi
-exit 0

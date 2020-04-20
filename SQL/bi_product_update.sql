@@ -7,15 +7,17 @@ set heading off
 set trimspool on
 set timing on
 WHENEVER SQLERROR EXIT SQL.SQLCODE;
--- Need to add columns given to Ishav for oms_rfs_o5_stg
-EXEC dbms_output.put_line ('MERGE 1 BI_PRODUCT Started');
+ALTER SESSION ENABLE PARALLEL DML;
+-- Need to add columns given to  for oms_rfs_o5_stg
+EXEC DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '||TO_CHAR(SYSDATE,'MM-DD-YYYY HH:MI:SS')||' Product Attribute Rows '|| NVL((SQL%rowcount),0)|| ' copied');
+
 DECLARE
     CURSOR cur IS
         SELECT
             o.*,
             bp.sku bp_skn
         FROM
-             (select * from oms_rfs_o5_stg o  where   o.upc=o.reorder_upc_no  ) o,
+             (select * from o5.oms_rfs_o5_stg o  where   o.upc=o.reorder_upc_no  ) o,
             o5.bi_product bp
         WHERE
             lpad(
@@ -23,7 +25,7 @@ DECLARE
                 13,
                 0
             ) = bp.sku (+)
-            and o.LAST_MOD_DATE >= (select last_run_on from JOB_STATUS where process_name='BI_PRODUCT_UPDT')
+            and o.LAST_MOD_DATE >= (select last_run_on from o5.JOB_STATUS where process_name='BI_PRODUCT_UPDT')
             ;
     TYPE v_typ IS
         TABLE OF cur%rowtype;
@@ -36,7 +38,7 @@ DECLARE
     v_err_cnt NUMBER;
    bi_product_failure EXCEPTION;
 BEGIN
-select RUN_ID_SEQ.nextval  INTO v_run_id from dual;
+select o5.RUN_ID_SEQ.nextval  INTO v_run_id from dual;
     OPEN cur;
     LOOP
         FETCH cur BULK COLLECT INTO v_coll LIMIT 50000;
@@ -48,7 +50,7 @@ select RUN_ID_SEQ.nextval  INTO v_run_id from dual;
                         v_coll(indx).bp_skn IS NULL AND   v_coll(indx).catalog_ind='Y'
                     THEN
            -- INSERT INTO bi_product VALUES (v_svs,v_count);
-                        INSERT INTO bi_product (
+                        INSERT INTO o5.bi_product (
                             upc,
                             sku,
                             item,
@@ -315,7 +317,7 @@ select RUN_ID_SEQ.nextval  INTO v_run_id from dual;
                     WHEN OTHERS THEN
                          err_code := SQLCODE;
                         err_msg := SUBSTR(SQLERRM, 1 , 4000);
-                        INSERT INTO o5.excptn_logger(PROCESS_NM,EXCPTN,TABLE_NM,COLUMN_NM,KEY_ID,add_dt,RUN_ID) VALUES ( 'BAY_ITEM_SETUP',err_code||err_msg,'BI_PRODUCT','',v_coll(indx).skn_no ,sysdate,v_run_id);
+                        INSERT INTO o5.excptn_logger(PROCESS_NM,EXCPTN,TABLE_NM,COLUMN_NM,KEY_ID,add_dt,RUN_ID) VALUES ( 'BI_PRODUCT_UPDT',err_code||err_msg,'BI_PRODUCT','',v_coll(indx).skn_no ,sysdate,v_run_id);
                         COMMIT;
                 END;
             END LOOP;
@@ -328,7 +330,7 @@ select RUN_ID_SEQ.nextval  INTO v_run_id from dual;
                     1,
                     4000
                 );
-                INSERT INTO o5.excptn_logger(PROCESS_NM,EXCPTN,TABLE_NM,COLUMN_NM,KEY_ID,add_dt,RUN_ID) VALUES ( 'BAY_ITEM_SETUP',err_msg||err_msg,'excptn_logger','','',sysdate,v_run_id );
+                INSERT INTO o5.excptn_logger(PROCESS_NM,EXCPTN,TABLE_NM,COLUMN_NM,KEY_ID,add_dt,RUN_ID) VALUES ( 'BI_PRODUCT_UPDT',err_msg||err_msg,'excptn_logger','','',sysdate,v_run_id );
                 COMMIT;
         END;
   END LOOP ;
@@ -386,7 +388,7 @@ FROM
    bi_product_failure EXCEPTION;
 BEGIN
 
-select RUN_ID_SEQ.nextval  INTO v_run_id from dual;
+select o5.RUN_ID_SEQ.nextval  INTO v_run_id from dual;
     OPEN cur;
     LOOP
         FETCH cur BULK COLLECT INTO v_coll LIMIT 50000;
@@ -430,7 +432,7 @@ select RUN_ID_SEQ.nextval  INTO v_run_id from dual;
                     WHEN OTHERS THEN
                          err_code := SQLCODE;
                         err_msg := SUBSTR(SQLERRM, 1 , 4000);
-                        INSERT INTO o5.excptn_logger(PROCESS_NM,EXCPTN,TABLE_NM,COLUMN_NM,KEY_ID,add_dt,RUN_ID) VALUES ( 'O5_PRD_ATTR_UPDATE',err_code||err_msg,'BI_PRODUCT','',v_coll(indx).product_code ,sysdate,v_run_id);
+                        INSERT INTO o5.excptn_logger(PROCESS_NM,EXCPTN,TABLE_NM,COLUMN_NM,KEY_ID,add_dt,RUN_ID) VALUES ( 'BI_PRODUCT_PRD_ATTR_UPDT',err_code||err_msg,'BI_PRODUCT','',v_coll(indx).product_code ,sysdate,v_run_id);
                         COMMIT;
                 END;
             END LOOP;
@@ -443,7 +445,7 @@ select RUN_ID_SEQ.nextval  INTO v_run_id from dual;
                     1,
                     4000
                 );
-                INSERT INTO o5.excptn_logger(PROCESS_NM,EXCPTN,TABLE_NM,COLUMN_NM,KEY_ID,add_dt,RUN_ID) VALUES ( 'O5_PRD_ATTR_UPDATE',err_msg||err_msg,'excptn_logger','','' ,sysdate,v_run_id );
+                INSERT INTO o5.excptn_logger(PROCESS_NM,EXCPTN,TABLE_NM,COLUMN_NM,KEY_ID,add_dt,RUN_ID) VALUES ( 'BI_PRODUCT_PRD_ATTR_UPDT',err_msg||err_msg,'excptn_logger','','' ,sysdate,v_run_id );
                 COMMIT;
         END;
     END LOOP ;
@@ -461,6 +463,7 @@ dbms_output.put_line('Error in Bi product process. Please check.');
 END;
 /
 
+exec dbms_stats.gather_table_stats('o5','bi_product',force => true);
 ---Product Sku attribute UPDATE
 
 DECLARE
@@ -492,7 +495,7 @@ ComplexSwatch from o5.all_active_pim_sku_attr_o5
    bi_product_failure EXCEPTION;
 BEGIN
 
-select RUN_ID_SEQ.nextval  INTO v_run_id from dual;
+select o5.RUN_ID_SEQ.nextval  INTO v_run_id from dual;
     OPEN cur;
     LOOP
         FETCH cur BULK COLLECT INTO v_coll LIMIT 50000;
@@ -520,7 +523,7 @@ select RUN_ID_SEQ.nextval  INTO v_run_id from dual;
                     WHEN OTHERS THEN
                          err_code := SQLCODE;
                         err_msg := SUBSTR(SQLERRM, 1 , 4000);
-                        INSERT INTO o5.excptn_logger(PROCESS_NM,EXCPTN,TABLE_NM,COLUMN_NM,KEY_ID,add_dt,RUN_ID) VALUES ( 'O5_SKU_ATTR_UPDATE',err_code||err_msg,'BI_PRODUCT','',v_coll(indx).upc,sysdate,v_run_id);
+                        INSERT INTO o5.excptn_logger(PROCESS_NM,EXCPTN,TABLE_NM,COLUMN_NM,KEY_ID,add_dt,RUN_ID) VALUES ( 'BI_PRODUCT_SKU_ATTR_UPDT',err_code||err_msg,'BI_PRODUCT','',v_coll(indx).upc,sysdate,v_run_id);
 
                         COMMIT;
                 END;
@@ -535,7 +538,7 @@ select RUN_ID_SEQ.nextval  INTO v_run_id from dual;
                     1,
                     4000
                 );
-                INSERT INTO o5.excptn_logger(PROCESS_NM,EXCPTN,TABLE_NM,COLUMN_NM,KEY_ID,add_dt,RUN_ID) VALUES ( 'O5_SKU_ATTR_UPDATE',err_msg||err_msg,'excptn_logger','','' ,sysdate,v_run_id );
+                INSERT INTO o5.excptn_logger(PROCESS_NM,EXCPTN,TABLE_NM,COLUMN_NM,KEY_ID,add_dt,RUN_ID) VALUES ( 'BI_PRODUCT_SKU_ATTR_UPDT',err_msg||err_msg,'excptn_logger','','' ,sysdate,v_run_id );
 
                 COMMIT;
         END;
@@ -599,7 +602,7 @@ BEGIN
                     WHEN OTHERS THEN
                          err_code := SQLCODE;
                         err_msg := SUBSTR(SQLERRM, 1 , 4000);
-                        INSERT INTO o5.excptn_logger(PROCESS_NM,EXCPTN,TABLE_NM,COLUMN_NM,KEY_ID,add_dt,RUN_ID) VALUES ( 'O5_INV_UPDATE',err_code||err_msg,'BI_PRODUCT','',v_coll(indx).sku,sysdate,'');
+                        INSERT INTO o5.excptn_logger(PROCESS_NM,EXCPTN,TABLE_NM,COLUMN_NM,KEY_ID,add_dt,RUN_ID) VALUES ( 'BI_PRODUCT_INV_UPDT',err_code||err_msg,'BI_PRODUCT','',v_coll(indx).sku,sysdate,'');
 
                         COMMIT;
                 END;
@@ -624,12 +627,16 @@ commit ;
 --- price status update
 DECLARE
     CURSOR cur IS
-       select  lpad(o.skn_no,13,'0') skn_no,PRICE_FLAG,MSRP ,Offer_price  from
-      o5.V_SD_PRICE_O5 o, o5.bi_product p
-      where lpad(o.skn_no,13,'0') = p.sku and
-      (o.msrp <> p.sku_list_price
-      or o.offer_price <> p.sku_sale_price );
-
+       select o.skn_no skn_no,PRICE_FLAG,MSRP ,Offer_price  from
+        (select  lpad(o.skn_no,13,'0') skn_no,
+       greatest(nvl(COMPARE_AT_AMT_DOL,0), nvl(original_ticket,0))  MSRP,Offer_price,
+       CASE WHEN trim(AMS_PRICE_TYPE_CD) = '0' THEN 'R'
+                     WHEN trim(AMS_PRICE_TYPE_CD) = '1' THEN 'M'
+                     WHEN trim(AMS_PRICE_TYPE_CD) = '2' THEN 'C'
+                     WHEN trim(AMS_PRICE_TYPE_CD) = '3' THEN 'F'
+                     END  as PRICE_FLAG
+                        from   edata_exchange.o5_sd_price o ) o, o5.bi_product p
+      where o.skn_no = p.sku ;
 
     TYPE v_typ IS
         TABLE OF cur%rowtype;
@@ -645,7 +652,7 @@ BEGIN
 
     OPEN cur;
     LOOP
-        FETCH cur BULK COLLECT INTO v_coll LIMIT 300000;
+        FETCH cur BULK COLLECT INTO v_coll LIMIT 500000;
             EXIT WHEN v_coll.count = 0;
             FOR indx IN v_coll.first..v_coll.last LOOP
                 BEGIN
@@ -663,7 +670,7 @@ BEGIN
                     WHEN OTHERS THEN
                          err_code := SQLCODE;
                         err_msg := SUBSTR(SQLERRM, 1 , 4000);
-                        INSERT INTO o5.excptn_logger(PROCESS_NM,EXCPTN,TABLE_NM,COLUMN_NM,KEY_ID,add_dt,RUN_ID) VALUES ( 'O5_INV_UPDATE',err_code||err_msg,'BI_PRODUCT','',v_coll(indx).skn_no,sysdate,'');
+                        INSERT INTO o5.excptn_logger(PROCESS_NM,EXCPTN,TABLE_NM,COLUMN_NM,KEY_ID,add_dt,RUN_ID) VALUES ( 'O5_IPRICE+_UPDATE',err_code||err_msg,'BI_PRODUCT','',v_coll(indx).skn_no,sysdate,'');
 
                         COMMIT;
                 END;
@@ -682,32 +689,56 @@ begin
 for r1 in
 (
 select a.prd_upc from
-(select  to_number(upc) upc,upc prd_upc, product_code from bay_ds.bi_product trg
+(select  to_number(upc) upc,upc prd_upc, product_code from o5.bi_product trg
 where trunc(add_dt)<> trunc(sysdate) and deactive_ind= 'N'
 ) a
-left join (select  upc from bay_ds.OMS_RFS_BAY_STG
+left join (select  upc from o5.OMS_RFS_o5_STG
   ) b
   on trim(a.upc) = trim(b.upc)
   where b.upc is null )
   loop
-  update bay_ds.bi_product set deactive_ind = 'Y' where  upc = r1.prd_upc ;
+  update o5.bi_product set deactive_ind = 'Y' where  upc = r1.prd_upc ;
   commit;
 end loop;
 end;
 /
 
+--seo url changes for PDP url
+declare
+BEGIN
+  FOR r1 IN
+  (
+  with prd_product as
+  (select DISTINCT
+      product_code,
+      product_url from o5.bi_product)
+  select  p.product_code,'https://www.saksoff5th.com'||seo_url product_url
+  from o5.product_seo_url_mapping p
+  ,prd_product prd
+  where p.product_code = prd.product_code
+  and  trim(nvl(prd.product_url,'x')) <> 'https://www.saksoff5th.com' || trim(p.seo_url)
+  )
+  LOOP
+    UPDATE o5.bi_product
+    SET product_url = r1.product_url
+    WHERE product_code      = r1.product_code;
+    COMMIT;
+  END LOOP;
+END;
+/
+
 --Move to Active Status if a Product is active IN RFS.
-UPDATE bay_ds.bi_product t1
+UPDATE o5.bi_product t1
    SET deactive_ind = 'N'
  WHERE deactive_ind = 'Y'
    AND EXISTS (SELECT 1
-		FROM bay_ds.oms_rfs_bay_stg t2
+		FROM o5.oms_rfs_o5_stg t2
 	       WHERE t2.upc = t1.upc
 		 AND t2.catalog_ind = 'Y'
 		 AND t2.upc = t2.reorder_upc_no);
 COMMIT;
 
-UPDATE   JOB_STATUS set last_run_on =LAST_COMPLETED_TIME,  LAST_COMPLETED_TIME= sysdate where process_name='o5a_ITEM_SETUP';
+UPDATE   o5.JOB_STATUS set last_run_on =LAST_COMPLETED_TIME,  LAST_COMPLETED_TIME= sysdate where process_name='BI_PRODUCT_UPDT';
 
 
 show errors;
