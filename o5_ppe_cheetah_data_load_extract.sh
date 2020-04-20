@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/ksh
 #############################################################################################################################
 #####                           SAKS INC.
 #############################################################################################################################
@@ -89,6 +89,14 @@ sqlplus -s -l  $CONNECTDWXML @${SQL}/${SQL2}.sql>> ${LOG_FILE}
 sqlplus -s -l  $CONNECTDW<<EOF> ${LOG}/${PROCESS}_runstats_finish.log @${SQL}/runstats_end.sql "$JOB_NAME" "$SCRIPT_NAME" "$SFILE_SIZE" "$FILE_NAME" "$LOAD_COUNT" "$FILE_COUNT" "$TFILE_SIZE" "$SOURCE_COUNT" "$TARGET_COUNT"
 EOF
 #################################################################
+#Pull the data from 145 box
+#################################################################
+echo -e "copying the o5 ppe data from 145 to 101 at `date '+%a %b %e %T %Z %Y'`\n " >>${LOG_FILE}
+scp cognos@$ORACLESRV:/oracle/EXPORTS/dataservices/Off5th_ppe_`date +%Y%m%d`.xml $DATA
+wait
+echo -e "Finished copying the data from 145 to 101 at `date '+%a %b %e %T %Z %Y'`\n " >>${LOG_FILE}
+echo -e "o5_ppe_cheetah_data_extract_load Process Ended at `date '+%a %b %e %T'`\n" >>${LOG_FILE}
+################################################################
 # Check for errors
 ################################################################
 if [ `egrep -c "^ERROR|ORA-|not found|SP2-0|^553" ${LOG_FILE}` -ne 0 ]

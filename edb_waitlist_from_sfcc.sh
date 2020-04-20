@@ -65,7 +65,7 @@ fi
 echo -e "${PROCESS} process started at `date '+%a %b %e %T'`\n" >${LOG_FILE}
 #################################################################
 cd $DATA
-sftp -o "IdentityFile=~/.ssh/${SFCC_PII_KEY}" ${SFCC_PII_USER}@sftp.integration.awshbc.io <<< "get ${SFCC_subscriptions_dir}/${DELTA_FILE_NAME}*.csv"
+sftp -o "IdentityFile=~/.ssh/${SFCC_PII_KEY}" ${SFCC_PII_USER}@sftp.integration.awshbc.io <<< "get ${SFCC_waitlist_dir}/${DELTA_FILE_NAME}*.csv"
 
 #### Fetch Email Opt data delta feed from SFCC sftp #####
 ####
@@ -130,10 +130,20 @@ EOF
 retcode=$?
 if [ $retcode -ne 0 ]
 then
-        echo "SQL Error in processing ${DELTA_FILE_NAME}...Please check" >> ${LOG_FILE}
+        echo "SQL Error in processing p_waitlist_data_prep_sfcc...Please check" >> ${LOG_FILE}
         exit 99
 else
-        echo "Email Opt In data from ${DELTA_FILE_NAME} processed successfully" >> ${LOG_FILE}
+        echo "p_waitlist_data_prep_sfcc processed successfully" >> ${LOG_FILE}
+fi
+sqlplus -s -l  $CONNECTDW <<EOF>> ${LOG_FILE} @${SQL}/edb_waitlist_dw_stage_all_banners.sql "$SCHEMA" "$LINK" >> ${LOG_FILE}
+EOF
+retcode=$?
+if [ $retcode -ne 0 ]
+then
+        echo "SQL Error in processing edb_waitlist_dw_stage_all_banners...Please check" >> ${LOG_FILE}
+        exit 99
+else
+        echo "edb_waitlist_dw_stage_all_banners processed successfully" >> ${LOG_FILE}
 fi
 sqlplus -s -l $CONNECTDW<<EOF>>${LOG_FILE}
 WHENEVER SQLERROR EXIT FAILURE
