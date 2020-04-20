@@ -223,7 +223,7 @@ INSERT INTO &2.&3 (
             LEFT JOIN (
                 SELECT
                     product_code,
-                    seo_url eng_url
+                    'https://www.saksoff5th.com'||seo_url  eng_url
                 FROM
                     &2.product_seo_url_mapping
             ) url ON bm.product_id = url.product_code;

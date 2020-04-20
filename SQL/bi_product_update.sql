@@ -703,6 +703,30 @@ end loop;
 end;
 /
 
+--seo url changes for PDP url
+declare
+BEGIN
+  FOR r1 IN
+  (
+  with prd_product as
+  (select DISTINCT
+      product_code,
+      product_url from o5.bi_product)
+  select  p.product_code,'https://www.saksoff5th.com'||seo_url product_url
+  from o5.product_seo_url_mapping p
+  ,prd_product prd
+  where p.product_code = prd.product_code
+  and  trim(nvl(prd.product_url,'x')) <> 'https://www.saksoff5th.com' || trim(p.seo_url)
+  )
+  LOOP
+    UPDATE o5.bi_product
+    SET product_url = r1.product_url
+    WHERE product_code      = r1.product_code;
+    COMMIT;
+  END LOOP;
+END;
+/
+
 --Move to Active Status if a Product is active IN RFS.
 UPDATE o5.bi_product t1
    SET deactive_ind = 'N'
