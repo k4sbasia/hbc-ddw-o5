@@ -70,13 +70,19 @@ EXECUTE IMMEDIATE 'truncate table &1.ALL_PRODUCT_ATTR_RR_FEED_&2';
    PD_RESTRICTEDSTATE_TEXT ,
    PD_RESTRICTEDSHIPTYPE_TEXT,
    CountryOfOrigin,
-   DROPSHIP_LEADDAYS
+   DROPSHIP_LEADDAYS,
+    PIM_ACTV_DT,
+     PIM_ADD_DT,
+     PIM_MODIFY_DT
      )
         WITH all_product_attributes AS
        (
        SELECT
                product_id,
                attribute_name,
+               PIM_ACTV_DT,
+               ADD_DT,
+               MODIFY_DT,
                TRIM(REPLACE(REPLACE(REPLACE(TRANSLATE(attribute_val, 'x'||CHR(10)||CHR(13), 'x'),'|',''),'^',''),'�','')) attribute_val
         FROM &3
        WHERE
@@ -111,7 +117,8 @@ EXECUTE IMMEDIATE 'truncate table &1.ALL_PRODUCT_ATTR_RR_FEED_&2';
    'waitlist',
    'Zoom',
    'CountryOfOrigin',
-   'DropShip_LeadDays')
+   'DropShip_LeadDays'
+    )
      AND attribute_val IS NOT NULL
        )
        SELECT
@@ -149,10 +156,12 @@ EXECUTE IMMEDIATE 'truncate table &1.ALL_PRODUCT_ATTR_RR_FEED_&2';
                 MAX(CASE WHEN attribute_name = 'PD_RestrictedState_Text' THEN attribute_val END) PD_RestrictedState_Text,
                 MAX(CASE WHEN attribute_name = 'PD_RestrictedShipType_Text' THEN attribute_val END) AS PD_RestrictedShipType_Text,
                 MAX(CASE WHEN attribute_name = 'CountryOfOrigin' THEN attribute_val END) AS CountryOfOrigin,
-                MAX(CASE WHEN attribute_name = 'DropShip_LeadDays' THEN attribute_val END) AS DropShip_LeadDays
+                MAX(CASE WHEN attribute_name = 'DropShip_LeadDays' THEN attribute_val END) AS DropShip_LeadDays,
+                max(PIM_ACTV_DT) As PIM_ACTV_DT,
+                MAX(ADD_DT) AS ADD_DT,
+                MAX(MODIFY_DT) AS MODIFY_DT
    FROM all_product_attributes
-       GROUP BY product_id
-    ;
+       GROUP BY product_id;
     COMMIT;
     DBMS_OUTPUT.PUT_LINE('PIM Product Attribute Fetch Process End :  '|| to_char(sysdate,'MM-DD-YYYY HH:MI:SS') || ' - ' || nvl((SQL%rowcount),0));
     COMMIT;
@@ -171,13 +180,19 @@ EXECUTE IMMEDIATE 'truncate table &1.ALL_PRODUCT_ATTR_RR_FEED_&2';
   WEBENDDATE,
   PICKUPALLOWEDIND ,
   PRIMARY_PARENT_COLOR,
-  SKUHEXVALUE)
+  SKUHEXVALUE,
+  PIM_ACTV_DT,
+  PIM_ADD_DT,
+  PIM_MODIFY_DT)
     WITH all_sku_attributes AS
                 (
                 SELECT
                         product_id,
                         upc,
                         attribute_name,
+                        PIM_ACTV_DT,
+                        ADD_DT,
+                        MODIFY_DT,
                         TRIM(REPLACE(REPLACE(TRANSLATE(attribute_val, 'x'||CHR(10)||CHR(13), 'x'),'|',''),'^','')) attribute_val
                  FROM &4
                 WHERE attribute_name IN ('Color','Size','status','US_STDSize2','ComplexSwatch',
@@ -199,7 +214,10 @@ EXECUTE IMMEDIATE 'truncate table &1.ALL_PRODUCT_ATTR_RR_FEED_&2';
           MAX(CASE WHEN attribute_name = 'webEndDate' THEN attribute_val ELSE NULL END) AS webEndDate,
          MAX(CASE WHEN attribute_name = 'pickUpAllowedInd' THEN attribute_val ELSE NULL END) AS pickUpAllowedInd,
          MAX(CASE WHEN attribute_name = 'Primary_Parent_Color' THEN attribute_val ELSE NULL END) AS Primary_Parent_Color,
-         MAX(CASE WHEN attribute_name = 'SkuHexValue' THEN attribute_val ELSE NULL END) AS SkuHexValue
+         MAX(CASE WHEN attribute_name = 'SkuHexValue' THEN attribute_val ELSE NULL END) AS SkuHexValue,
+         max(PIM_ACTV_DT) As PIM_ACTV_DT,
+         MAX(ADD_DT) AS ADD_DT,
+        MAX(MODIFY_DT) AS MODIFY_DT
         FROM all_sku_attributes sku_attr
         GROUP BY upc
     ;
