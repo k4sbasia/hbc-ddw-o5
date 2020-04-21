@@ -375,7 +375,7 @@ DECLARE
     prd_readyforprod
 FROM
     o5.all_active_pim_prd_attr_o5
-;
+    where  (trunc(PIM_ADD_DT) >= trunc(sysdate-7) or  trunc(PIM_MODIFY_DT) >= trunc(sysdate-7) or trunc(PIM_ADD_DT)  >= trunc(sysdate-7)  );
   TYPE v_typ IS
         TABLE OF cur%rowtype;
     v_coll     v_typ;
@@ -480,10 +480,8 @@ pickUpAllowedInd,
 to_char(to_date(webEndDate,'MM/DD/YYYY'),'DD-MON-YYYY') webEndDate,
 to_char(to_date(webStartDate,'MM/DD/YYYY'),'DD-MON-YYYY') webStartDate,
 ComplexSwatch from o5.all_active_pim_sku_attr_o5
-;
-
-
-    TYPE v_typ IS
+where  (trunc(PIM_ADD_DT) >= trunc(sysdate-7) or  trunc(PIM_MODIFY_DT) >= trunc(sysdate-7) or trunc(PIM_ADD_DT)  >= trunc(sysdate-7)  );
+TYPE v_typ IS
         TABLE OF cur%rowtype;
     v_coll     v_typ;
     v_svs      VARCHAR2(4000) := '';
@@ -563,8 +561,6 @@ END;
 /
 EXEC dbms_output.put_line ('inventoy update started');
 
-
-
 DECLARE
     CURSOR cur IS
        select p.sku,i.in_stock_sellable_qty  from o5.bi_product p
@@ -620,10 +616,7 @@ BEGIN
 EXEC dbms_output.put_line ('Bi_Product : inventoy update completed');
 
 EXEC dbms_output.put_line ('Bi_Product : Price Update started');
-
-
 commit ;
-
 --- price status update
 DECLARE
     CURSOR cur IS
@@ -680,8 +673,6 @@ BEGIN
     CLOSE cur;
  END;
  /
-;
-
 
 --If upc is not present in RFS then make it deactive= 'Y' and default deactive = 'N'
 declare
