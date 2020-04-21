@@ -45,6 +45,12 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '||TO_CHAR(SYSDATE,'MM-DD-YYYY HH:MI:SS')||' Product Attribute Rows '|| NVL((SQL%rowcount),0)|| ' copied');
     COMMIT;
 
+    update  &1.all_active_pim_prd_attr_&2 set item_gender  = 1 WHERE  REGEXP_like(item_gender,'[^0-9]') ;
+ commit;
+
+ update  &1.all_active_pim_prd_attr_&2 set alternate  = 1 WHERE  REGEXP_like(alternate,'[^0-9]') ;
+ commit;
+
     --DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '||TO_CHAR(SYSDATE,'MM-DD-YYYY HH:Mi:SS')||' Start extracting PIM SKU data ');
     INSERT INTO &1.all_active_pim_sku_attr_&2
             SELECT * FROM pim_exp_bm.all_active_pim_sku_attr_&2@&3;
