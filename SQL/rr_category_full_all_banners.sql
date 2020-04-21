@@ -59,8 +59,6 @@ FROM
     ) b
 WHERE
     a.folder_path = b.folder_path
-     -- and a.folder_path = '/Assortments/SaksMain/ShopCategory/Women/Apparel/Coats'
-    AND status_cd = 'A'
 union
 SELECT
 lower(replace(replace(replace( a.folder_path,'/Assortments/SaksMain/ShopCategory/',''),'/Assortments/SaksMain/Custom/',''),'/','>'))
@@ -112,6 +110,5 @@ FROM
     ) b
 WHERE
     a.folder_path = b.folder_path
-     -- and a.folder_path = '/Assortments/SaksMain/ShopCategory/Women/Apparel/Coats'
-    AND status_cd = 'A';    
+;    
 EXIT;
