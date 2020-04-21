@@ -18,7 +18,7 @@
 #####                                   Jayanthi             Added Austrialian transactions to Linkshare
 #####
 #############################################################################################################################
-. $HOME/initvars
+. $HOME/params.conf o5
 ################################################################
 ##Control File Variables
 export SQL=$HOME/SQL
