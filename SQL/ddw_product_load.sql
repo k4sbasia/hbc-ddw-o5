@@ -111,4 +111,7 @@ THEN
     RAISE;
 END;
 /
+exec  dbms_stats.gather_table_stats('o5','all_active_pim_sku_attr_o5',force => true);
+exec  dbms_stats.gather_table_stats('o5','all_active_pim_prd_attr_o5',force => true);
+exec  dbms_stats.gather_table_stats('o5','all_actv_pim_assortment_o5',force => true);
 EXIT;
