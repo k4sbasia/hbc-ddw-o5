@@ -1,6 +1,6 @@
 REM ##############################################################
 REM                         SAKS, INC.
-REM ############################################################################
+REM ########################################################################
 REM
 REM  SCRIPT NAME:  ddw_product_load.sql
 REM  DESCRIPTION:  This script populates the partner base table for O5 products
