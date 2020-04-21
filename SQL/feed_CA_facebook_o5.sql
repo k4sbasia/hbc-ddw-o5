@@ -100,7 +100,7 @@ SELECT
     || '~'
     ||nvl(replace(replace(t5.folder_path,'/assortments/saksmain/shopcategory/',''),'/','>'),'Saks OFF 5TH')
     || '~'
-    || 
+    ||
         case when t1.itm_gender = 1 then 'unisex'
            when t1.itm_gender  = 2 then 'male'
           when t1.itm_gender  = 3 then 'female'
@@ -109,7 +109,6 @@ SELECT
             when  t1.itm_gender = 6 then 'unisex'
           else 'unisex'
           end
-    END
     || '~'
     || CASE WHEN nvl(t1.sale_price,0) = 0 OR nvl(t2.item_cst_amt,0) = 0 THEN 0 ELSE ROUND(((t1.sale_price - t2.item_cst_amt)/t1.sale_price),2) END
 	|| '~'
