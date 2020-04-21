@@ -46,7 +46,7 @@ export O5_FILE_NAME1="google_inventory_feed_${BANNER}_`date +"%Y_%m_%d"`.txt"
 export O5_FILE_NAME2="saksofffifthavenue_en-us_price-quantity_test"
 export LT_FILE_NAME1="google_inventory_feed_${BANNER}_`date +"%Y_%m_%d"`.txt"
 export LT_FILE_NAME2="lordandtaylor_en-us_price-quantity_test"
-export BANNER='&1'
+export BANNER=&1
 ########################################################################
 ##Initialize Email Function
 #####################################################################
@@ -74,7 +74,7 @@ echo " ${SOURCE_COUNT} records found in ${SAKS_FILE_NAME1} file " >> ${LOG_FILE}
 cd $DATA
 cp ${SAKS_FILE_NAME1} ${SAKS_FILE_NAME2} >>${LOG_FILE}
 echo -e "FTP for Inventory started to google at `date '+%a %b %e %T'`" >>${LOG_FILE}
-##lftp -u mc-sftp-9439371,'^4>M$,!O7a' sftp://partnerupload.google.com:19321 <<EOF>>${LOG_FILE}
+lftp -u mc-sftp-9439371,'^4>M$,!O7a' sftp://partnerupload.google.com:19321 <<EOF>>${LOG_FILE}
 put ${SAKS_FILE_NAME2}
 wait
 Bye
@@ -86,7 +86,7 @@ echo -e "FTP for inventory ended to google at `date '+%a %b %e %T'` " >>${LOG_FI
 echo "Finished Extracting data  at `date '+%a %b %e %T'`" >>${LOG_FILE}
 else
 echo "${PROCESS} failed. Please investigate. Only ${SOURCE_COUNT} records found in $DATA/${SAKS_FILE_NAME1} file which is less than 60000. Please check  ${SAKS_FILE_NAME1}  file" >> ${LOG_FILE}
-##echo "Google product feed for ${BANNER}. Please check $DATA/${SAKS_FILE_NAME1} file "| mailx -s "Google product feed failed - ${BANNER}" hbcdigitaldatamanagement@saksinc.com
+echo "Google product feed for ${BANNER}. Please check $DATA/${SAKS_FILE_NAME1} file "| mailx -s "Google product feed failed - ${BANNER}" hbcdigitaldatamanagement@saksinc.com
 exit 99
 fi
 fi
@@ -109,7 +109,7 @@ cp ${O5_FILE_NAME1}  ${O5_FILE_NAME2} >>${LOG_FILE}
 ## DO FTP here
 ################################################################
 echo -e "FTP for O5 Inventory started to google at `date '+%a %b %e %T'`" >>${LOG_FILE}
-#lftp -u mc-sftp-17287421,'q!c!_6m{Oa' sftp://partnerupload.google.com:19321 <<EOF>>${LOG_FILE}
+lftp -u mc-sftp-17287421,'q!c!_6m{Oa' sftp://partnerupload.google.com:19321 <<EOF>>${LOG_FILE}
 put ${O5_FILE_NAME2}
 wait
 Bye
@@ -141,7 +141,7 @@ cp ${LT_FILE_NAME1}  ${LT_FILE_NAME2} >>${LOG_FILE}
 ## DO FTP here
 ################################################################
 echo -e "FTP for LT Inventory started to google at `date '+%a %b %e %T'`" >>${LOG_FILE}
-#lftp -u mc-sftp-6649174,'T:y7#Htw<K' sftp://partnerupload.google.com:19321 <<EOF>>${LOG_FILE}
+lftp -u mc-sftp-6649174,'T:y7#Htw<K' sftp://partnerupload.google.com:19321 <<EOF>>${LOG_FILE}
 put ${LT_FILE_NAME2}
 wait
 Bye
