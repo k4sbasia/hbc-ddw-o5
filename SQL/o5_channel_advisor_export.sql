@@ -228,12 +228,12 @@ SELECT fcae.manufacturer_part#
     || '|'
     || CASE WHEN clearance_type = 'C' THEN 'Y' ELSE 'N' END
     || '|'
-    || case when itm_gender = '1' then 'Not Applicable'
-        when  itm_gender = '2' then 'Men'
-        when  itm_gender = '3' then 'Women'
-        when  itm_gender = '4' then 'Unisex'
-        when  itm_gender = '5' then 'Kids'
-        when  itm_gender = '6' then 'Pets'
+    || case when itm_gender = 1 then 'Not Applicable'
+        when  itm_gender = 2 then 'Men'
+        when  itm_gender = 3 then 'Women'
+        when  itm_gender = 4 then 'Unisex'
+        when  itm_gender = 5 then 'Kids'
+        when  itm_gender = 6 then 'Pets'
         else itm_gender
         end
     || '|'
