@@ -34,67 +34,17 @@ COMMIT;
 EXEC DBMS_OUTPUT.PUT_LINE ('Preparing O5.O5_WEB_ASSORTMENTS started at '||to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 
 INSERT INTO O5.O5_WEB_ASSORTMENTS
-SELECT
-	c.product_code AS PRD_ID
+SSELECT
+	b.product_id AS PRD_ID
     ,a.folder_id AS SBA_ID
-   ,SUBSTR(REPLACE(a.folder_path,'/','>'),2)  AS SBA_PATH
-   ,c.product_id AS PRODUCT_CODE
+   ,b.folder_path  AS SBA_PATH
+   ,b.product_id AS PRODUCT_CODE
 FROM
     pim_exp_bm.pim_ab_o5_web_folder_data@PIM_READ a,
-    (
-        SELECT
-            *
-        FROM
-            (
-                SELECT
-                    folder_path,
-                    MAX(
-                        CASE
-                            WHEN attribute_name = 'FolderActive' THEN
-                                attribute_val
-                        END
-                    ) AS folderactive,
-                    MAX(
-                        CASE
-                            WHEN attribute_name = 'readyForProdStartTime' THEN
-                                attribute_val
-                        END
-                    ) AS readyforprodstarttime,
-                    MAX(
-                        CASE
-                            WHEN attribute_name = 'readyForProdEndTime' THEN
-                                attribute_val
-                        END
-                      ) AS readyforprodendtime,
-                      MAX(
-                        CASE
-                            WHEN attribute_name = 'readyforprodfolder' THEN
-                                attribute_val
-                        END
-                      ) AS readyforprodfolder
-                FROM
-                    pim_exp_bm.pim_ab_o5_folder_attr_data@PIM_READ
-                WHERE
-                    folder_path IS NOT NULL
-                GROUP BY
-                    folder_path
-            )
-        WHERE
-            folderactive = 'Yes'
-            AND ( nvl(to_date(readyforprodstarttime, 'MM/DD/YYYY HH:MI PM'), trunc(sysdate)) <= trunc(sysdate)
-                  AND nvl(to_date(readyforprodendtime, 'MM/DD/YYYY HH:MI PM'), trunc(sysdate)) >= trunc(sysdate) )
-            AND ( ( folder_path LIKE '/Assortments/SaksMain/ShopCategory%'
-      OR (folder_path LIKE '/Assortments/SaksMain/Custom%'))
-             )
-    ) b,
-    (SELECT pa.PRODUCT_ID PRODUCT_ID,ps.PRODUCT_CODE,pa.FOLDER_PATH FROM o5.all_actv_pim_assortment_o5 pa
-    	LEFT JOIN o5.all_active_product_sku_o5 ps ON ps.upc=pa.PRODUCT_ID )c
+    o5.SFCC_ACTV_PIM_ASSORTMENT_O5 b
 WHERE
     a.folder_path = b.folder_path
-    AND a.folder_path = c.folder_path
-     -- and a.folder_path = '/Assortments/SaksMain/ShopCategory/Women/Apparel/Coats'
-    AND status_cd = 'A'
-	 AND c.product_code IS NOT null;
+;
 
 COMMIT;
 
@@ -107,7 +57,7 @@ COMMIT;
 EXEC DBMS_OUTPUT.PUT_LINE ('Preparing O5.O5_SR_PRODUCTS_BM started at '||to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 
 INSERT INTO o5.O5_SR_PRODUCTS_BM
-SELECT SKU.PRODUCT_CODE PRD_ID,
+SELECT distinct SKU.PRODUCT_CODE PRD_ID,
   pa.Product_id PRODUCT_CODE,
   S.skn_no SKN,
   LPAD(sku.upc,13,'0') sku_CODE,
@@ -116,11 +66,10 @@ SELECT SKU.PRODUCT_CODE PRD_ID,
    ASRT.SBA_PATH,
   NVL(S.in_stock_sellable_qty, 0)  AS WH_SELLABLE_QTY
 FROM o5.all_active_product_sku_o5 SKU
-JOIN o5.inventory S ON s.SKN_NO =sku.PRODUCT_CODE
-JOIN o5.all_active_pim_prd_attr_o5 pa ON pa.PRODUCT_ID =sku.upc
-JOIN O5.O5_WEB_ASSORTMENTS ASRT ON (ASRT.PRD_ID        = SKU.PRODUCT_CODE)
-WHERE
-NVL(S.in_stock_sellable_qty, 0) > 0
+JOIN o5.inventory S ON s.SKN_NO =sku.skn_no
+JOIN o5.all_active_pim_prd_attr_o5 pa ON pa.PRODUCT_ID =sku.product_code
+JOIN O5.O5_WEB_ASSORTMENTS_BKUP ASRT ON (ASRT.PRoduct_code        = SKU.PRODUCT_CODE);
+commit ;
 ;
 COMMIT;
 EXEC DBMS_OUTPUT.PUT_LINE ('Preparing O5.O5_SR_PRODUCTS_BM completed at '||to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
@@ -224,20 +173,6 @@ COMMIT;
 
 EXEC DBMS_OUTPUT.PUT_LINE ('Preparing O5.O5_SR_PRODUCTS started at '||to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 
-INSERT INTO O5.O5_SR_PRODUCTS
-SELECT  DISTINCT bm.PRODUCT_CODE
-FROM o5.BI_PRODUCT prd
-JOIN o5.BI_PRODUCT_INFO bm
-ON (bm.PRODUCT_CODE = prd.item
-AND BM.UPC     = PRD.UPC)
-WHERE REGEXP_LIKE (prd.ITEM_DESCRIPTION, 'virtual', 'i') -- VIRTUAL PRODUCTS
-OR prd.Dropship_ind ='T' -- DROP SHIP ELIGIBLE
-OR bm.PURCH_RES     = '2' -- CSR ONLY ITEMS
-OR REGEXP_LIKE (prd.SKU_DESCRIPTION, ' egc', 'i') -- ELECTRONIC GIFT CARDS
-OR REGEXP_LIKE (prd.SKU_DESCRIPTION, ' vegc', 'i') -- VIRTUAL GIFT CARDS
-OR BM.COUNTRY_RESTRICTION NOT IN ('ALL','ALLX') /* INTERNATIONAL SHIPPING ELIGIBLE PRODUCTS */;
-
-COMMIT;
 EXEC DBMS_OUTPUT.PUT_LINE ('Update O5.BI_PRODUCT_INFO with shoprunner elligible completed at '||to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 
 EXEC DBMS_OUTPUT.PUT_LINE ('Genetration of file started at '||to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
