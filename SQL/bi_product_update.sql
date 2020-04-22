@@ -194,8 +194,7 @@ select o5.RUN_ID_SEQ.nextval  INTO v_run_id from dual;
      );
                     ELSIF
                        v_coll(indx).bp_skn  IS  NOT NULL and v_coll(indx).catalog_ind='Y'
-
-					 THEN
+             THEN
                         UPDATE o5.bi_product
                             SET
                                 upc = lpad(
@@ -302,7 +301,7 @@ select o5.RUN_ID_SEQ.nextval  INTO v_run_id from dual;
                                 v_coll(indx).skn_no,
                                 13,
                                 0
-                            );
+                            ) and DEACTIVE_IND = 'N';
               ELSE
               update o5.bi_product
                  set  DEACTIVE_IND = 'Y'
