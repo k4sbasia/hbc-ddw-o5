@@ -34,7 +34,7 @@ COMMIT;
 EXEC DBMS_OUTPUT.PUT_LINE ('Preparing O5.O5_WEB_ASSORTMENTS started at '||to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 
 INSERT INTO O5.O5_WEB_ASSORTMENTS
-SSELECT
+SELECT
 	b.product_id AS PRD_ID
     ,a.folder_id AS SBA_ID
    ,b.folder_path  AS SBA_PATH
@@ -166,14 +166,6 @@ FROM BASE;
 COMMIT;
 
 EXEC DBMS_OUTPUT.PUT_LINE ('Preparing O5.BI_PRODUCT_INFO completed at '||to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
-
-TRUNCATE TABLE O5.O5_SR_PRODUCTS;
-
-COMMIT;
-
-EXEC DBMS_OUTPUT.PUT_LINE ('Preparing O5.O5_SR_PRODUCTS started at '||to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
-
-EXEC DBMS_OUTPUT.PUT_LINE ('Update O5.BI_PRODUCT_INFO with shoprunner elligible completed at '||to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 
 EXEC DBMS_OUTPUT.PUT_LINE ('Genetration of file started at '||to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 

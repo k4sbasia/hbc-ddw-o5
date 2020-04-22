@@ -1,14 +1,16 @@
-set timing on
-set echo on
-set linesize 10000
-set pagesize 0
-set sqlprompt ''
-set heading off
-set trimspool on
-set timing on
-WHENEVER SQLERROR EXIT SQL.SQLCODE;
-ALTER SESSION ENABLE PARALLEL DML;
+SET ECHO ON
+SET LINESIZE 10000
+SET PAGESIZE 0
+SET SQLPROMPT ''
+SET TIMING ON
+SET HEADING OFF
+SET TRIMSPOOL ON
+SET SERVEROUTPUT ON
+SET VERIFY OFF
+WHENEVER OSERROR EXIT FAILURE
+WHENEVER SQLERROR EXIT FAILURE
 
+EXEC DBMS_OUTPUT.PUT_LINE ('BI_PRODUCT Update from RFS started at '|| to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 TRUNCATE TABLE o5.excptn_logger;
 -- Need to add columns given to  for oms_rfs_o5_stg
 DECLARE
@@ -346,6 +348,9 @@ EXCEPTION
 dbms_output.put_line('Error in Bi product process. Please check.');
 END;
 /
+EXEC DBMS_OUTPUT.PUT_LINE ('BI_PRODUCT Update from RFS ended at '|| to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
+
+EXEC DBMS_OUTPUT.PUT_LINE ('BI_PRODUCT Update from PRD PIM ATTRIBUTE started at '|| to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 --- Product prd atrribute update :
 DECLARE
     CURSOR cur IS
@@ -461,7 +466,8 @@ EXCEPTION
 dbms_output.put_line('Error in Bi product process. Please check.');
 END;
 /
-
+EXEC DBMS_OUTPUT.PUT_LINE ('BI_PRODUCT Update from PIM PRD TABLE ended at '|| to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
+EXEC DBMS_OUTPUT.PUT_LINE ('BI_PRODUCT Update from PIM SKU TABLE started at '|| to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 exec dbms_stats.gather_table_stats('o5','bi_product',force => true);
 ---Product Sku attribute UPDATE
 
@@ -558,7 +564,8 @@ dbms_output.put_line('Error in Bi product process. Please check.');
 
 END;
 /
-EXEC dbms_output.put_line ('inventoy update started');
+EXEC DBMS_OUTPUT.PUT_LINE ('BI_PRODUCT Update from PIM SKU TABLE ended at '|| to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
+EXEC DBMS_OUTPUT.PUT_LINE ('BI_PRODUCT Update for Inventory started at '|| to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 
 DECLARE
     CURSOR cur IS
@@ -612,10 +619,9 @@ BEGIN
     CLOSE cur;
  END;
 /
-EXEC dbms_output.put_line ('Bi_Product : inventoy update completed');
+EXEC DBMS_OUTPUT.PUT_LINE ('BI_PRODUCT Update for Inventory ended at '|| to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 
-EXEC dbms_output.put_line ('Bi_Product : Price Update started');
-commit ;
+EXEC DBMS_OUTPUT.PUT_LINE ('BI_PRODUCT Update for Price started at '|| to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 --- price status update
 DECLARE
     CURSOR cur IS
@@ -673,8 +679,9 @@ BEGIN
     CLOSE cur;
  END;
  /
-
+EXEC DBMS_OUTPUT.PUT_LINE ('BI_PRODUCT Update for Price ended at '|| to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 --If upc is not present in RFS then make it deactive= 'Y' and default deactive = 'N'
+EXEC DBMS_OUTPUT.PUT_LINE ('BI_PRODUCT Update for deactive_ind started at '|| to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 declare
 begin
 for r1 in
@@ -693,7 +700,8 @@ left join (select  upc from o5.OMS_RFS_o5_STG
 end loop;
 end;
 /
-
+EXEC DBMS_OUTPUT.PUT_LINE ('BI_PRODUCT Update for deactive_ind ended at '|| to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
+EXEC DBMS_OUTPUT.PUT_LINE ('BI_PRODUCT Update for SEO URL started at '|| to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 --seo url changes for PDP url
 declare
 BEGIN
@@ -717,7 +725,7 @@ BEGIN
   END LOOP;
 END;
 /
-
+EXEC DBMS_OUTPUT.PUT_LINE ('BI_PRODUCT Update for SEO URL ended at '|| to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 --Move to Active Status if a Product is active IN RFS.
 UPDATE o5.bi_product t1
    SET deactive_ind = 'N'
@@ -731,7 +739,7 @@ COMMIT;
 
 UPDATE   o5.JOB_STATUS set last_run_on =LAST_COMPLETED_TIME,  LAST_COMPLETED_TIME= sysdate where process_name='BI_PRODUCT_UPDT';
 
-
+EXEC DBMS_OUTPUT.PUT_LINE ('BI_PRODUCT Update ended at '|| to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 show errors;
 
 exit

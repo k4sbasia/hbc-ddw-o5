@@ -67,7 +67,7 @@ function send_delay_email {
 sqlplus -s -l $CONNECTDW <<EOF>${LOG}/${PROCESS}_runstats_start.log @${SQL}/runstats_start.sql "$JOB_NAME" "$SCRIPT_NAME" "$SFILE_SIZE" "$FILE_NAME" "$LOAD_COUNT" "$FILE_COUNT" "$TFILE_SIZE" "$SOURCE_COUNT" "$TARGET_COUNT"
 EOF
 ###################################################################
-echo "Started preparing data from DW at `date '+%a %b %e %T'`" >>${LOG_FILE}
+echo "Started preparing data from DW at `date '+%a %b %e %T'`" > ${LOG_FILE}
  sqlplus -s -l $CONNECTDWXML @${SQL}/${PRODUCT_FEED_DW} >>${LOG_FILE}
  SQL_RET_CODE=$?
 echo "Finished preparing data from DW at `date '+%a %b %e %T'`" >>${LOG_FILE}
