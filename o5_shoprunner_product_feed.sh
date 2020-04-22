@@ -48,7 +48,7 @@ export BBODY="Upstream commerce product feed is delayed and we are looking into 
 export SUBJECT="${PROCESS} Failed. Please investigate"
 #################################################################
 #SEND MAIL
-################################################################
+###############################################################
 function send_email {
  CURRENT_TIME=`date +"%m/%d/%Y-%H:%M:%S"`
  cat $HOME/email_distribution_list.txt|grep '^3'|while read group address
