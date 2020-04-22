@@ -72,7 +72,7 @@ AS CLOB INDENT SIZE = 5--.EXTRACT ('/*').getclobVal ()
                                 XMLELEMENT ("custom-attribute",
                                             XMLATTRIBUTES ('isClearance' as "attribute-id"),NVL(si.isClearance,'false')),
                                 XMLELEMENT ("custom-attribute",
-                                            XMLATTRIBUTES ('FinalSale' as "attribute-id"),NVL(si.isFinalSale,'false'))
+                                            XMLATTRIBUTES ('finalSale' as "attribute-id"),NVL(si.isFinalSale,'false'))
                                             )
                                             ) )
                             from
