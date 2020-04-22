@@ -30,13 +30,11 @@ BEGIN
     EXECUTE IMMEDIATE 'TRUNCATE TABLE &1.all_active_pim_prd_attr_&2';
     EXECUTE IMMEDIATE 'TRUNCATE TABLE &1.all_active_pim_sku_attr_&2';
     EXECUTE IMMEDIATE 'TRUNCATE TABLE &1.all_actv_pim_assortment_&2';
+    EXECUTE IMMEDIATE 'TRUNCATE TABLE &1.all_active_product_sku_&2';
 
-
-
-    DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '||TO_CHAR(SYSDATE,'MM-DD-YYYY HH:Mi:SS')||' Products Identified from BM : '||' '||NVL((SQL%ROWCOUNT),0)||' rows affected.');
-
+DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '||TO_CHAR(SYSDATE,'MM-DD-YYYY HH:Mi:SS')||' Products Identified from BM : '||' '||NVL((SQL%ROWCOUNT),0)||' rows affected.');
 /*
-        Get Data from PIM to BAY_DS-- Populate bi_partners_extract_wrk
+        Get Data from PIM - Populate bi_partners_extract_wrk
 */
 
     DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '|| TO_CHAR(SYSDATE,'MM-DD-YYYY HH:MI:SS') || ' START PIM Data Move from PIM to Local Schema');
