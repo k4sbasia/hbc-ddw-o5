@@ -12,7 +12,7 @@ WHENEVER SQLERROR EXIT FAILURE
 
 EXEC DBMS_OUTPUT.PUT_LINE ('BI_PRODUCT Update from RFS started at '|| to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 TRUNCATE TABLE o5.excptn_logger;
--- Need to add columns given 
+-- Need to add columns given to 
 DECLARE
     CURSOR cur IS
     SELECT
