@@ -628,7 +628,8 @@ DECLARE
                      WHEN trim(AMS_PRICE_TYPE_CD) = '3' THEN 'F'
                      END  as PRICE_FLAG
                         from   edata_exchange.o5_sd_price o ) o, o5.bi_product p
-      where o.skn_no = p.sku ;
+      where o.skn_no = p.sku
+           and (o.Offer_price <> sku_sale_price or  o.MSRP <> sku_list_price and o.PRICE_FLAG = p.PRICE_status);
 
     TYPE v_typ IS
         TABLE OF cur%rowtype;
