@@ -8,24 +8,24 @@ set trimspool on
 set timing on
 WHENEVER SQLERROR EXIT SQL.SQLCODE;
 ALTER SESSION ENABLE PARALLEL DML;
--- Need to add columns given to  for oms_rfs_o5_stg
-EXEC DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '||TO_CHAR(SYSDATE,'MM-DD-YYYY HH:MI:SS')||' Product Attribute Rows '|| NVL((SQL%rowcount),0)|| ' copied');
 
+TRUNCATE TABLE o5.excptn_logger;
+-- Need to add columns given to  for oms_rfs_o5_stg
 DECLARE
     CURSOR cur IS
-        SELECT
-            o.*,
-            bp.sku bp_skn
-        FROM
-             (select * from o5.oms_rfs_o5_stg o  where   o.upc=o.reorder_upc_no  ) o,
-            o5.bi_product bp
-        WHERE
-            lpad(
-                o.skn_no,
-                13,
-                0
-            ) = bp.sku (+)
-            and o.LAST_MOD_DATE >= (select last_run_on from o5.JOB_STATUS where process_name='BI_PRODUCT_UPDT')
+    SELECT
+         o.*,
+         bp.sku bp_skn
+     FROM
+          (select * from o5.oms_rfs_o5_stg o  where   o.upc=o.reorder_upc_no  ) o,
+          (select * from o5.bi_product where  deactive_ind = 'N')  bp
+     WHERE
+         lpad(
+             o.skn_no,
+             13,
+             0
+         ) = bp.sku (+)
+         and o.LAST_MOD_DATE >= (select last_run_on from o5.JOB_STATUS where process_name='BI_PRODUCT_UPDT')
             ;
     TYPE v_typ IS
         TABLE OF cur%rowtype;
