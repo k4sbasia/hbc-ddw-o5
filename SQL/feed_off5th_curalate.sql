@@ -28,23 +28,21 @@ SELECT DISTINCT manufacturer_part#
   || product_url
   ||','||
   product_image_url
-  ||'_300x400.jpg'
   ||','
   || (
-  CASE
-  WHEN itm_gender = '1' THEN 'N/A'
-  WHEN itm_gender = '2' THEN 'Men'
-  WHEN itm_gender = '3' THEN 'Women'
-  WHEN itm_gender = '4' THEN 'Unisex'
-  WHEN itm_gender = '5' THEN 'Kids '
-  WHEN itm_gender = '6' THEN 'Pets'
-  ELSE 'N/A'
-  END)
+    case when itm_gender = 1 then 'N/A'
+       when itm_gender  = 2 then 'Men'
+      when itm_gender  = 3 then 'Women'
+       when itm_gender  = 4 then 'Unisex'
+       when itm_gender  = 5 then 'Kids'
+        when  itm_gender  = 6 then 'Pets'
+      else 'N/A'
+      end)
   ||' > '
  ||  RegExp_substr(path,'[^/]+',1,+regexp_count(path,'[^/]+'))
   ||','
   || manufacturer_part#
-FROM channel_advisor_extract_new t1
+FROM o5.channel_advisor_extract_new t1
 where  qty_on_hand > 0
 ;
 exit
