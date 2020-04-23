@@ -83,7 +83,7 @@ EXECUTE IMMEDIATE 'truncate table &1.ALL_PRODUCT_ATTR_RR_FEED_&2';
                PIM_ACTV_DT,
                ADD_DT,
                MODIFY_DT,
-               TRIM(REPLACE(REPLACE(REPLACE(TRANSLATE(attribute_val, 'x'||CHR(10)||CHR(13), 'x'),'|',''),'^',''),'�','')) attribute_val
+               TRIM(REPLACE(REPLACE(REPLACE(TRANSLATE(pim_exp_bm.char_conversion_new(attribute_val), 'x'||CHR(10)||CHR(13), 'x'),'|',''),'^',''),'�','')) attribute_val
         FROM &3
        WHERE
        attribute_name IN  ( 'status',
