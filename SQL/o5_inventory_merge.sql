@@ -12,7 +12,7 @@ exec dbms_stats.gather_table_stats('O5','INVENTORY_V1');
 
 exec dbms_stats.gather_table_stats('O5','INVENTORY');
 
-UPDATE inventory_v1 set PROCESSED='P' WHERE PROCESSED='F';
+UPDATE O5.inventory_v1 set PROCESSED='P' WHERE PROCESSED='F';
 
 COMMIT;
 
@@ -28,7 +28,7 @@ declare
   v_err_cnt NUMBER;
   batch_err_cnt   EXCEPTION;
   CURSOR C1 IS
-select i.*, to_date('19700101', 'YYYYMMDD') + ( 1 / 24 / 60 / 60 / 1000) * i.ALLOCATIONTIMESTAMP alloc_tstmp,i.rowid rid from inventory_v1 i 
+select i.*, to_date('19700101', 'YYYYMMDD') + ( 1 / 24 / 60 / 60 / 1000) * i.ALLOCATIONTIMESTAMP alloc_tstmp,i.rowid rid from O5.inventory_v1 i 
 where i.PROCESSED='P'
 order by to_date('19700101', 'YYYYMMDD') + ( 1 / 24 / 60 / 60 / 1000) * i.ALLOCATIONTIMESTAMP
 --and rownum<10
@@ -79,7 +79,7 @@ EXCEPTION
       #' || SQL%BULK_EXCEPTIONS(i).ERROR_INDEX);
       dbms_output.put_line('Error message is ' ||
       SQLERRM(-SQL%BULK_EXCEPTIONS(i).ERROR_CODE));
-      INSERT INTO  TECH_EXCPTN
+      INSERT INTO  O5.TECH_EXCPTN
                      (
                      PROCESS_NM,KEY_ID ,ERR_MSG, EXCPT_DT,BATCH_ID
                      )
@@ -97,14 +97,14 @@ END;
      
      BEGIN 
       FORALL indx IN 1..v_coll_INV_REC_TYPE.COUNT SAVE EXCEPTIONS
-      UPDATE inventory_v1 set PROCESSED='C' WHERE rowid=v_coll_INV_REC_TYPE(indx).rid
+      UPDATE O5.inventory_v1 set PROCESSED='C' WHERE rowid=v_coll_INV_REC_TYPE(indx).rid
      -- and not exists (select 'X' from TECH_EXCPTN WHERE BATCH_ID=v_prcs_batch and KEY_ID=to_char(v_coll_INV_REC_TYPE(indx).itemid))
      ;
       
       COMMIT;
 --      
 --      FORALL indx IN 1..v_coll_INV_REC_TYPE.COUNT SAVE EXCEPTIONS
---      UPDATE inventory_v1 set PROCESSED='F' WHERE ITEMID=to_char(v_coll_INV_REC_TYPE(indx).itemid)
+--      UPDATE O5.inventory_v1 set PROCESSED='F' WHERE ITEMID=to_char(v_coll_INV_REC_TYPE(indx).itemid)
 --      and exists (select 'X' from TECH_EXCPTN WHERE BATCH_ID=v_prcs_batch and KEY_ID=to_char(v_coll_INV_REC_TYPE(indx).itemid))
 --      ;
       
@@ -151,7 +151,7 @@ CLOSE c1;
 
 FOR l_tech in (select key_ID from O5.TECH_EXCPTN where BATCH_ID=v_prcs_batch and PROCESS_NM in ('INV_UPD_PRCSD','INV_MERGE'))
 LOOP
-UPDATE inventory_v1 set PROCESSED='F' WHERE ITEMID=to_char(l_tech.key_ID);
+UPDATE O5.inventory_v1 set PROCESSED='F' WHERE ITEMID=to_char(l_tech.key_ID);
 
 END LOOP;
 
