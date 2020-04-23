@@ -213,7 +213,7 @@ SELECT Manufacturer_part#
        || '~'
        ||replace(replace(Material,chr(10)),'~')
        || '~'
-       ||o5.f_get_category_path_all (Manufacturer_part#)
+       ||o5.f_get_category_path_all_sfcc (Manufacturer_part#)
        || '~'
        ||department_id
        || '~'
