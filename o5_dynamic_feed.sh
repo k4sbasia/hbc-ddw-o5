@@ -44,6 +44,7 @@ export ENV=$1
 export load_type=$2
 export SLEEP_TIME=120
 export RUN_DATE_EXPR="TO_DATE('`date +"%Y%m%d"`','YYYYMMDD')"
+export process_name=$3
 echo "Started Job :: ${PROCESS} " >${LOG_FILE}
 ################################################################
 ##Initialize Email Function
