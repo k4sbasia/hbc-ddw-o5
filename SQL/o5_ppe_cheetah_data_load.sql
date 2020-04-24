@@ -37,7 +37,8 @@ INSERT INTO o5.TURN_TO_CHEETAH_EXTRACT(ordernum,
                                      IMAGE_URL,
                                                                          ORDER_DATE,
                                                                          ZIPCODE,
-                                                                         ORDERSEQ
+                                                                         ORDERSEQ,
+                                     productcopy
                                                                          )
 select
 max(a.ordernum) as ordernum,
@@ -56,17 +57,17 @@ max(a.ordernum) as ordernum,
       max(a.orderseq)
       from
 (
-select bs.createfor,e.product_code,bs.ordernum,INTERNATIONAL_IND,e.bm_desc item_description,e.brand_name,bs.shipdate,
+select bs.createfor,e.styl_seq_num product_code,bs.ordernum,bs.INTERNATIONAL_IND,e.bm_desc item_description,e.brand_name,bs.shipdate,
                 'https://image.s5a.com/is/image/saks/'
-                || TRIM (e.product_code)
+                || TRIM (e.styl_seq_num)
                 || '_180x240.jpg'
           PROD_IMG_URL,bs.orderdate,
                         bs.orderseq
- FROM o5.bi_sale bs, o5.TURNTO_CATALOG_FULL_EXTRACT e
+ FROM o5.bi_sale bs, o5.O5_PARTNERS_EXTRACT_WRK e
       WHERE
       ( (bs.shipdate = TRUNC (SYSDATE) - 9 AND international_ind = 'F')
              OR (bs.shipdate = TRUNC (SYSDATE) - 14 AND international_ind = 'T') )
-        and bs.bm_skuid = e.bm_skuid ) a,
+        and bs.sku = lpad(e.sku,13,0) ) a,
         o5.bi_customer bc
         where a.createfor = bc.customer_id
         and bc.internetaddress NOT LIKE 'E4X%'
@@ -113,6 +114,7 @@ SET
 
 commit;
 
+/*Commented as attribute not available in BlueMartini as well
 MERGE INTO o5.TURN_TO_CHEETAH_EXTRACT tg
    USING (SELECT   c.ordernum,upper(b.oba_str_val) oba_str_val
               FROM martini_main.ATTRIBUTE@o5prod_mrep a,
@@ -136,8 +138,10 @@ MERGE INTO o5.TURN_TO_CHEETAH_EXTRACT tg
    WHEN MATCHED THEN
       UPDATE
          SET tg.email = src.oba_str_val;
+*/
 commit;
 
+/*Commented as BV view not being used
 MERGE INTO o5.BV_CHEETAH_EXTRACT tg
      USING (
             SELECT p.prd_code_lower product_code
@@ -169,6 +173,7 @@ WHEN MATCHED
 THEN
    UPDATE SET tg.item_exclude = 'T';
 commit;
+*/
 
 
 --Assign a request_id to each customer
@@ -191,43 +196,8 @@ WHEN MATCHED
 THEN
    UPDATE SET tg.request_id = src.request_id;
    commit;
---get the long description
-MERGE INTO o5.TURN_TO_CHEETAH_EXTRACT tg
-     USING (SELECT p.prd_code_lower, oa.oba_str_val long_desc
-              FROM martini_main.object_attribute@o5prod_mrep oa,
-                   martini_main.product@o5prod_mrep p
-             -- o5.TURN_TO_CHEETAH_EXTRACT bc
-             WHERE oa.oba_obj_id = p.prd_id
-                   --and bc.product_id=p.prd_id
-                   --AND rownum < 10
-                   and p.prd_status_cd <> 'D'
-                   AND oa.oba_atr_id IN
-                          (SELECT a.atr_id
-                             FROM martini_main.
-                                   attribute@o5prod_mrep a
-                            WHERE a.atr_nm_lower = 'productcopy')) src
-         ON (tg.product_id = src.prd_code_lower and tg.add_dt = TRUNC (SYSDATE) AND tg.item_exclude = 'F')
-WHEN MATCHED
-THEN
-   UPDATE SET tg.productcopy = src.long_desc;
-commit;
---Update the short_description for any change happened at the attribute level
-MERGE INTO o5.TURN_TO_CHEETAH_EXTRACT tg
-     USING (SELECT p.prd_code_lower, oa.oba_str_val as short_description
-  FROM martini_main.object_attribute@o5prod_mrep oa,
-       martini_main.product@o5prod_mrep p
- WHERE oa.oba_obj_id = p.prd_id
-        and p.prd_status_cd <> 'D'
-        AND oa.oba_atr_id IN
-              (SELECT a.atr_id
-                 FROM martini_main.attribute@o5prod_mrep a
-                WHERE a.atr_nm_lower = 'productshortdescription')) src
-         ON (tg.product_id = src.prd_code_lower and tg.add_dt = TRUNC (SYSDATE) AND tg.item_exclude = 'F')
-WHEN MATCHED
-THEN
-   UPDATE SET tg.SHRT_PROD_DESC = src.short_description;
-commit;
 
+/* removed since no Bm_prd_id available
 merge into o5.TURN_TO_CHEETAH_EXTRACT TG
      USING (SELECT p.prd_code_lower, p.prd_id bm_prd_id
               from MARTINI_MAIN.PRODUCT@o5prod_mrep P
@@ -237,6 +207,7 @@ WHEN MATCHED
 THEN
    update set TG.bm_prd_id = SRC.bm_prd_id;
 commit;
+*/
 
 --Update turntoord field with Jason formate as per turnto document
 
