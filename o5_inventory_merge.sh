@@ -47,17 +47,28 @@ echo "Started Job :: ${PROCESS} " >${LOG_FILE}
 sqlplus -s -l  $CONNECTDW <<EOF >${LOG}/${PROCESS}_runstats_start.log @${SQL}/runstats_start.sql "$JOB_NAME" "$SCRIPT_NAME" "$SFILE_SIZE" "$FILE_NAME" "$LOAD_COUNT" "$FILE_COUNT" "$TFILE_SIZE" "$SOURCE_COUNT" "$TARGET_COUNT"
 EOF
 ###################################################################
- echo "Start Merge in $CONNECTDW" > ${LOG_FILE}
+ echo "Start Merge in $CONNECTDW" >> ${LOG_FILE}
 ####################################################################################
 
 sqlplus -s -l $CONNECTDW @SQL/${PROCESS}.sql >> ${LOG_FILE}
 retcode=$?
 if [ $retcode -ne 0 ]
 then
-        echo "SQL Error in product data for process ${PROCESS}...Please check" >> ${LOG_FILE}
+        echo "SQL Error in merging inventory data for process ${PROCESS}...Please check" >> ${LOG_FILE}
         exit 99
 else
-        echo "Product data loaded for the process ${PROCESS} is complete" >> ${LOG_FILE}
+        echo "Inventory data loaded for the process ${PROCESS} is complete" >> ${LOG_FILE}
+fi
+
+echo "Start Store Inventory Merge in $CONNECTDW" >> ${LOG_FILE}
+sqlplus -s -l $CONNECTDW @SQL/o5_inv_str_merge.sql >> ${LOG_FILE}
+retcode=$?
+if [ $retcode -ne 0 ]
+then
+        echo "SQL Error in merging store inventory data for process ${PROCESS}...Please check" >> ${LOG_FILE}
+        exit 99
+else
+        echo "Store Inventory data loaded for the process ${PROCESS} is complete" >> ${LOG_FILE}
 fi
 ##
 echo "${PROCESS} completed at `date '+%a %b %e %T'`" >>${LOG_FILE}
