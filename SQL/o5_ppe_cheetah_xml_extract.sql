@@ -55,7 +55,8 @@ xmlagg(
           EXTRACT ('/*').getclobVal () into xml_item
     FROM  o5.TURN_TO_CHEETAH_EXTRACT a where item_exclude='F' and email is not null and product_id is not null
         and a.brand is not null and a.SHRT_PROD_DESC is not null and a.PRODUCTCOPY is not null AND turntoord IS NOT NULL AND request_id IS NOT NULL
-        and email NOT LIKE 'E4X%'and a.BM_PRD_ID is not null and add_dt = TRUNC (SYSDATE)
+        and email NOT LIKE 'E4X%'--and a.BM_PRD_ID is not null 
+and add_dt = TRUNC (SYSDATE)
 GROUP BY customer_id, email,customer_first_name,request_id order by request_id;
 DBMS_XSLPROCESSOR.clob2file(xml_item, 'DATASERVICE', 'Off5th_ppe_'||to_char(sysdate,'YYYYMMDD')||'.xml');
 END;

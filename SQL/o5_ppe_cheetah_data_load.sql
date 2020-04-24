@@ -125,67 +125,67 @@ SET
 
 commit;
 
-/*Commented as attribute not available in BlueMartini as well
-MERGE INTO o5.TURN_TO_CHEETAH_EXTRACT tg
-   USING (SELECT   c.ordernum,upper(b.oba_str_val) oba_str_val
-              FROM martini_main.ATTRIBUTE@o5prod_mrep a,
-                   martini_store.object_attribute@o5prod_mrep b,
-                   o5.bi_sale c
-             WHERE a.atr_nm IN ('MarketingBillToEmail')
-               AND a.VERSION = 1
-               AND a.atr_status_cd <> 'D'
-               AND a.atr_id = b.oba_atr_id
-               AND b.oba_obj_id = c.orderhdr
-               AND c.orderhdr IN (
-                      SELECT TO_CHAR (orderhdr) AS orderhdr
-                        FROM O5.bi_sale
-                       WHERE ordernum IN (
-                                SELECT ordernum
-                                  FROM o5.TURN_TO_CHEETAH_EXTRACT
-                                 WHERE  NVL(international_ind,'F')='T'
-                                   AND add_dt = TRUNC (SYSDATE)))
-          GROUP BY c.ordernum, b.oba_str_val) src
-   ON (tg.ordernum = src.ordernum)
-   WHEN MATCHED THEN
-      UPDATE
-         SET tg.email = src.oba_str_val;
-*/
-commit;
+--Commented as attribute not available in BlueMartini as well
+--MERGE INTO o5.TURN_TO_CHEETAH_EXTRACT tg
+--   USING (SELECT   c.ordernum,upper(b.oba_str_val) oba_str_val
+--              FROM martini_main.ATTRIBUTE@o5prod_mrep a,
+--                   martini_store.object_attribute@o5prod_mrep b,
+--                   o5.bi_sale c
+--             WHERE a.atr_nm IN ('MarketingBillToEmail')
+--               AND a.VERSION = 1
+--               AND a.atr_status_cd <> 'D'
+--               AND a.atr_id = b.oba_atr_id
+--               AND b.oba_obj_id = c.orderhdr
+--               AND c.orderhdr IN (
+--                      SELECT TO_CHAR (orderhdr) AS orderhdr
+--                        FROM O5.bi_sale
+--                       WHERE ordernum IN (
+--                                SELECT ordernum
+--                                  FROM o5.TURN_TO_CHEETAH_EXTRACT
+--                                 WHERE  NVL(international_ind,'F')='T'
+--                                   AND add_dt = TRUNC (SYSDATE)))
+--          GROUP BY c.ordernum, b.oba_str_val) src
+--   ON (tg.ordernum = src.ordernum)
+--   WHEN MATCHED THEN
+--      UPDATE
+--         SET tg.email = src.oba_str_val;
+--
+--commit;
 
-/*
-Commented as BV view not being used
-MERGE INTO o5.BV_CHEETAH_EXTRACT tg
-     USING (
-            SELECT p.prd_code_lower product_code
-              FROM martini_main.product@o5prod_mrep p
-             WHERE   p.version=1
-             AND prd_status_cd<>'A'
-            UNION
-            SELECT p.prd_code_lower product_code
-              FROM martini_main.object_attribute@o5prod_mrep oa,
-                   martini_main.product@o5prod_mrep p
-             WHERE   p.version=1 and oa.version=1 and  oa.oba_obj_id = p.prd_id
-                   AND oba_boo_val = 'T'
-                   AND oa.oba_atr_id IN (SELECT a.atr_id
-                                           FROM martini_main.
-                                                 attribute@o5prod_mrep a
-                                          WHERE a.atr_nm_lower = 'isegc')
-            UNION
-            SELECT p.prd_code_lower product_code
-              FROM martini_main.object_attribute@o5prod_mrep oa,
-                   martini_main.product@o5prod_mrep p
-             WHERE   p.version=1 and oa.version=1 and  oa.oba_obj_id = p.prd_id
-                   AND oba_boo_val = 'T'
-                   AND oa.oba_atr_id IN (SELECT a.atr_id
-                                           FROM martini_main.
-                                                 attribute@o5prod_mrep a
-                                          WHERE a.atr_nm_lower = 'gwp_flag')) src
-        ON (tg.product_id = src.product_code and add_dt=trunc(sysdate))
-WHEN MATCHED
-THEN
-   UPDATE SET tg.item_exclude = 'T';
-commit;
-*/
+--
+--Commented as BV view not being used
+--MERGE INTO o5.BV_CHEETAH_EXTRACT tg
+--     USING (
+--            SELECT p.prd_code_lower product_code
+--              FROM martini_main.product@o5prod_mrep p
+--             WHERE   p.version=1
+--             AND prd_status_cd<>'A'
+--            UNION
+--            SELECT p.prd_code_lower product_code
+--              FROM martini_main.object_attribute@o5prod_mrep oa,
+--                   martini_main.product@o5prod_mrep p
+--             WHERE   p.version=1 and oa.version=1 and  oa.oba_obj_id = p.prd_id
+--                   AND oba_boo_val = 'T'
+--                   AND oa.oba_atr_id IN (SELECT a.atr_id
+--                                           FROM martini_main.
+--                                                 attribute@o5prod_mrep a
+--                                          WHERE a.atr_nm_lower = 'isegc')
+--            UNION
+--            SELECT p.prd_code_lower product_code
+--              FROM martini_main.object_attribute@o5prod_mrep oa,
+--                   martini_main.product@o5prod_mrep p
+--             WHERE   p.version=1 and oa.version=1 and  oa.oba_obj_id = p.prd_id
+--                   AND oba_boo_val = 'T'
+--                   AND oa.oba_atr_id IN (SELECT a.atr_id
+--                                           FROM martini_main.
+--                                                 attribute@o5prod_mrep a
+--                                          WHERE a.atr_nm_lower = 'gwp_flag')) src
+--        ON (tg.product_id = src.product_code and add_dt=trunc(sysdate))
+--WHEN MATCHED
+--THEN
+--   UPDATE SET tg.item_exclude = 'T';
+--commit;
+
 
 
 --Assign a request_id to each customer
