@@ -91,6 +91,10 @@ SELECT '<?xml version="1.0" encoding="UTF-8"?>'||
                    ),
       XMLAGG(
        XMLELEMENT ("category-assignment",
+                   XMLATTRIBUTES (1584742450203 AS "category-id", a.product_id AS "product-id", 'delete' as "mode"))
+                   ),
+      XMLAGG(
+       XMLELEMENT ("category-assignment",
                    XMLATTRIBUTES (1584742450202 AS "category-id", a.product_id AS "product-id", 'delete' as "mode"))
                    ),
       XMLAGG(Case when dfs_flag = 'N' THEN 
@@ -172,6 +176,12 @@ SELECT '<?xml version="1.0" encoding="UTF-8"?>'||
                         CASE WHEN isnew='true' AND primary_parent_category = 'Men' THEN
                                    XMLELEMENT ("category-assignment",
                                            XMLATTRIBUTES (1584742450201 AS "category-id", a.product_id AS "product-id"))
+                               ELSE NULL            END
+                               ),
+                  XMLAGG(
+                        CASE WHEN isnew='true' AND primary_parent_category = 'Kids' THEN
+                                   XMLELEMENT ("category-assignment",
+                                           XMLATTRIBUTES (1584742450203 AS "category-id", a.product_id AS "product-id"))
                                ELSE NULL            END
                                )
                    )) AS CLOB INDENT SIZE = 5)

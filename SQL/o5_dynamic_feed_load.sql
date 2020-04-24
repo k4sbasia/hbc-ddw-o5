@@ -9,7 +9,7 @@ WHENEVER OSERROR  EXIT FAILURE
 WHENEVER SQLERROR EXIT FAILURE
 
 
-/*to be removed before go live */
+--to be removed before go live 
 TRUNCATE TABLE o5.inventory;
 
 INSERT INTO o5.inventory i (i.skn_no,i.IN_STOCK_SELLABLE_QTY,i.IN_STOCK_UPDATE_DATE,add_dt,i.IN_STORE_QTY,i.IN_STORE_UPDATE_DATE)
