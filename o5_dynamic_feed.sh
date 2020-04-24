@@ -40,10 +40,10 @@ export FILE_COUNT=0
 export TFILE_SIZE=0
 export SOURCE_COUNT=0
 export TARGET_COUNT=0
-export ENV=$1
 export load_type=$2
 export SLEEP_TIME=120
 export RUN_DATE_EXPR="TO_DATE('`date +"%Y%m%d"`','YYYYMMDD')"
+export process_name=$1
 echo "Started Job :: ${PROCESS} " >${LOG_FILE}
 ################################################################
 ##Initialize Email Function
