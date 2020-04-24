@@ -15,6 +15,16 @@ REM                -----------------            ----------      ----------------
 REM                Jayanthi                 06/02/2014              Created
 REM
 REM ############################################################################
+set echo off
+set linesize 10000
+set pagesize 0
+set sqlprompt ''
+set timing on
+set heading off
+set trimspool on
+set sqlblanklines on
+WHENEVER OSERROR  EXIT FAILURE
+WHENEVER SQLERROR EXIT FAILURE
 --bring the product/cutsomer/sale info from three different tables
 
 --delete data older than 7 months.
@@ -142,7 +152,8 @@ MERGE INTO o5.TURN_TO_CHEETAH_EXTRACT tg
 */
 commit;
 
-/*Commented as BV view not being used
+/*
+Commented as BV view not being used
 MERGE INTO o5.BV_CHEETAH_EXTRACT tg
      USING (
             SELECT p.prd_code_lower product_code
