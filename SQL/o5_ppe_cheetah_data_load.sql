@@ -54,7 +54,8 @@ max(a.ordernum) as ordernum,
             max(a.PROD_IMG_URL),
                         max(trunc(a.orderdate)),
                         max(bc.zipcode),
-      max(a.orderseq)
+      max(a.orderseq),
+      max(a.productcopy)
       from
 (
 select bs.createfor,e.styl_seq_num product_code,bs.ordernum,bs.INTERNATIONAL_IND,e.bm_desc item_description,e.brand_name,bs.shipdate,
@@ -62,8 +63,8 @@ select bs.createfor,e.styl_seq_num product_code,bs.ordernum,bs.INTERNATIONAL_IND
                 || TRIM (e.styl_seq_num)
                 || '_180x240.jpg'
           PROD_IMG_URL,bs.orderdate,
-                        bs.orderseq
- FROM o5.bi_sale bs, o5.O5_PARTNERS_EXTRACT_WRK e
+                        bs.orderseq, e.productcopy
+ FROM o5.bi_sale bs, o5.O5_PARTNERS_EXTRACT_WRK_DDW e
       WHERE
       ( (bs.shipdate = TRUNC (SYSDATE) - 9 AND international_ind = 'F')
              OR (bs.shipdate = TRUNC (SYSDATE) - 14 AND international_ind = 'T') )
