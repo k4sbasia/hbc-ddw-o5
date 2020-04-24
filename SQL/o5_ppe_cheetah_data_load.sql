@@ -209,19 +209,8 @@ THEN
    UPDATE SET tg.request_id = src.request_id;
    commit;
 
-/* removed since no Bm_prd_id available
-merge into o5.TURN_TO_CHEETAH_EXTRACT TG
-     USING (SELECT p.prd_code_lower, p.prd_id bm_prd_id
-              from MARTINI_MAIN.PRODUCT@o5prod_mrep P
-             WHERE version=1 and p.prd_status_cd='A' ) src
-         ON (tg.product_id = src.prd_code_lower and tg.add_dt = TRUNC (SYSDATE))
-WHEN MATCHED
-THEN
-   update set TG.bm_prd_id = SRC.bm_prd_id;
-commit;
-*/
 
---Update turntoord field with Jason formate as per turnto document
+--Update turntoord field with Json formate as per turnto document
 
 DECLARE
 BEGIN
