@@ -64,7 +64,7 @@ select bs.createfor,e.styl_seq_num product_code,bs.ordernum,bs.INTERNATIONAL_IND
                 || '_180x240.jpg'
           PROD_IMG_URL,bs.orderdate,
                         bs.orderseq, e.productcopy
- FROM o5.bi_sale bs, o5.O5_PARTNERS_EXTRACT_WRK_DDW e
+ FROM o5.bi_sale bs, o5.O5_PARTNERS_EXTRACT_WRK e
       WHERE
       ( (bs.shipdate = TRUNC (SYSDATE) - 9 AND international_ind = 'F')
              OR (bs.shipdate = TRUNC (SYSDATE) - 14 AND international_ind = 'T') )
