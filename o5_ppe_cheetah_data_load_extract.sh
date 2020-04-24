@@ -75,7 +75,7 @@ fi
 TARGET_COUNT=`sqlplus -s $CONNECTDW <<EOF
 set heading off
 select count(*)
-from o5.BV_CHEETAH_EXTRACT
+from o5.TURN_TO_CHEETAH_EXTRACT
 WHERE item_exclude='F' and email is not null and product_id is not null
 and trunc(add_dt) = TRUNC (SYSDATE);
 quit;

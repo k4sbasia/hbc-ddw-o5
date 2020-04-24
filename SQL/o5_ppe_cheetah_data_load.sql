@@ -15,6 +15,16 @@ REM                -----------------            ----------      ----------------
 REM                Jayanthi                 06/02/2014              Created
 REM
 REM ############################################################################
+set echo off
+set linesize 10000
+set pagesize 0
+set sqlprompt ''
+set timing on
+set heading off
+set trimspool on
+set sqlblanklines on
+WHENEVER OSERROR  EXIT FAILURE
+WHENEVER SQLERROR EXIT FAILURE
 --bring the product/cutsomer/sale info from three different tables
 
 --delete data older than 7 months.
@@ -54,7 +64,8 @@ max(a.ordernum) as ordernum,
             max(a.PROD_IMG_URL),
                         max(trunc(a.orderdate)),
                         max(bc.zipcode),
-      max(a.orderseq)
+      max(a.orderseq),
+      max(a.productcopy)
       from
 (
 select bs.createfor,e.styl_seq_num product_code,bs.ordernum,bs.INTERNATIONAL_IND,e.bm_desc item_description,e.brand_name,bs.shipdate,
@@ -62,7 +73,7 @@ select bs.createfor,e.styl_seq_num product_code,bs.ordernum,bs.INTERNATIONAL_IND
                 || TRIM (e.styl_seq_num)
                 || '_180x240.jpg'
           PROD_IMG_URL,bs.orderdate,
-                        bs.orderseq
+                        bs.orderseq, e.productcopy
  FROM o5.bi_sale bs, o5.O5_PARTNERS_EXTRACT_WRK e
       WHERE
       ( (bs.shipdate = TRUNC (SYSDATE) - 9 AND international_ind = 'F')
@@ -141,7 +152,8 @@ MERGE INTO o5.TURN_TO_CHEETAH_EXTRACT tg
 */
 commit;
 
-/*Commented as BV view not being used
+/*
+Commented as BV view not being used
 MERGE INTO o5.BV_CHEETAH_EXTRACT tg
      USING (
             SELECT p.prd_code_lower product_code
