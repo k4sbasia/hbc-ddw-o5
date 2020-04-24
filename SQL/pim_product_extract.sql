@@ -252,8 +252,8 @@ READYFORPRODFOLDER
             AND EXISTS (SELECT 1
                           FROM &6 fla
                          WHERE fla.folder_path = fl.folder_path
-                           AND (CASE WHEN fla.attribute_name = 'readyForProdFolder' AND fla.attribute_val = 'Yes' THEN 1
-                                     WHEN fla.attribute_name = 'folderactive'   AND fla.attribute_val = 'Yes' THEN 1
+                           AND (CASE WHEN   lower(fla.attribute_name) = 'readyforprodfolder' AND fla.attribute_val = 'Yes' THEN 1
+                                     WHEN lower(fla.attribute_name) = 'folderactive' AND fla.attribute_val = 'Yes' THEN 1
                                      ELSE 0
                                  END) = 1)
             ORDER BY LEVEL, fl.folder_id
