@@ -31,6 +31,7 @@ BEGIN
     EXECUTE IMMEDIATE 'TRUNCATE TABLE &1.all_active_pim_sku_attr_&2';
     EXECUTE IMMEDIATE 'TRUNCATE TABLE &1.all_actv_pim_assortment_&2';
     EXECUTE IMMEDIATE 'TRUNCATE TABLE &1.all_active_product_sku_&2';
+    EXECUTE IMMEDIATE 'TRUNCATE TABLE &1.ALL_ACTV_PIM_ASST_FULL_&2';
 
 DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '||TO_CHAR(SYSDATE,'MM-DD-YYYY HH:Mi:SS')||' Products Identified from BM : '||' '||NVL((SQL%ROWCOUNT),0)||' rows affected.');
 /*
@@ -59,9 +60,10 @@ DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '||TO_CHAR(SYSDATE,'MM-DD-YYYY HH:Mi:SS')||'
             SELECT * FROM pim_exp_bm.all_actv_pim_assortment_&2@&3;
     DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '||TO_CHAR(SYSDATE,'MM-DD-YYYY HH:MI:SS')||' Product Assortment Rows '|| NVL((SQL%rowcount),0)|| ' copied');
     COMMIT;
+    INSERT INTO &1.ALL_ACTV_PIM_ASST_FULL_&2
+            SELECT * FROM pim_exp_bm.ALL_ACTV_PIM_ASST_FULL_&2@&3;
+   COMMIT;
     DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '|| TO_CHAR(SYSDATE,'MM-DD-YYYY HH:MI:SS') || ' END PIM Data Move from PIM to Local Schema');
-
-
     DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '||TO_CHAR(SYSDATE,'MM-DD-YYYY HH:Mi:SS')||' Start fetching active products ');
 
     --Fetch all active poroducts from BlueMartini
@@ -112,4 +114,5 @@ END;
 exec  dbms_stats.gather_table_stats('o5','all_active_pim_sku_attr_o5',force => true);
 exec  dbms_stats.gather_table_stats('o5','all_active_pim_prd_attr_o5',force => true);
 exec  dbms_stats.gather_table_stats('o5','all_actv_pim_assortment_o5',force => true);
+exec  dbms_stats.gather_table_stats('o5','ALL_ACTV_PIM_ASST_FULL_o5',force => true);
 EXIT;
