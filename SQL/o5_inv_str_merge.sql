@@ -12,7 +12,7 @@ exec dbms_stats.gather_table_stats('O5','INVENTORY_STORES_V1') ;
 
 exec dbms_stats.gather_table_stats('O5','INVENTORY');
 
-UPDATE o5.inventory_STORES_v1 set PROCESSED='P' WHERE PROCESSED='C';
+UPDATE o5.inventory_STORES_v1 set PROCESSED='P' WHERE PROCESSED='N';
 
 COMMIT;
 

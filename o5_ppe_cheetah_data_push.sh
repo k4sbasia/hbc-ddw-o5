@@ -3,7 +3,7 @@
 #####                           SAKS INC.
 #############################################################################################################################
 #####
-#####   PROGRAM NAME : o5_ppe_cheetah_data_push.sh 
+#####   PROGRAM NAME : o5_ppe_cheetah_data_push.sh
 #####
 #####   DESCRIPTION  : This script does the following
 #####                              1. pushes the file to cheetah
@@ -14,7 +14,7 @@
 #####                                   Divya Kafle           06/02/2014      Created
 #####
 #############################################################################################################################
-. $HOME/initvars
+. $HOME/params.conf o5
 export PROCESS='o5_ppe_cheetah_data_push'
 export SQL=$HOME/SQL
 export LOG=$HOME/LOG
@@ -36,7 +36,7 @@ if [ -f "$DATA/Off5th_ppe_`date +%Y%m%d`.xml" ]
 then
 echo "Off5th PPE File for cheetah is available at `date '+%a %b %e %T'`\n">>${LOG_FILE}
 cd $DATA
-lftp -u SDO5feeds,rEfrU8 sftp://tt.cheetahmail.com <<EOF>>${LOG_FILE} 
+lftp -u SDO5feeds,rEfrU8 sftp://tt.cheetahmail.com <<EOF>>${LOG_FILE}
 cd autoproc
 put Off5th_ppe_`date +%Y%m%d`.xml
 bye
