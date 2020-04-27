@@ -396,7 +396,7 @@ FOLDER_NAME
                 fd.folder_path,
                 fd.label,
                 fd.folder_parent_id,
-                fd.folder_name
+                fd.folder_name,
 --                asrt.assort_name ||
                 asrt.sub_assrt_name  || '/' || object_name AS product_asrt,
                 row_number() OVER(PARTITION BY asrt.object_name ORDER BY greatest(asrt.pim_actv_dt,asrt.modify_dt) DESC) AS latest_prd_path
