@@ -339,8 +339,7 @@ READYFORPRODFOLDER
             'T' FOLDERACTIVE,
             'T' READYFORPRODFOLDER
         FROM all_assortments;
-
-
+Commit;        
          INSERT INTO &1.ALL_ACTV_PIM_ASST_FULL_&2
     (
       PRODUCT_ID  ,
@@ -357,8 +356,7 @@ READYFORPRODFOLDER
                 fl.folder_id,
                 fl.folder_name,
                 fl.folder_path,
-
-                CONNECT_BY_ROOT fl.folder_name AS primary_parent_category,
+              CONNECT_BY_ROOT fl.folder_name AS primary_parent_category,
                 substr(sys_connect_by_path(fl.LABEL,'~'),2) AS path_label,
                 LEVEL
             FROM &5 fl
@@ -397,7 +395,7 @@ READYFORPRODFOLDER
             'T' FOLDERACTIVE,
             'T' READYFORPRODFOLDER
         FROM all_assortments
-        WHERE latest_prd_path = 1;
+      ;
 commit;
 insert into ALL_PRODUCT_ATTR_RR_FEED_&2
 WITH all_product_attributes AS
