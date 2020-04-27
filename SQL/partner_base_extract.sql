@@ -127,9 +127,9 @@ INSERT INTO &2.&3 (
             url.eng_url                  AS product_url,
             CASE
                 WHEN '&1' = 'o5' THEN
-                    'https://image.s5a.com/is/image/saksoff5th/' || bm.product_id
+                    'https://image.s5a.com/is/image/saksoff5th/' || bm.product_id||'_300x400.jpg'
                 ELSE
-                    'https://image.s5a.com/is/image/saks/' || bm.product_id
+                    'https://image.s5a.com/is/image/saks/' || bm.product_id||'_300x400.jpg'
             END upc_url,
             NULL AS clearance_type,
             nvl(rfs.division_id, prd.division_id) AS division_id,
