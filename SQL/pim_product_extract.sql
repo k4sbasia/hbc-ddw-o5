@@ -294,7 +294,10 @@ PATH_LABEL ,
 FOLDER_PATH,
 PRODUCT_ASRT ,
 FOLDERACTIVE,
-READYFORPRODFOLDER
+READYFORPRODFOLDER,
+LABEL,
+FOLDER_PARENT_ID,
+FOLDER_NAME
     )
     WITH all_folder_data
       AS (
@@ -302,6 +305,8 @@ READYFORPRODFOLDER
                 fl.folder_id,
                 fl.folder_name,
                 fl.folder_path,
+                fl.label,
+                fl.folder_parent_id,
                 CONNECT_BY_ROOT fl.folder_name AS primary_parent_category,
                 substr(sys_connect_by_path(fl.LABEL,'~'),2) AS path_label,
                 LEVEL
@@ -323,6 +328,9 @@ READYFORPRODFOLDER
                 fd.primary_parent_category,
                 fd.path_label,
                 fd.folder_path,
+                fd.label,
+                fd.folder_parent_id,
+                fd.folder_name,
 --                asrt.assort_name ||
                 asrt.sub_assrt_name  || '/' || object_name AS product_asrt,
                 row_number() OVER(PARTITION BY asrt.object_name ORDER BY greatest(asrt.pim_actv_dt,asrt.modify_dt) DESC) AS latest_prd_path
@@ -337,9 +345,12 @@ READYFORPRODFOLDER
             folder_path,
             product_asrt,
             'T' FOLDERACTIVE,
-            'T' READYFORPRODFOLDER
+            'T' READYFORPRODFOLDER,
+            label,
+            folder_parent_id,
+            folder_name
         FROM all_assortments;
-Commit;        
+Commit;
          INSERT INTO &1.ALL_ACTV_PIM_ASST_FULL_&2
     (
       PRODUCT_ID  ,
@@ -348,7 +359,10 @@ PATH_LABEL ,
 FOLDER_PATH,
 PRODUCT_ASRT ,
 FOLDERACTIVE,
-READYFORPRODFOLDER
+READYFORPRODFOLDER,
+LABEL,
+FOLDER_PARENT_ID,
+FOLDER_NAME
     )
     WITH all_folder_data
       AS (
@@ -356,6 +370,8 @@ READYFORPRODFOLDER
                 fl.folder_id,
                 fl.folder_name,
                 fl.folder_path,
+                fl.folder_parent_id,
+                fl.label,
               CONNECT_BY_ROOT fl.folder_name AS primary_parent_category,
                 substr(sys_connect_by_path(fl.LABEL,'~'),2) AS path_label,
                 LEVEL
@@ -378,6 +394,9 @@ READYFORPRODFOLDER
                 fd.primary_parent_category,
                 fd.path_label,
                 fd.folder_path,
+                fd.label,
+                fd.folder_parent_id,
+                fd.folder_name
 --                asrt.assort_name ||
                 asrt.sub_assrt_name  || '/' || object_name AS product_asrt,
                 row_number() OVER(PARTITION BY asrt.object_name ORDER BY greatest(asrt.pim_actv_dt,asrt.modify_dt) DESC) AS latest_prd_path
@@ -393,7 +412,10 @@ READYFORPRODFOLDER
             folder_path,
             product_asrt,
             'T' FOLDERACTIVE,
-            'T' READYFORPRODFOLDER
+            'T' READYFORPRODFOLDER,
+            label,
+            folder_parent_id,
+            folder_name
         FROM all_assortments
       ;
 commit;

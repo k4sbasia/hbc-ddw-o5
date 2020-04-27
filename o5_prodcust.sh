@@ -5,7 +5,7 @@
 #####
 #####   PROGRAM NAME : o5_prodcust.sh
 #####
-#####   DESCRIPTION  : This script does the following 
+#####   DESCRIPTION  : This script does the following
 #####				   1. Calls the sql script that peforms the customer load
 #####
 #####
@@ -19,7 +19,7 @@
 #####
 #############################################################################################################################
 ################################################################
-. $HOME/initvars
+. $HOME/params.conf o5
 export PROCESS='o5_prodcust'
 export SQL=$HOME/SQL
 export LOG=$HOME/LOG
@@ -27,7 +27,7 @@ export DATA=$HOME/DATA
 export LOG_FILE="${LOG}/${PROCESS}_log.txt"
 export BAD_SUBJECT="${PROCESS} failed"
 export JOB_NAME="${PROCESS}"
-export SCRIPT_NAME="${PROCESS}" 
+export SCRIPT_NAME="${PROCESS}"
 export SFILE_SIZE='0'
 export FILE_NAME='0'
 export LOAD_COUNT='0'
@@ -35,10 +35,10 @@ export FILE_COUNT='0'
 export TFILE_SIZE='0'
 export SOURCE_COUNT='0'
 export TARGET_COUNT='0'
-##Change Level 2010:05:05 Commented out reference to slelist 
+##Change Level 2010:05:05 Commented out reference to slelist
 ########################################################################
 ##Initialize Email Function
-######################################################################## 
+########################################################################
 function send_email {
  CURRENT_TIME=`date +"%m/%d/%Y-%H:%M:%S"`
  cat $HOME/email_distribution_list.txt|grep '^9'|while read group address
@@ -64,7 +64,7 @@ LOAD_COUNT=`sqlplus -s $CONNECTDW <<EOF
 set heading off
 select count(*)
 from O5.BI_CUSTOMER_WRK;
-quit; 
+quit;
 EOF`
 #################################################################
 ##Update Runstats Finish
@@ -86,4 +86,3 @@ echo -e "${PROCESS} completed without errors."
 echo -e "${PROCESS} completed without errors.\n" >> ${LOG_FILE}
 fi
 exit 0
-
