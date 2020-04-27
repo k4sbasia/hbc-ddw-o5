@@ -26,7 +26,8 @@ COMMIT;
 	CURSOR existing IS
    		SELECT sku.PRODUCT_ID, sku.SKN, sku.ISCLEARANCE AS EXISTING_ISCLEARANCE, sku.IsFinalSale AS EXISTING_IsFinalSale,
    			CASE
-   				WHEN pr.PRICE_TYPE_CD IN ('M', 'C', 'F') OR SD_PIP_TEXT IS NOT NULL THEN 'true'
+   				WHEN pr.PRICE_TYPE_CD IN ('M', 'C', 'F') --OR SD_PIP_TEXT IS NOT NULL commented as part of 
+				 THEN 'true'
    				WHEN (pr.PRICE_TYPE_CD NOT IN ('M', 'C', 'F')) THEN 'false'
    			ELSE 'false' END AS ACTUAL_ISCLEARANCE,
    			CASE WHEN pr.PRICE_TYPE_CD IN ('C', 'F') THEN 'true'
@@ -44,7 +45,8 @@ COMMIT;
    CURSOR not_existing IS
    		SELECT pr.ITEM_ID AS PRODUCT_ID, pr.SKN_NO as SKN, skunx.ISCLEARANCE AS EXISTING_ISCLEARANCE, skunx.IsFinalSale AS EXISTING_IsFinalSale,
    			CASE
-   				WHEN pr.PRICE_TYPE_CD IN ('M', 'C', 'F') OR SD_PIP_TEXT IS NOT NULL THEN 'true'
+   				WHEN pr.PRICE_TYPE_CD IN ('M', 'C', 'F') --OR SD_PIP_TEXT IS NOT NULL  commented as part of 
+				THEN 'true'
    				WHEN (pr.PRICE_TYPE_CD NOT IN ('M', 'C', 'F')) THEN 'false'
    			ELSE 'false' END AS ACTUAL_ISCLEARANCE,
    			CASE WHEN pr.PRICE_TYPE_CD IN ('C', 'F') THEN 'true'
