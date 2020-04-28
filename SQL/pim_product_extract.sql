@@ -297,7 +297,8 @@ FOLDERACTIVE,
 READYFORPRODFOLDER,
 LABEL,
 FOLDER_PARENT_ID,
-FOLDER_NAME
+FOLDER_NAME,
+FOLDER_ID
     )
     WITH all_folder_data
       AS (
@@ -331,6 +332,7 @@ FOLDER_NAME
                 fd.label,
                 fd.folder_parent_id,
                 fd.folder_name,
+                fd.folder_id,
 --                asrt.assort_name ||
                 asrt.sub_assrt_name  || '/' || object_name AS product_asrt,
                 row_number() OVER(PARTITION BY asrt.object_name ORDER BY greatest(asrt.pim_actv_dt,asrt.modify_dt) DESC) AS latest_prd_path
@@ -348,7 +350,8 @@ FOLDER_NAME
             'T' READYFORPRODFOLDER,
             label,
             folder_parent_id,
-            folder_name
+            folder_name,
+            folder_id
         FROM all_assortments;
 Commit;
          INSERT INTO &1.ALL_ACTV_PIM_ASST_FULL_&2
@@ -362,7 +365,8 @@ FOLDERACTIVE,
 READYFORPRODFOLDER,
 LABEL,
 FOLDER_PARENT_ID,
-FOLDER_NAME
+FOLDER_NAME,
+FOLDER_ID
     )
     WITH all_folder_data
       AS (
@@ -397,6 +401,7 @@ FOLDER_NAME
                 fd.label,
                 fd.folder_parent_id,
                 fd.folder_name,
+                fd.folder_id,
 --                asrt.assort_name ||
                 asrt.sub_assrt_name  || '/' || object_name AS product_asrt,
                 row_number() OVER(PARTITION BY asrt.object_name ORDER BY greatest(asrt.pim_actv_dt,asrt.modify_dt) DESC) AS latest_prd_path
@@ -415,7 +420,8 @@ FOLDER_NAME
             'T' READYFORPRODFOLDER,
             label,
             folder_parent_id,
-            folder_name
+            folder_name,
+            folder_id
         FROM all_assortments
       ;
 commit;

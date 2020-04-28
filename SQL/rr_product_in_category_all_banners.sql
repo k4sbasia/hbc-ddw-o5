@@ -27,12 +27,9 @@ SET HEADING OFF
 SET VERIFY OFF
 
 select 'category_id'||'|'||'product_id' from dual;
-SELECT fld.folder_id || '|' || prd.product_id
-  FROM o5.SFCC_ACTV_PIM_ASSORTMENT_O5 prd
- inner JOIN pim_exp_bm.pim_ab_o5_web_folder_data@pim_read fld ON trim(fld.folder_path) = trim(prd.folder_path)
+SELECT folder_id || '|' || product_id
+  FROM ALL_ACTV_PIM_ASST_FULL_o5
 union
-SELECT lower(replace(replace(replace( prd.folder_path,'/Assortments/SaksMain/ShopCategory/',''),'/Assortments/SaksMain/Custom/',''),'/','>')) || '|' || prd.product_id
-  FROM o5.SFCC_ACTV_PIM_ASSORTMENT_O5 prd
- inner JOIN pim_exp_bm.pim_ab_o5_web_folder_data@pim_read fld ON trim(fld.folder_path) = trim(prd.folder_path)
-;
+SELECT lower(replace(replace(replace( folder_path,'/Assortments/SaksMain/ShopCategory/',''),'/Assortments/SaksMain/Custom/',''),'/','>')) || '|' || product_id
+  FROM ALL_ACTV_PIM_ASST_FULL_o5;
 exit;
