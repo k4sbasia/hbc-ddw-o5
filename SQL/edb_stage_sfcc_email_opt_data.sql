@@ -171,7 +171,7 @@ canada_flag,
 'M',
 language
 from &1.edb_stage_sfcc_email_opt_data
-where decode('&1','o5.',trim(OFF5TH_OPT_STATUS),'mrep.',trim(saks_opt_status)) = 'F')
+where decode('&1','o5.',trim(OFF5TH_OPT_STATUS),'mrep.',trim(saks_opt_status)) = 'F'
 and email_address is not null;
 
 commit;
