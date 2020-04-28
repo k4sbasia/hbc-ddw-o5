@@ -61,7 +61,14 @@ sqlplus -s -l  $CONNECTDW <<EOF>> ${LOG_FILE} @${SQL}/${PROCESS}.sql >>${LOG_FIL
 EOF
 echo "sub spool started" >> ${LOG_FILE}
 sqlplus -s $CONNECTDW  @${SQL}/${SQLSUB}.sql > ${DATA}/${sub}
-
+retcode=$?
+if [ $retcode -ne 0 ]
+then
+        echo "SQL Error in merging generating file for process ${PROCESS}...Please check" >> ${LOG_FILE}
+        exit 99
+else
+        echo "File generatd for the process ${PROCESS} is complete" >> ${LOG_FILE}
+fi
 echo "o5_edb_export_delta ended" >> ${LOG_FILE}
 #################################################################
 ##Update Runstats Finish
