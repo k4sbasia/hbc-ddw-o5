@@ -44,7 +44,7 @@ from
 &1.edb_stage_sfcc_email_opt_data
 where 
 (source_id in ('9166','500','9184','9197','9168','9050','9192','9193') and
-decode('&1','o5.',trim(OFF5TH_OPT_STATUS),'mrep.',trim(saks_opt_status)) = 'T')
+decode('&1','o5.',trim(OFF5TH_OPT_STATUS),'mrep.',trim(saks_opt_status)) = 'Y')
 and email_address is not null;
 
 commit;
@@ -86,7 +86,7 @@ language
 from
 &1.edb_stage_sfcc_email_opt_data
 where 
- source_id in ('9168') and trim(saks_opt_status) = 'T'
+ source_id in ('9168') and trim(saks_opt_status) = 'Y'
 and email_address is not null;
 
 COMMIT;
@@ -171,7 +171,7 @@ canada_flag,
 'M',
 language
 from &1.edb_stage_sfcc_email_opt_data
-where decode('&1','o5.',trim(OFF5TH_OPT_STATUS),'mrep.',trim(saks_opt_status)) = 'F'
+where decode('&1','o5.',trim(OFF5TH_OPT_STATUS),'mrep.',trim(saks_opt_status)) = 'N'
 and email_address is not null;
 
 commit;
