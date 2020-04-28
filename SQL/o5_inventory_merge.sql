@@ -60,13 +60,15 @@ order by to_date('19700101', 'YYYYMMDD') + ( 1 / 24 / 60 / 60 / 1000) * i.ALLOCA
   ON (UA.SKN_NO = CP.ITEMID )
   WHEN MATCHED THEN
     UPDATE SET IN_STOCK_SELLABLE_QTY = CP.ONHAND,
-    IN_STOCK_UPDATE_DATE=cp.instockdate,
+    IN_STOCK_UPDATE_DATE=cp.alloc_tstmp,
     BATCH_ID=cp.batch_id,
-    MERGE_BATCH_ID=v_prcs_batch
+    MERGE_BATCH_ID=v_prcs_batch,
+    MODIFY_DT=SYSDATE,
+    INSTOCK_DT=cp.instockdate
   WHEN NOT MATCHED THEN
-    INSERT (SKN_NO,IN_STOCK_SELLABLE_QTY,IN_STOCK_UPDATE_DATE,ADD_DT,BATCH_ID,MERGE_BATCH_ID
+    INSERT (SKN_NO,IN_STOCK_SELLABLE_QTY,IN_STOCK_UPDATE_DATE,ADD_DT,BATCH_ID,MERGE_BATCH_ID,INSTOCK_DT
             )
-    VALUES (CP.ITEMID,CP.ONHAND,CP.instockdate,SYSDATE,cp.batch_id,v_prcs_batch
+    VALUES (CP.ITEMID,CP.ONHAND,CP.alloc_tstmp,SYSDATE,cp.batch_id,v_prcs_batch,cp.instockdate
        );
        COMMIT;
     

@@ -130,7 +130,7 @@ language
 from
 mrep.edb_stage_sfcc_email_opt_data
 where 
- source_id in ('9050') and trim(OFF5TH_OPT_STATUS) = 'T'
+ source_id in ('9050') and trim(OFF5TH_OPT_STATUS) = 'Y'
 and email_address is not null;
 */
 
