@@ -70,7 +70,7 @@ order by to_date('19700101', 'YYYYMMDD') + ( 1 / 24 / 60 / 60 / 1000) * i.ALLOCA
   WHEN NOT MATCHED THEN
     INSERT (SKN_NO,STORE_ID,IN_STORE_QTY,IN_STORE_UPDATE_DATE,ADD_DT,BATCH_ID,MERGE_BATCH_ID,INSTOCK_DT
             )
-    VALUES (CP.ITEMID,CP.STOREID,CP.ONHAND,CP.instockdate,SYSDATE,cp.batch_id,v_prcs_batch,cp.INSTOCK_DT
+    VALUES (CP.ITEMID,CP.STOREID,CP.ONHAND,CP.alloc_tstmp,SYSDATE,cp.batch_id,v_prcs_batch,cp.instockdate
        );
        COMMIT;
     
