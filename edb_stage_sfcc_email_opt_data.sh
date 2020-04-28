@@ -113,7 +113,7 @@ retcode=`echo $?`
               mv $DATA/${f} $DATA/ARCHIVE
       fi
 #################################################################
-sqlplus -s -l $CONNECTDW <<EOF>> ${LOG_FILE} @$SQL/${PROCESS}.sql "bay_ds." >> ${LOG_FILE}
+sqlplus -s -l $CONNECTDW <<EOF>> ${LOG_FILE} @$SQL/${PROCESS}.sql "${BANNER}." >> ${LOG_FILE}
 retcode=$?
 if [ $retcode -ne 0 ]
 then
