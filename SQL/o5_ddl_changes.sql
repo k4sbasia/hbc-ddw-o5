@@ -214,3 +214,68 @@ COMMIT;
 
 
 GRANT ALL ON o5.EDB_STAGE_SFCC_WL_WRK to DM_USER;  
+
+
+create or replace PROCEDURE       "P_WAITLIST_DATA_PREP_SFCC"
+is 
+bm_prd_id number;
+bm_sku_id number;
+currPrice varchar2(20)   default null;
+vPrdCode  varchar2(200) default null;
+vSku      number(20);
+vSkuCode varchar2(200) default null;
+
+begin
+  execute immediate 'truncate table O5.edb_stage_dw_waitlist_wrk';
+ -- update O5.edb_stage_mongo_wl_wrk set product_skus =replace(replace(replace(replace(product_skus,']'),'[') ,'"'),' ');
+ -- commit;
+
+
+
+    dbms_output.put_line('sku '||bm_prd_id||bm_sku_id);
+
+      Insert into o5.edb_stage_dw_waitlist_wrk (WAITLIST_ID
+                                              ,EMAIL_ADDRESS
+                                              ,UPC
+                                              ,BRAND_NAME
+                                              ,ITEM_DESC
+                                              ,SKU_SIZE
+                                              ,SKU_COLOR
+                                              ,SKU_PRICE
+                                              ,PRODUCT_CODE
+                                              ,QTY
+                                              ,PRODUCT_DETAIL_URL
+                                              ,WAITLIST_CREATED_DT
+                                              ,WAITLIST_STATUS_CHANGE
+                                              ,WAITLIST_SENT_DT
+                                              ,WAITLIST_STATUS
+                                              ,PHONE_NUMBER)
+                         SELECT o5.WAITLIST_SEQ.nextval
+                                              ,upper(sfw.email_address)
+                                              ,bpw.upc
+                                              ,bpw.BRAND_NAME
+                                              ,bpw.BM_DESC
+                                              ,bpw.SKU_SIZE1_DESC
+                                              ,bpw.SKU_COLOR
+                                              ,bpw.SKU_SALE_PRICE
+                                              ,bpw.STYL_SEQ_NUM
+                                              ,bpw.WH_SELLABLE_QTY
+                                              ,bpw.PRODUCT_URL
+                                              ,to_date(sfw.add_date,'MM/DD/YYYY HH24:MI:SS')
+                                              ,null
+                                              ,null
+                                              ,'N'
+                                              ,sfw.PHONE_NUMBER
+ FROM o5.O5_PARTNERS_EXTRACT_WRK bpw ,o5.edb_stage_sfcc_wl_wrk sfw
+where bpw.sku=sfw.PRODUCT_SKUS   ;
+      commit;
+
+
+
+
+end p_waitlist_data_prep_SFCC;
+/
+
+GRANT EXECUTE ON P_WAITLIST_DATA_PREP_SFCC TO DM_USER;
+
+ALTER TABLE O5.WAITLIST ADD (WAITLIST_RCVD_SDW_DT DATE DEFAULT SYSDATE);

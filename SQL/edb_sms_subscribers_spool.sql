@@ -14,7 +14,7 @@ select 'mdn' from dual;
 SELECT distinct phone_number
 FROM &1.waitlist W
 WHERE w.phone_number is not null
-and WAITLIST_CREATED_DT >=(select max(last_extract_time) from  mrep.job_extract_status where process_name='WAITLIST_SMS_SUBS')
+and WAITLIST_RCVD_SDW_DT >=(select max(curr_extract_time) from  mrep.job_extract_status where process_name='WAITLIST_SMS_SUBS')
 ;
 
 exit;
