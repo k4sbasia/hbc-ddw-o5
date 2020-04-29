@@ -18,8 +18,8 @@ COMPARE_PRICE ||'|'||
 replace(MREP.CHAR_REPLACE_NEW(BRAND_NAME), '|', ' ') ||'|'||
 replace(MREP.CHAR_REPLACE_NEW(SKU_COLOR), '|', ' ') ||'|'||
 replace(MREP.CHAR_REPLACE_NEW(SKU_SIZE1_DESC), '|', '/') ||'|'||
-REPLACE(image_url,'300x400.jpg','_247x329.jpg')||'|'||
-REPLACE(image_url,'300x400.jpg','_222x296.jpg')||'|'||
+REPLACE(image_url,'_300x400.jpg','_247x329.jpg')||'|'||
+REPLACE(image_url,'_300x400.jpg','_222x296.jpg')||'|'||
 'USD'||'|'||
 ''
 from
