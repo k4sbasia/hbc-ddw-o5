@@ -11,7 +11,7 @@ UPC||'|'||
 replace(MREP.CHAR_REPLACE_NEW(SKU_DESC), '|', ' ') ||'|'||
 STYL_SEQ_NUM||'|'||
 replace(MREP.CHAR_REPLACE_NEW(category), '|', ' ') ||'|'||
-prd_parent_id ||'|'||
+''||'|'||
 replace(MREP.CHAR_REPLACE_NEW(bm_desc), '|', ' ') ||'|'||
 sku_sale_price||'|'||
 COMPARE_PRICE ||'|'||
