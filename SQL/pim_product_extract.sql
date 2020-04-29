@@ -32,6 +32,7 @@ EXECUTE IMMEDIATE 'truncate table &1.all_active_pim_prd_attr_&2';
 EXECUTE IMMEDIATE 'truncate table &1.all_active_pim_sku_attr_&2';
 EXECUTE IMMEDIATE 'truncate table &1.all_actv_pim_assortment_&2';
 EXECUTE IMMEDIATE 'truncate table &1.ALL_PRODUCT_ATTR_RR_FEED_&2';
+EXECUTE IMMEDIATE 'truncate table &1.ALL_ACTV_PIM_ASST_FULL_&2';
     --Get Product Attributes
     DBMS_OUTPUT.PUT_LINE('PIM Product ATTRIBUTE Fetch Process Start :  '|| to_char(sysdate,'MM-DD-YYYY HH:MI:SS'));
     INSERT INTO all_active_pim_prd_attr_&2
@@ -83,7 +84,7 @@ EXECUTE IMMEDIATE 'truncate table &1.ALL_PRODUCT_ATTR_RR_FEED_&2';
                PIM_ACTV_DT,
                ADD_DT,
                MODIFY_DT,
-               TRIM(REPLACE(REPLACE(REPLACE(TRANSLATE(attribute_val, 'x'||CHR(10)||CHR(13), 'x'),'|',''),'^',''),'�','')) attribute_val
+               TRIM(REPLACE(REPLACE(REPLACE(TRANSLATE(pim_exp_bm.char_conversion_new(attribute_val), 'x'||CHR(10)||CHR(13), 'x'),'|',''),'^',''),'�','')) attribute_val
         FROM &3
        WHERE
        attribute_name IN  ( 'status',
@@ -252,8 +253,8 @@ READYFORPRODFOLDER
             AND EXISTS (SELECT 1
                           FROM &6 fla
                          WHERE fla.folder_path = fl.folder_path
-                           AND (CASE WHEN fla.attribute_name = 'readyForProdFolder' AND fla.attribute_val = 'Yes' THEN 1
-                                     WHEN fla.attribute_name = 'folderactive'   AND fla.attribute_val = 'Yes' THEN 1
+                           AND (CASE WHEN   lower(fla.attribute_name) = 'readyforprodfolder' AND fla.attribute_val = 'Yes' THEN 1
+                                     WHEN lower(fla.attribute_name) = 'folderactive' AND fla.attribute_val = 'Yes' THEN 1
                                      ELSE 0
                                  END) = 1)
             ORDER BY LEVEL, fl.folder_id
@@ -266,7 +267,7 @@ READYFORPRODFOLDER
                 fd.folder_path,
 --                asrt.assort_name ||
                 asrt.sub_assrt_name  || '/' || object_name AS product_asrt,
-                row_number() OVER(PARTITION BY asrt.object_name ORDER BY greatest(asrt.pim_actv_dt,asrt.modify_dt) DESC) AS latest_prd_path
+                 row_number() OVER(PARTITION BY asrt.object_name ORDER BY least(asrt.pim_actv_dt,asrt.modify_dt) ASC) AS latest_prd_path
         FROM
                 &7 asrt
                 JOIN all_folder_data fd ON fd.folder_path = asrt.assort_name || asrt.sub_assrt_name
@@ -285,6 +286,145 @@ READYFORPRODFOLDER
     DBMS_OUTPUT.PUT_LINE('PIM Assortment Fetch Process End :  '|| to_char(sysdate,'MM-DD-YYYY HH:MI:SS') || ' - ' || nvl((SQL%rowcount),0));
     COMMIT;
 DBMS_OUTPUT.PUT_LINE('Rich Relavance all product attribite Fetch Process Started  :  '|| to_char(sysdate,'MM-DD-YYYY HH:MI:SS'));
+INSERT INTO &1.ALL_ACTV_PIM_ASST_FULL_&2
+    (
+      PRODUCT_ID  ,
+PRIMARY_PARENT_CATEGORY ,
+PATH_LABEL ,
+FOLDER_PATH,
+PRODUCT_ASRT ,
+FOLDERACTIVE,
+READYFORPRODFOLDER,
+LABEL,
+FOLDER_PARENT_ID,
+FOLDER_NAME,
+FOLDER_ID
+    )
+    WITH all_folder_data
+      AS (
+          SELECT DISTINCT
+                fl.folder_id,
+                fl.folder_name,
+                fl.folder_path,
+                fl.label,
+                fl.folder_parent_id,
+                CONNECT_BY_ROOT fl.folder_name AS primary_parent_category,
+                substr(sys_connect_by_path(fl.LABEL,'~'),2) AS path_label,
+                LEVEL
+            FROM &5 fl
+            START WITH fl.folder_parent_id = 1408474395181057
+            CONNECT BY PRIOR fl.folder_id = fl.folder_parent_id
+            AND EXISTS (SELECT 1
+                          FROM &6 fla
+                         WHERE fla.folder_path = fl.folder_path
+                           AND (CASE WHEN lower(fla.attribute_name) = 'readyforprodfolder' AND fla.attribute_val = 'Yes' THEN 1
+                                     WHEN fla.attribute_name = 'folderactive'   AND fla.attribute_val = 'Yes' THEN 1
+                                     ELSE 0
+                                 END) = 1)
+            ORDER BY LEVEL, fl.folder_id
+        )
+        ,all_assortments AS (
+            SELECT
+                asrt.object_name AS product_id,
+                fd.primary_parent_category,
+                fd.path_label,
+                fd.folder_path,
+                fd.label,
+                fd.folder_parent_id,
+                fd.folder_name,
+                fd.folder_id,
+--                asrt.assort_name ||
+                asrt.sub_assrt_name  || '/' || object_name AS product_asrt,
+                row_number() OVER(PARTITION BY asrt.object_name ORDER BY greatest(asrt.pim_actv_dt,asrt.modify_dt) DESC) AS latest_prd_path
+        FROM
+                &7 asrt
+                JOIN all_folder_data fd ON fd.folder_path = asrt.assort_name || asrt.sub_assrt_name
+            WHERE ACTIVITY_IND<>'Delete'
+        ) SELECT
+            product_id,
+            primary_parent_category,
+            path_label,
+            folder_path,
+            product_asrt,
+            'T' FOLDERACTIVE,
+            'T' READYFORPRODFOLDER,
+            label,
+            folder_parent_id,
+            folder_name,
+            folder_id
+        FROM all_assortments;
+Commit;
+         INSERT INTO &1.ALL_ACTV_PIM_ASST_FULL_&2
+    (
+      PRODUCT_ID  ,
+PRIMARY_PARENT_CATEGORY ,
+PATH_LABEL ,
+FOLDER_PATH,
+PRODUCT_ASRT ,
+FOLDERACTIVE,
+READYFORPRODFOLDER,
+LABEL,
+FOLDER_PARENT_ID,
+FOLDER_NAME,
+FOLDER_ID
+    )
+    WITH all_folder_data
+      AS (
+            SELECT DISTINCT
+                fl.folder_id,
+                fl.folder_name,
+                fl.folder_path,
+                fl.folder_parent_id,
+                fl.label,
+              CONNECT_BY_ROOT fl.folder_name AS primary_parent_category,
+                substr(sys_connect_by_path(fl.LABEL,'~'),2) AS path_label,
+                LEVEL
+            FROM &5 fl
+            START WITH fl.folder_parent_id = 1408474395181059
+            CONNECT BY PRIOR fl.folder_id = fl.folder_parent_id
+            AND fl.folder_path LIKE '/Assortments/SaksMain/ShopCategory%'
+            AND EXISTS (SELECT 1
+                          FROM  &6 fla
+                         WHERE fla.folder_path = fl.folder_path
+                           AND (CASE WHEN   lower(fla.attribute_name) = 'readyforprodfolder' AND fla.attribute_val = 'Yes' THEN 1
+                                     WHEN lower(fla.attribute_name) = 'folderactive' AND fla.attribute_val = 'Yes' THEN 1
+                                     ELSE 0
+                                 END) = 1)
+            ORDER BY LEVEL, fl.folder_id
+        )
+        ,all_assortments AS (
+            SELECT
+                asrt.object_name AS product_id,
+                fd.primary_parent_category,
+                fd.path_label,
+                fd.folder_path,
+                fd.label,
+                fd.folder_parent_id,
+                fd.folder_name,
+                fd.folder_id,
+--                asrt.assort_name ||
+                asrt.sub_assrt_name  || '/' || object_name AS product_asrt,
+                row_number() OVER(PARTITION BY asrt.object_name ORDER BY greatest(asrt.pim_actv_dt,asrt.modify_dt) DESC) AS latest_prd_path
+        FROM
+                            &7 asrt
+                JOIN all_folder_data fd ON fd.folder_path = asrt.assort_name || asrt.sub_assrt_name
+            WHERE TRIM(asrt.assort_name) = '/Assortments/SaksMain/ShopCategory'
+                and ACTIVITY_IND<>'Delete'
+        ) SELECT
+            product_id,
+            primary_parent_category,
+            path_label,
+            folder_path,
+            product_asrt,
+            'T' FOLDERACTIVE,
+            'T' READYFORPRODFOLDER,
+            label,
+            folder_parent_id,
+            folder_name,
+            folder_id
+        FROM all_assortments
+      ;
+commit;
 insert into ALL_PRODUCT_ATTR_RR_FEED_&2
 WITH all_product_attributes AS
        (SELECT

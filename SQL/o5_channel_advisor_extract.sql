@@ -190,7 +190,7 @@ FROM
     FROM O5.bi_product_aggregate WRK
     WHERE product_code = PRD.STYL_SEQ_NUM)
      AS SIZES,
-    (SELECT prod_sizes
+    (SELECT prod_colors
     FROM O5.bi_product_aggregate WRK
     WHERE product_code = PRD.STYL_SEQ_NUM) AS COLOR,
     'P'                                                        AS VARIATION_NAME ,
