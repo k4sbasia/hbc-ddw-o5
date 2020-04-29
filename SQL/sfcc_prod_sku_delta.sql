@@ -88,7 +88,7 @@ BEGIN
                         execute immediate v_ins_sql;
                         --COMMIT;
                      ELSE
-                        v_upd_sql:= 'UPDATE  O5.SFCC_PROD_SKU_DYN_FLAGS SET '||v_upd_set_lst||' ,PIM_CHG_DT=SYSDATE , PRODUCT_ID='||v_curr_prd||' WHERE  UPC ='''|| v_curr_upc||'''';
+                        v_upd_sql:= 'UPDATE  O5.SFCC_PROD_SKU_DYN_FLAGS SET '||v_upd_set_lst||' ,PIM_CHG_DT=SYSDATE , PRODUCT_ID='''||v_curr_prd||''' WHERE  UPC ='''|| v_curr_upc||'''';
                        -- dbms_output.put_line (v_upd_sql);
                         execute immediate v_upd_sql;
                         --COMMIT;
@@ -161,7 +161,7 @@ BEGIN
                         execute immediate v_ins_sql;
                             COMMIT;
                        ELSE
-                        v_upd_sql:= 'UPDATE  O5.SFCC_PROD_SKU_DYN_FLAGS SET '||v_upd_set_lst||' ,PIM_CHG_DT=SYSDATE , PRODUCT_ID='||v_curr_prd||' WHERE  UPC ='''|| v_curr_upc||'''';
+                        v_upd_sql:= 'UPDATE  O5.SFCC_PROD_SKU_DYN_FLAGS SET '||v_upd_set_lst||' ,PIM_CHG_DT=SYSDATE , PRODUCT_ID='''||v_curr_prd||''' WHERE  UPC ='''|| v_curr_upc||'''';
                        --  dbms_output.put_line (v_upd_sql);
                         execute immediate v_upd_sql;
                             COMMIT;
