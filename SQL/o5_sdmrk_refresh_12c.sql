@@ -4,49 +4,72 @@ set pagesize 0
 set tab off
 SET LINESIZE 10000
 set timing on
---  WEEKLY RE_FRESH SDMRK.O5_ORDERS
-TRUNCATE TABLE SDMRK.O5_ORDERS;
-COMMIT;
+
+SELECT 'Alter table for nologging - SDMRK.O5_ORDERS:' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
+ALTER TABLE SDMRK.O5_ORDERS NOLOGGING;
+
+
+SELECT 'Truncate table SDMRK.O5_ORDERS:' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
+TRUNCATE TABLE SDMRK.O5_ORDERS REUSE STORAGE;
+
+--Disable indexes for O5_Orders
+DECLARE
+BEGIN
+  FOR R1 IN
+  (SELECT INDEX_NAME,OWNER,TABLE_NAME
+  FROM ALL_INDEXES
+  WHERE TABLE_NAME = 'O5_ORDERS' and OWNER = 'SDMRK'
+  )
+  Loop
+    begin
+    EXECUTE IMMEDIATE 'ALTER INDEX '|| R1.Index_Name|| 'ON SDMRK.O5_ORDERS DISABLE';
+    Exception When Others Then
+    null;
+   end;
+    END LOOP;
+END;
+/
 ---
+SELECT 'Insert into SDMRK.O5_ORDERS:' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
 INSERT INTO SDMRK.O5_ORDERS
 (ORDER_NUMBER ,
 ORDER_LINE_NUMBER,
 ORDERDATE,
-ORDER_LINE_STATUS, 
+ORDER_LINE_STATUS,
 ORDER_HEADER_STATUS,
 ORDER_TYPE,
 CUSTOMER_NUMBER,
 FREIGHT_CHARGES ,
 SHIP_VIA,
 CANCELLATION_DOLLARS,
-RETURN_DOLLARS,     
-TAX,       
-CANCEL_DATE,         
-PROMO_ID , 
-REFER_ID, 
+RETURN_DOLLARS,
+TAX,
+CANCEL_DATE,
+PROMO_ID ,
+REFER_ID,
 DEMAND_DOLLARS,
 DEMAND_UNITS,
 CANCEL_REASON_CODE,
 CANCEL_REASON_DESCRIPTION,
 RETURN_REASON_CODE,
 RETURN_REASON_DESCRIPTION,
-BACKORDER_INDICATOR,   
-SAKS_FIRST_INDICATOR, 
-EMPLOYEE_INDICATOR,   
-SAKS_FIRST_FREE_SHIP_INDICATOR,    
-FILL_LOCATION ,      
+BACKORDER_INDICATOR,
+SAKS_FIRST_INDICATOR,
+EMPLOYEE_INDICATOR,
+SAKS_FIRST_FREE_SHIP_INDICATOR,
+FILL_LOCATION ,
 CUSTOMER_ID,
 INDIVIDUAL_ID ,
-HOUSEHOLD_ID ,  
+HOUSEHOLD_ID ,
 SHIP_DATE ,
 CREDIT_CARD_TYPE,
 CREDIT_CARD_DESCRIPTION,
 BILL_TO_ADDRESS_ID,
 SHIP_TO_ADDRESS_ID ,
-STORE_NUMBER,  
-RETURN_DATE , 
+STORE_NUMBER,
+RETURN_DATE ,
 ITEM_NUMBER ,
-SKU ,   
+SKU ,
 VENDOR_ID,
 DEPARTMENT_ID,
 GROUP_ID,
@@ -54,23 +77,24 @@ DIVISION_ID,
 GIFT_WRAP_INDICATOR,
 GIFTWRAP_TYPE ,
 FIRST_PO_DATE  ,
-RETURN_UNITS , 
-CANCELLATION_UNITS ,  
-EMC_NUMBER , 
-AFFILIATE_ID , 
-INTERNATIONAL_IND,  
+RETURN_UNITS ,
+CANCELLATION_UNITS ,
+EMC_NUMBER ,
+AFFILIATE_ID ,
+INTERNATIONAL_IND,
 SHIP_ADDR1,
-SHIP_ADDR2, 
-SHIP_ADDR3 , 
+SHIP_ADDR2,
+SHIP_ADDR3 ,
 SHIP_CITY ,
 SHIP_STATE,
 SHIP_ZIPCODE,
-SHIP_COUNTRY,  
+SHIP_COUNTRY,
 ANYTIME_IND,
 FLASH_IND,
 FULLFILLLOCATION,
-MORE_NUMBER, 
-csr_id)
+MORE_NUMBER,
+csr_id,
+SRIND)
    SELECT ORDERNUM Order_Number,
           LINENUM Order_Line_Number,
      --     TRUNC (ORDERDATE) Orderdate,
@@ -147,7 +171,8 @@ csr_id)
 	RPT_FLASH,
  	FULLFILLLOCATION,
 MORE_NUMBER,
-csr_id
+csr_id,
+SRIND
 FROM
 (
   SELECT ordernum ordernum,
@@ -492,52 +517,61 @@ FROM
     RPT_ANYTIME,
     FULLFILLLOCATION,
 MORE_NUMBER,
-csr_id
-  FROM &1.Bi_Sale@&3
+csr_id,
+SRIND
+  FROM o5.Bi_Sale@reportdb
   where ORDERDATE>='01-jan-2004'
   )
   where LINENUM is not null
     AND order_header_status not in ('N')
 ;
-
 COMMIT;
 
---merge into SDMRK.O5_ORDERS TRG using
---(select distinct BM_ORDER_NUMBER, DEMANDWARE_ORDER_NUMBER from O5.ORDER_REPORT where BM_ORDER_NUMBER is not null and lower(BM_ORDER_NUMBER)<>'null'
---) SRC ON (to_number(SRC.BM_ORDER_NUMBER)=TRG.ORDER_NUMBER)
---WHEN matched THEN
- -- update
-  --set TRG.DW_ORDER_NUMBER=SRC.DEMANDWARE_ORDER_NUMBER
- -- where DW_ORDER_NUMBER is null ;
+---- Rebuild indexes for ORDERS
+DECLARE
+BEGIN
+  FOR R1 IN
+  (SELECT INDEX_NAME,OWNER,TABLE_NAME
+  FROM ALL_INDEXES
+  WHERE TABLE_NAME = 'O5_ORDERS' and OWNER = 'SDMRK'
+  )
+  Loop
+    begin
+    EXECUTE IMMEDIATE 'ALTER INDEX '|| R1.Index_Name|| 'ON SDMRK.O5_ORDERS REBUILD';
+    Exception When Others Then
+    null;
+   end;
+    END LOOP;
+END;
+/
 
---COMMIT;
+SELECT 'Alter table for nologging for SDMRK.O5_PRODUCT:' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
+ALTER TABLE SDMRK.O5_PRODUCT NOLOGGING;
 
---MERGE INTO SDMRK.O5_ORDERS HST USING
---(SELECT DISTINCT order_number,
---  sku,
---  qs.evt_id,
---  ff.evt_name
---FROM SDMRK.O5_ORDERS O
---INNER JOIN MREP.BI_QUICK_STATS_OFFPRICE QS
---ON TRUNC(O.ORDERDATE) = TRUNC(QS.QS_DT_KEY)
---AND O.SKU             = QS.QS_SKU
---AND O.ITEM_NUMBER     = QS.QS_ITEM
---INNER JOIN SAKS_CUSTOM.FASHION_FIX_EVENTS@O5PROD_SAKS_CUSTOM FF
---ON QS.EVT_ID = FF.EVT_ID
---AND TRUNC(o.orderdate) BETWEEN TRUNC(evt_vip_start_dt) AND TRUNC(evt_end_dt)
---WHERE NVL(QS.EVT_ID,'99999') <> '99999'
----AND o.flash_ind               = 'T'
---AND o.evt_id                 IS NULL
---) TRN ON (trn.order_number    = hst.order_number AND hst.sku = trn.sku)
---WHEN MATCHED THEN
---  UPDATE SET HST.EVT_ID = TRN.EVT_ID, hst.evt_name = trn.evt_name;
---  COMMIT;
---
-ANALYZE TABLE SDMRK.O5_ORDERS ESTIMATE STATISTICS;
 --  Re Fresh Product
-
-TRUNCATE TABLE SDMRK.O5_PRODUCT;
+SELECT 'Truncate table SDMRK.O5_PRODUCT: ' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
+TRUNCATE TABLE SDMRK.O5_PRODUCT REUSE STORAGE;
 COMMIT;
+
+--Disable indexes for Product
+DECLARE
+BEGIN
+  FOR R1 IN
+  (SELECT INDEX_NAME,OWNER,TABLE_NAME
+  FROM ALL_INDEXES
+  WHERE TABLE_NAME = 'O5_PRODUCT' and OWNER = 'SDMRK'
+  )
+  Loop
+    begin
+    EXECUTE IMMEDIATE 'ALTER INDEX '|| R1.Index_Name|| 'ON SDMRK.O5_PRODUCT DISABLE';
+    Exception When Others Then
+    null;
+   end;
+    END LOOP;
+END;
+/
+
+SELECT 'Insert into SDMRK.O5_PRODUCT:' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
 
 INSERT INTO SDMRK.O5_PRODUCT
           (UPC ,
@@ -574,7 +608,9 @@ INSERT INTO SDMRK.O5_PRODUCT
           PRODUCT_CODE,
           STORE_INVENTORY,
           PRD_ID,
-          DEACTIVE_IND
+          DEACTIVE_IND,
+          COMPARE_PRICE,
+          readyforprod_flag
 )
    SELECT a.UPC UPC,
           SKU SKU,
@@ -608,17 +644,38 @@ INSERT INTO SDMRK.O5_PRODUCT
           PRICE_STATUS price_status,
           BRAND_NAME brand_name,
           NVL(a.PRODUCT_CODE,a.ITEM) PRODUCT_CODE,
-          s.in_store_qty as "STORE_INVENTORY",
-          p.product_code PRD_ID,
-          a.DEACTIVE_IND
-     FROM &1.bi_product a,
-     &1.inventory s ,
-     &1.all_active_product_sku_&2 p
-     WHERE a.UPC = lpad(s.SKN_NO(+),13,0)
-     and a.PRODUCT_CODE = p.upc;
+          s.in_store_qty as STORE_INVENTORY,
+          a.product_code PRD_ID,
+          a.DEACTIVE_IND,
+          DECODE(NVL(a.COMPARE_PRICE,0),0,NVL(a.ITEM_LIST_PRICE,0),NVL(a.COMPARE_PRICE,0)) COMPARE_PRICE,
+          case when READYFORPROD = 'Yes' then 'T'
+          else 'F'
+          end
+     FROM &1.bi_product@reportdb a,
+     &1.inventory@reportdb s
+     WHERE a.sku = lpad(s.SKN_NO,13,'0');
 
 commit;
 
+DECLARE
+BEGIN
+  FOR R1 IN
+  (SELECT INDEX_NAME,OWNER,TABLE_NAME
+  FROM ALL_INDEXES
+  WHERE TABLE_NAME = 'O5_PRODUCT' and OWNER = 'SDMRK'
+  )
+  Loop
+    begin
+    EXECUTE IMMEDIATE 'ALTER INDEX '|| R1.Index_Name|| 'ON SDMRK.O5_PRODUCT REBUILD';
+    Exception When Others Then
+    null;
+   end;
+    END LOOP;
+END;
+/
+
+
+/*
 merge into sdmrk.o5_product trg
 using (select web_book_dt,final_item_num from &1.bi_pubdate@&3) src
 on (NVL(trg.PRODUCT_CODE,trg.ITEM) = src.FINAL_ITEM_NUM)
@@ -626,38 +683,41 @@ when matched then
 update set trg.web_book_dt = src.web_book_dt;
 
 commit;
+*/
 
 merge into sdmrk.o5_product trg
-using (select initcap(bm_desc) bm_desc, item_id from &1.bi_product_id@&3) src
-on (NVL(trg.PRODUCT_CODE,trg.ITEM) = src.ITEM_ID)
+using (select f_rev_char_conversion(replace(replace(initcap(bm_desc),'Amp;',''),'''S','''s'))  bm_desc,
+to_date(READYFORPROD_TIMER,'MM/DD/YYYY HH:MI AM') readyforprod_timer, product_id item_id
+from o5.ALL_ACTIVE_PIM_PRD_ATTR_O5@reportdb
+) src
+on (trg.PRODUCT_CODE = src.ITEM_ID)
 when matched then
-update set trg.bm_desc = src.bm_desc;
-
+update set trg.bm_desc = src.bm_desc,
+           trg.readyforprod_timer = src.readyforprod_timer;
 commit;
 
-merge into sdmrk.o5_product trg
-using (   select
-        PRODUCT_ID product_code,
-        PRD_READYFORPROD readyforprod_flag
- from &1.all_active_pim_prd_attr_&2
-  ) src
-on (trg.product_code = src.product_code)
-when matched then
-update set trg.readyforprod_flag = src.readyforprod_flag;
-
-commit;
-
-merge into sdmrk.o5_product trg
-using (  select
-        PRODUCT_ID product_code,
-        READYFORPROD_TIMER readyforprod_timer
- from &1.all_active_pim_prd_attr_&2
-  ) src
-on (trg.product_code = src.product_code)
-when matched then
-update set trg.readyforprod_timer = src.readyforprod_timer;
-
-commit;
+ --- Fixing the ampersand chars in the product description
+ --- Suppress French/Accented characters in BM_DESC as this is being used to trigger email campaigns to Cheetah and Cheetah is unable to translate them
+ SELECT 'Update SDMRK.O5_PRODUCT for fixing the ampersand chars and suppress accent characters in the product description: ' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
+ DECLARE
+ CURSOR REC_CUR IS
+ SELECT ROWID FROM SDMRK.O5_PRODUCT;
+ TYPE ROWID_T IS TABLE OF VARCHAR2(50);
+ ROWID_TAB ROWID_T;
+ BEGIN
+ OPEN REC_CUR;
+ LOOP
+ FETCH REC_CUR BULK COLLECT INTO ROWID_TAB LIMIT 5000;
+ EXIT WHEN ROWID_TAB.COUNT() = 0;
+ FORALL I IN ROWID_TAB.FIRST .. ROWID_TAB.LAST
+ UPDATE SDMRK.O5_PRODUCT NOLOGGING
+ SET bm_desc = replace(initcap(utl_raw.cast_to_varchar2((nlssort(f_rev_char_conversion(replace(replace(bm_desc,'Amp;',''),'amp;','')),'nls_sort=binary_ai')))),'''S','''s')
+ WHERE ROWID = ROWID_TAB(I);
+ COMMIT;
+ END LOOP;
+ CLOSE REC_CUR;
+ END;
+ /
 
 UPDATE SDMRK.O5_PRODUCT
 SET SKU_COLOR = 'BEAT MEN'
@@ -665,12 +725,10 @@ WHERE SKU_COLOR like 'BEAT MEN%' ;
 
 commit;
 
-ANALYZE TABLE SDMRK.O5_PRODUCT ESTIMATE STATISTICS;
-COMMIT;
-
+SELECT 'Truncate table SDMRK.O5_INDIVIDUAL:' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
 TRUNCATE TABLE SDMRK.O5_INDIVIDUAL;
-commit;
-
+COMMIT;
+SELECT 'Insert into SDMRK.O5_INDIVIDUAL:' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
 INSERT INTO SDMRK.O5_INDIVIDUAL
    SELECT INDIVIDUAL_ID Individual_ID,
           LORD_DT LAST_ORDER_DATE,
@@ -700,21 +758,17 @@ INSERT INTO SDMRK.O5_INDIVIDUAL
           WEB_CUSTOMER,
           STORE_ASSOCIATE_CUSTOMER,
           CALL_CENTER_CUSTOMER
-     FROM &1.BI_INDIVIDUAL@&3
+     FROM O5.BI_INDIVIDUAL@reportdb
     WHERE INDIVIDUAL_ID NOT IN (102264328, 102289121);
 
 COMMIT;
 
 ---CONSOLIDATING INTERNATIONAL UNKNOWN CUSTOMER TO ONE INDIVIDUAL ID OF 999999999
-
-
-
-ANALYZE TABLE SDMRK.O5_INDIVIDUAL ESTIMATE STATISTICS;
-COMMIT;
+SELECT 'Truncate table SDMRK.O5_CUSTOMER:' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
 TRUNCATE TABLE SDMRK.O5_customer;
 COMMIT;
 
-
+SELECT 'SDMRK.O5_CUSTOMER:' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
 INSERT INTO SDMRK.O5_customer
    SELECT CUSTOMER_ID CUSTOMER_ID,
           (CASE
@@ -743,7 +797,7 @@ INSERT INTO SDMRK.O5_customer
 	MORE_NUMBER,
 	user_id,
 	SDMRK.STRING_TO_MD5_HASH(INTERNETADDRESS)
-     FROM &1.bi_customer@&3
+     FROM o5.bi_customer@reportdb
     WHERE INTERNETADDRESS LIKE '%@%' AND INTERNETADDRESS LIKE '%.%'
           AND (   LENGTH (
                      SUBSTR (INTERNETADDRESS,
@@ -763,21 +817,7 @@ INSERT INTO SDMRK.O5_customer
                              INSTR (INTERNETADDRESS, '.') + 1)) > 1);
 
 COMMIT;
-ANALYZE TABLE SDMRK.O5_CUSTOMER ESTIMATE STATISTICS;
-COMMIT;
-
-merge into sdmrk.O5_Demandware_users trg
-using (SELECT distinct email_address, demandware_userid
-       from  &1.O5_Demandware_users@&3) hst
-on (upper(trim(trg.email_address))=upper(trim(hst.email_address)))
-when not matched then insert (email_address, demandware_userid) values
-(hst.email_address, hst.demandware_userid);
-COMMIT;
-ANALYZE TABLE SDMRK.O5_Demandware_users ESTIMATE STATISTICS;
-COMMIT;
-
---PROMO_ORDERS
-
+SELECT 'Merge into SDMRK.O5_promo_orders:' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
 MERGE INTO SDMRK.O5_promo_orders hst
      USING (SELECT ordernum,
                    promo_id_01,
@@ -790,7 +830,7 @@ MERGE INTO SDMRK.O5_promo_orders hst
                    promo_id_08,
                    promo_id_09,
                    promo_id_10
-              FROM &1.bi_promo_sale_wrk@&3) trn
+              FROM o5.bi_promo_sale_wrk@reportdb) trn
         ON (trn.ordernum = hst.ordernum)
 WHEN MATCHED
 THEN
@@ -831,16 +871,13 @@ THEN
 
 COMMIT;
 
-ANALYZE TABLE SDMRK.O5_promo_orders ESTIMATE STATISTICS;
-COMMIT;
-----email_addres
+----email_address
+SELECT 'Truncate table SDMRK.O5_EMAIL_ADDRESS:' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
+TRUNCATE TABLE SDMRK.O5_EMAIL_ADDRESS;
 
-TRUNCATE TABLE SDMRK.O5_EMAIL_ADDRESS; 
-
-INSERT
-  /*+ append */
-INTO SDMRK.O5_email_address
- ( 
+SELECT 'Insert into SDMRK.O5_EMAIL_ADDRESS:' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
+INSERT INTO SDMRK.O5_email_address
+ (
     EMAIL_ID,
     EMAIL_ADDRESS,
     GENDER,
@@ -878,27 +915,26 @@ LOCAL_STORE,
 LOCAL_STORE_BY_ZIP,
 CANADA_FLAG,
 SDMRK.STRING_TO_MD5_HASH(EMAIL_ADDRESS)
-FROM &1.EMAIL_ADDRESS@&3
+FROM O5.EMAIL_ADDRESS@reportdb
 WHERE VALID_IND=1;
 
-commit;
+COMMIT;
 
------email events
-
+SELECT 'Truncate table SDMRK.O5_EMAIL_EVENTS:' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
 TRUNCATE TABLE SDMRK.O5_email_events;
 
-INSERT                                                           /*+ append */
-      INTO                SDMRK.O5_email_events (EVENTTYPE,
-                                              EVENTTIME,
-                                              ISSUEID,
-                                              RESULTCODE,
-                                              MIMETYPE,
-                                              SENDTIME,
-                                              EID,
-                                              BUYER_TYPE,
-                                              EMAIL_CNT,
-                                              LOAD_DT)
-   SELECT EVENTTYPE,
+SELECT 'Insert into table SDMRK.O5_EMAIL_EVENTS:' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
+INSERT INTO SDMRK.O5_email_events (EVENTTYPE,
+                                   EVENTTIME,
+                                   ISSUEID,
+                                   RESULTCODE,
+                                   MIMETYPE,
+                                   SENDTIME,
+                                   EID,
+                                   BUYER_TYPE,
+                                   EMAIL_CNT,
+                                   LOAD_DT)
+SELECT EVENTTYPE,
           EVENTTIME,
           ISSUEID,
           RESULTCODE,
@@ -908,51 +944,48 @@ INSERT                                                           /*+ append */
           BUYER_TYPE,
           EMAIL_CNT,
           SYSDATE
-     FROM &1.email_events@&3;
+FROM o5.email_events@reportdb;
 
 COMMIT;
 
-ANALYZE TABLE SDMRK.O5_email_events ESTIMATE STATISTICS;
-
-
+SELECT 'Truncate table SDMRK.O5_EMAIL_MAILING_METADATA:' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
 TRUNCATE TABLE SDMRK.O5_EMAIL_MAILING_METADATA;
 
-INSERT                                                           /*+ append */
-      INTO                SDMRK.O5_EMAIL_MAILING_METADATA (ISSUEID,
-                                                        ISSUENAME,
-                                                        TIMESENT,
-                                                        MAILING_ID,
-                                                        SUBJECT,
-                                                        MAILING_NAME,
-                                                        LOAD_DT)
-   SELECT ISSUEID,
+SELECT 'Insert into SDMRK.O5_EMAIL_MAILING_METADATA:' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
+INSERT INTO SDMRK.O5_EMAIL_MAILING_METADATA (ISSUEID,
+                                             ISSUENAME,
+                                             TIMESENT,
+                                             MAILING_ID,
+                                             SUBJECT,
+                                             MAILING_NAME,
+                                             LOAD_DT)
+SELECT ISSUEID,
           ISSUENAME,
           TIMESENT,
           MAILING_ID,
           SUBJECT,
           MAILING_NAME,
           SYSDATE
-     FROM &1.EMAIL_MAILING_METADATA@&3;
+FROM O5.EMAIL_MAILING_METADATA@reportdb;
 
 COMMIT;
 
-ANALYZE TABLE SDMRK.O5_EMAIL_MAILING_METADATA ESTIMATE STATISTICS;
 
 ---OPT IN/OUT DATA
-
+SELECT 'Truncate table SDMRK.O5_EMAIL_OPT_INOUT:' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
 TRUNCATE TABLE SDMRK.O5_EMAIL_OPT_INOUT;
 
-INSERT                                                           /*+ append */
-      INTO                SDMRK.O5_EMAIL_OPT_INOUT (ADD_BY_SOURCE_ID,
-                                                 CHG_BY_SOURCE_ID,
-                                                 EMAIL_ADDRESS,
-                                                 EMAIL_ID,
-                                                 OPT_DT,
-                                                 OPT_IN,
-                                                 OPT_TIME,
-                                                 LOAD_DT,
-                                                 REASON)
-   SELECT ADD_BY_SOURCE_ID,
+SELECT 'Insert into SDMRK.O5_EMAIL_OPT_INOUT:' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
+INSERT INTO SDMRK.O5_EMAIL_OPT_INOUT (ADD_BY_SOURCE_ID,
+                                      CHG_BY_SOURCE_ID,
+                                      EMAIL_ADDRESS,
+                                      EMAIL_ID,
+                                      OPT_DT,
+                                      OPT_IN,
+                                      OPT_TIME,
+                                      LOAD_DT,
+                                      REASON)
+SELECT ADD_BY_SOURCE_ID,
           CHG_BY_SOURCE_ID,
           EMAIL_ADDRESS,
           EMAIL_ID,
@@ -961,17 +994,13 @@ INSERT                                                           /*+ append */
           OPT_TIME,
           SYSDATE,
           REASON
-     FROM &1.EMAIL_OPT_INOUT@&3
-    ;
+FROM O5.EMAIL_OPT_INOUT@reportdb
+;
 
 COMMIT;
 
-ANALYZE TABLE SDMRK.O5_EMAIL_OPT_INOUT ESTIMATE STATISTICS;
-
-truncate table SDMRK.O5_EMAIL_CHANGE_HISTORY;
-
-INSERT /*+ append */
-INTO SDMRK.O5_EMAIL_CHANGE_HISTORY
+SELECT 'Insert into SDMRK.O5_EMAIL_CHANGE_HISTORY:' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
+INSERT INTO SDMRK.O5_EMAIL_CHANGE_HISTORY
   (
     EMAIL_ID,
     OLD_EMAIL_ADDRESS,
@@ -982,25 +1011,24 @@ SELECT EMAIL_ID,
   OLD_EMAIL_ADDRESS,
   NEW_EMAIL_ADDRESS,
   EMAIL_CHG_DT
-FROM &1.Email_Change_History@&3;
-
-commit;
-
-ANALYZE TABLE SDMRK.O5_EMAIL_CHANGE_HISTORY ESTIMATE STATISTICS;
-
-TRUNCATE TABLE  SDMRK.O5_EMAIL_CHEETAH_SEGMENTS;
-
-INSERT  /*+ append */ INTO SDMRK.O5_EMAIL_CHEETAH_SEGMENTS
-SELECT * FROM  &1.EMAIL_CHEETAH_SEGMENTS@&3;
+FROM o5.Email_Change_History@reportdb;
 
 COMMIT;
 
-ANALYZE TABLE SDMRK.O5_EMAIL_CHEETAH_SEGMENTS  ESTIMATE STATISTICS;
+SELECT 'Truncate table SDMRK.O5_EMAIL_CHEETAH_SEGMENTS:' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
+TRUNCATE TABLE  SDMRK.O5_EMAIL_CHEETAH_SEGMENTS;
 
---Netsale information
-truncate table SDMRK.O5_netsale;
+SELECT 'Insert into SDMRK.O5_EMAIL_CHEETAH_SEGMENTS:' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
+INSERT INTO SDMRK.O5_EMAIL_CHEETAH_SEGMENTS
+SELECT * FROM  O5.EMAIL_CHEETAH_SEGMENTS@reportdb;
 
-insert /*+ append */ into SDMRK.O5_NETSALE
+COMMIT;
+
+SELECT 'truncate into SDMRK.O5_NETSALE:' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
+TRUNCATE TABLE SDMRK.O5_NETSALE;
+
+SELECT 'Insert into SDMRK.O5_NETSALE:' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
+INSERT into SDMRK.O5_NETSALE
 (
   RECTYPE ,
   DIVISION,
@@ -1029,7 +1057,7 @@ insert /*+ append */ into SDMRK.O5_NETSALE
   MODIFY_DT,
   BM_ORDERNUM
   )
-select 
+SELECT
   RECTYPE ,
   DIVISION,
   STORE,
@@ -1056,18 +1084,21 @@ select
   sysdate,
   MODIFY_DT,
   BM_ORDERNUM
-from &1.BI_NETSALE@&3
+from O5.BI_NETSALE@reportdb
 where transdate >='01-jan-2008';
 
-commit;
-
+COMMIT;
+SELECT 'Truncate table SDMRK.O5_NEW_ARRIVAL:' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
 truncate table sdmrk.o5_new_arrival;
 
-insert into sdmrk.o5_new_arrival(product_code,new_arrival_date) 
-select item_id product_code,tstamp displayablearrivaldate from &1.t_new_arrival_date_update_rfp;
+SELECT 'Insert into SDMRK.O5_NEW_ARRIVAL:' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
+INSERT into sdmrk.o5_new_arrival(product_code,new_arrival_date)
+select prduct_code,to_date(publish_dt,'MM/DD/YYYY HH:MI AM') publish_dt
+from o5.SFCC_PROD_PRODUCT_DATA@reportdb r;
 
-commit;
+COMMIT;
 
+SELECT 'MV Refreh - mv_o5_web_folderid_lkup:' || to_char(sysdate,'DD-MON-YYYY hh24:mi:ss') FROM DUAL;
 exec DBMS_MVIEW.refresh('SDMRK.mv_o5_web_folderid_lkup', 'C', ATOMIC_REFRESH => false);
 
 exit

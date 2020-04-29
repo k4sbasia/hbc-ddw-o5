@@ -105,8 +105,8 @@ fi
 
 #################################################################
 ##DB SQL
-################################################################# 
-sqlplus -s -l $CONNECTSDMRK12C <<EOF> ${LOG_FILE} @${SQL}/${PROCESS}_12c.sql ${SCHEMA} ${BANNER} ${PIM_DBLINK}>> ${LOG_FILE}
+#################################################################
+sqlplus -s -l $CONNECTSDMRK12C <<EOF> ${LOG_FILE} @${SQL}/${PROCESS}_12c.sql >> ${LOG_FILE}
 EOF
 
 ################################################################
@@ -170,10 +170,11 @@ retcode=$?
 if [ $retcode -ne 0 ]
 then
         echo "SQL Error in updating a row in the SDMRK job_status table for the process ${PROCESS}...Please check" >> ${LOG_FILE}
+        exit 99
 else
         echo "Update of a row in SDMRK job_status table for the process ${PROCESS} is complete" >> ${LOG_FILE}
+        exit 0
 fi
 export SUBJECT="${GOOD_SUBJECT}"
 send_email
 fi
-exit 0
