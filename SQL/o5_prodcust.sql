@@ -34,7 +34,7 @@ SELECT   aaa.customer_id, aaa.customernum, aaa.employeenbr,
             aaa.addr3, aaa.city, aaa.state, aaa.zipcode, aaa.country,
             aaa.internetaddress, aaa.bill_to_address, aaa.ship_to_address,
             aaa.optout_ind, null gender,null receiveemail, null saksfirstmember, null saksfirstnumber, null title,null birthdate,
-            SYSDATE, NULL, aaa.registered_customer
+            SYSDATE, NULL, aaa.registered_customer,aaa.recency_date_time
        FROM (SELECT   usa.usa_id customer_id,
                       NULL as CUSTOMERNUM,
                       usa.USA_EMPLOYEENBR employeenbr,
@@ -54,7 +54,8 @@ SELECT   aaa.customer_id, aaa.customernum, aaa.employeenbr,
                       NULL bill_to_address,
                       NULL ship_to_address,
                       usa.EMAIL_OPT_IND optout_ind,
-                      'Y' registered_customer
+                      'Y' registered_customer,
+                      usa.recency_date_time
                  FROM o5.user_account usa
                 WHERE   DDW_CRT_TS > trunc(sysdate -3) OR DDW_MOD_TS > trunc(sysdate -3)                --  Fix 3/2009
 ) aaa
@@ -89,14 +90,15 @@ MERGE INTO O5.bi_customer hst
              hst.saksfirstnumber = trn.saksfirstnumber,
              hst.custtitle = trn.custtitle, hst.birthdate = trn.birthdate,
              hst.modify_dt = SYSDATE,
-             hst.registered_customer = trn.registered_customer
+             hst.registered_customer = trn.registered_customer,
+             hst.recency_date_time = trn.recency_date_time
    WHEN NOT MATCHED THEN
       INSERT (customer_id, customernum, employeenbr, customertype, firstname,
               middlename, lastname, home_ph, bus_ph, fax_ph, addr1, addr2,
               addr3, city, state, zipcode, country, internetaddress,
               bill_to_address, ship_to_address, optout_ind, gender,
               receiveemail, saksfirstmember, saksfirstnumber, custtitle,
-              birthdate, add_dt, registered_customer, p_code)
+              birthdate, add_dt, registered_customer, p_code ,recency_date_time)
       VALUES (trn.customer_id, trn.customernum, trn.employeenbr,
               trn.customertype, trn.firstname, trn.middlename, trn.lastname,
               trn.home_ph, trn.bus_ph, trn.fax_ph, trn.addr1, trn.addr2,
@@ -104,7 +106,7 @@ MERGE INTO O5.bi_customer hst
               trn.internetaddress, trn.bill_to_address, trn.ship_to_address,
               trn.optout_ind, trn.gender, trn.receiveemail,
               trn.saksfirstmember, trn.saksfirstnumber, trn.custtitle,
-              trn.birthdate, SYSDATE, trn.registered_customer, NULL);
+              trn.birthdate, SYSDATE, trn.registered_customer, NULL,trn.recency_date_time);
 COMMIT ;
 
 

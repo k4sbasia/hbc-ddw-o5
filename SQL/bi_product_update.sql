@@ -691,6 +691,7 @@ select a.prd_upc from
 where trunc(add_dt)<> trunc(sysdate) and deactive_ind= 'N'
 ) a
 left join (select  upc from o5.OMS_RFS_o5_STG
+  where upc=reorder_upc_no
   ) b
   on trim(a.upc) = trim(b.upc)
   where b.upc is null )
@@ -732,7 +733,8 @@ UPDATE o5.bi_product t1
  WHERE deactive_ind = 'Y'
    AND EXISTS (SELECT 1
 		FROM o5.oms_rfs_o5_stg t2
-	       WHERE t2.upc = t1.upc
+	       WHERE  lpad(t2.skn_no,13,'0') = t1.sku
+           and  lpad(t2.upc,13,'0') = t1.upc
 		 AND t2.catalog_ind = 'Y'
 		 AND t2.upc = t2.reorder_upc_no);
 COMMIT;
