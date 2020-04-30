@@ -248,18 +248,11 @@ for r1 in
 select
   (rating / 100) rating
   ,
- (
- CASE
- WHEN r.rating IS NOT NULL
-THEN r.rating
-  || '.gif'
-ELSE NULL
-END) rating_image_url,
 R.TOTALREVIEWCOUNT num_reviews,
  product_id
   from &1.TURN_TO_PRODUCT_REVIEW R ) loop
 
-  update &1.FEED_RR_PRODUCT_DAILY set rating = r1.rating,rating_image_url = r1.rating_image_url,num_reviews= r1.num_reviews where  product_id = r1.product_id;
+  update &1.FEED_RR_PRODUCT_DAILY set rating = r1.rating,num_reviews= r1.num_reviews where  product_id = r1.product_id;
   commit;
   end loop;
   end;

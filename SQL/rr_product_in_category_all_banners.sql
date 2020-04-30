@@ -28,8 +28,8 @@ SET VERIFY OFF
 
 select 'category_id'||'|'||'product_id' from dual;
 SELECT folder_id || '|' || product_id
-  FROM ALL_ACTV_PIM_ASST_FULL_o5
+  FROM o5.ALL_ACTV_PIM_ASST_FULL_o5
 union
 SELECT lower(replace(replace(replace( folder_path,'/Assortments/SaksMain/ShopCategory/',''),'/Assortments/SaksMain/Custom/',''),'/','>')) || '|' || product_id
-  FROM ALL_ACTV_PIM_ASST_FULL_o5;
+  FROM o5.ALL_ACTV_PIM_ASST_FULL_o5;
 exit;
