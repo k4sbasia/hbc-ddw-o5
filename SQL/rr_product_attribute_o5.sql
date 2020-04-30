@@ -91,7 +91,7 @@ DISPLAY_REVIEW    ||'|'||
 NOW_PRICE_RANGE    ||'|'||
 WAS_PRICE_RANGE    ||'|'||
 SALES_FLAG    ||'|'||
-CASE   WHEN O5.F_GET_RR_ALT_IMAGE (PRODUCT_ID, 'A1')
+CASE   WHEN O5.F_GET_RR_ALT_IMAGE (p.PRODUCT_ID, 'A1')
                                  IS NOT NULL
                          THEN
                             'Y'
@@ -100,15 +100,6 @@ CASE   WHEN O5.F_GET_RR_ALT_IMAGE (PRODUCT_ID, 'A1')
                       END||'|'||
 O5.F_GET_RR_ALT_IMAGE (p.PRODUCT_ID, 'A1')  ||'|'||
 O5.F_GET_RR_ALT_IMAGE (p.PRODUCT_ID, 'A2')  ||'|'||
-                        CASE
-                           WHEN O5.F_GET_RR_ALT_IMAGE (p.PRODUCT_ID, 'A1')
-                                   IS NOT NULL
-                           THEN
-                              'Y'
-                           ELSE
-                              'N'
-                        END
-                            ||'|'||
 concat('https://m.saksoff5th.com/pd.jsp?productCode=', p.PRODUCT_ID) ||'|'||
 concat('https://image.s5a.com/is/image/saksoff5th/',p.PRODUCT_ID) ||'|'||
 BACKORDERABLE ||'|'||
