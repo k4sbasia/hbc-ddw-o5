@@ -86,7 +86,8 @@ AS CLOB INDENT SIZE = 5--.EXTRACT ('/*').getclobVal ()
 from    o5.SFCC_PROD_PRODUCT_DATA sp
 where  (exists  (select 'X' from  o5.SFCC_PROD_SKU_DYN_FLAGS si where sp.PRDUCT_CODE=si.product_id and
                               (  si.DYN_FLAG_CHG_DT  >= (select last_run_on from o5.JOB_STATUS where process_name='SFCC_DYNAMIC')
-                                OR  si.IN_STOCK_CHG_DT  >= (select last_run_on from o5.JOB_STATUS where process_name='SFCC_DYNAMIC')   )
+                                OR  si.IN_STOCK_CHG_DT  >= (select last_run_on from o5.JOB_STATUS where process_name='SFCC_DYNAMIC') 
+								OR si.PIM_CHG_DT >=(select last_run_on from o5.JOB_STATUS where process_name='SFCC_DYNAMIC')  )
                           )
         OR
         sp.DYN_FLAG_CHG_DT  >= (select last_run_on from o5.JOB_STATUS where process_name='SFCC_DYNAMIC')

@@ -43,6 +43,7 @@ SELECT DISTINCT prduct_code product_id,CASE WHEN isclearance = 'true' THEN 15845
       ( (exists  (select 'X' from  O5.SFCC_PROD_SKU_DYN_FLAGS si where sp.PRDUCT_CODE=si.product_id and
                               ( si.DYN_FLAG_CHG_DT  >= (select last_run_on from o5.JOB_STATUS where process_name='SFCC_DYNAMIC_ASSGN')
                                 OR  si.IN_STOCK_CHG_DT  >= (select last_run_on from o5.JOB_STATUS where process_name='SFCC_DYNAMIC_ASSGN')
+								OR  si.PIM_CHG_DT >=(select last_run_on from o5.JOB_STATUS where process_name='SFCC_DYNAMIC_ASSGN')
                               )
                               )
        OR
