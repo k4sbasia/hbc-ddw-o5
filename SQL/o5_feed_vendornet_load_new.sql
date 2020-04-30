@@ -94,7 +94,7 @@ WHEN MATCHED THEN
   MERGE INTO o5.bi_vendornet_prod_new trg USING
   (SELECT product_id prd_code_lower,
     case when PRD_READYFORPROD= 'Yes' then 'T' else 'F' end READYFORPROD ,
-   REPLACE (REPLACE(REPLACE(REPLACE( bm_desc, '^', '\^'), '\', '\\'),'amp;',''),'<br>','')
+   REPLACE (REPLACE(REPLACE(REPLACE( bm_desc, '^', '\^'), '\', '\\'),'amp;',''),'<br>','') bm_desc
   FROM
     o5.all_active_pim_prd_attr_o5
     ) hst ON (trg.product_id = hst.prd_code_lower AND add_dt=TRUNC(sysdate))
