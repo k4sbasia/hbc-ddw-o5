@@ -430,7 +430,7 @@ WITH all_product_attributes AS
        (SELECT
                product_id,
                attribute_name,
-               TRIM(REPLACE(REPLACE(REPLACE(TRANSLATE(attribute_val, 'x'||CHR(10)||CHR(13), 'x'),'|',''),'^',''),'�','')) attribute_val
+               TRIM(REPLACE(REPLACE(REPLACE(TRANSLATE(pim_exp_bm.char_conversion_new(attribute_val), 'x'||CHR(10)||CHR(13), 'x'),'|',''),'^',''),'�','')) attribute_val
         FROM &3
        WHERE
        lower(attribute_name) IN  ('backorderable',
