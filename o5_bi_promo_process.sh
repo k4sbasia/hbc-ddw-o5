@@ -32,15 +32,7 @@ export LOG_FILE="$LOG/${PROCESS}_log.txt"
 export BAD_SUBJECT="${PROCESS} failed"
 export JOB_NAME="${PROCESS}"
 export SCRIPT_NAME="${PROCESS}"
-export SFILE_SIZE='0'
-export FILE_NAME='0'
-export LOAD_COUNT='0'
-export FILE_COUNT='0'
-export TFILE_SIZE='0'
-export SOURCE_COUNT='0'
-export TARGET_COUNT='0'
-export SQL1='o5_bi_promo_parse'
-export SQL2='o5_bi_promo_update'
+export SQL='promo_process'
 export BANNER=$1
 ########################################################################
 echo -e "BI_PROMO_PROCESS started at `date '+%a %b %e %T'`\n" >${LOG_FILE}
@@ -56,48 +48,26 @@ function send_email {
 }
 if [ "${BANNER}" == "saks" ]
 then
-export SCHEMA="mrep."
+    export SCHEMA="mrep."
 fi
 if [ "${BANNER}" == "o5" ]
 then
-export SCHEMA="o5."
+    export SCHEMA="o5."
 fi
 #################################################################
 #################################################################
 ##Update Runstats Start
 #################################################################
-sqlplus -s -l  $CONNECTDW <<EOF> ${LOG}/${PROCESS}_runstats_start.log @${SQL}/runstats_start.sql "$JOB_NAME" "$SCRIPT_NAME" "$SFILE_SIZE" "$FILE_NAME" "$LOAD_COUNT" "$FILE_COUNT" "$TFILE_SIZE" "$SOURCE_COUNT" "$TARGET_COUNT"
+sqlplus -s -l  $CONNECTDW <<EOF > ${LOG}/${PROCESS}_runstats_start.log @${SQL}/runstats_start.sql "$JOB_NAME" "$SCRIPT_NAME" "$SFILE_SIZE" "$FILE_NAME" "$LOAD_COUNT" "$FILE_COUNT" "$TFILE_SIZE" "$SOURCE_COUNT" "$TARGET_COUNT"
 EOF
 #################################################################
 ##DB SQL
 #################################################################
-echo -e "extract and parse o5 promo id from bi sale"
-echo -e "Creation of the data file started at `date '+%a %b %e %T'`\n" >>${LOG_FILE}
-sqlplus -s -l  $CONNECTDW @${SQL}/${SQL1}.sql "${SCHEMA}" >$DATA/o5_bi_promo.txt
-echo -e "Creation of the data file ended at `date '+%a %b %e %T'`\n" >>${LOG_FILE}
+echo -e "Run SQL To Populate Promo Tables at `date '+%a %b %e %T'`\n" >>${LOG_FILE}
+sqlplus -s -l  $CONNECTDW @${SQL}/${SQL}.sql "${SCHEMA}" >>${LOG_FILE}
+echo -e "Populate Promo Tables Completed at `date '+%a %b %e %T'`\n" >>${LOG_FILE}
 ################################################################
-#################################################################
-# Get the file stats
-#################################################################
-if [ -e ${DATA}/o5_bi_promo.txt ]
-then
-export FILE_NAME=o5_bi_promo.txt
-TFILE_SIZE="`ls -ll ${DATA}/$FILE_NAME |tr -s ' ' '|' |cut -f5 -d'|'`"
-FILE_COUNT="`wc -l ${DATA}/$FILE_NAME |tr -s ' ' '|' |cut -f1 -d'|'`"
-fi
-#################################################################
-echo -e "load parse o5 promo to work file \n" >> ${LOG_FILE}
-$HOME/o5_bi_promo_parse_ld.sh> o5_bi_promo_parse_ld.out
-wait
-echo -e "Finished loading parse o5 promo to work file\n" >> ${LOG_FILE}
-cat $LOG/bi_promo_parse_ld.log>>${LOG_FILE}
-###############################################################
-echo -e "Update promo actvities\n" >>${LOG_FILE}
-sqlplus -s -l  $CONNECTDW @${SQL}/${SQL2}.sql >> ${LOG_FILE}
-#################################################################
-##Update Runstats Finish
-#################################################################
-sqlplus -s -l  $CONNECTDW<<EOF> ${LOG}/${PROCESS}_runstats_finish.log @${SQL}/runstats_end.sql "$JOB_NAME" "$SCRIPT_NAME" "$SFILE_SIZE" "$FILE_NAME" "$LOAD_COUNT" "$FILE_COUNT" "$TFILE_SIZE" "$SOURCE_COUNT" "$TARGET_COUNT"
+sqlplus -s -l  $CONNECTDW<<EOF > ${LOG}/${PROCESS}_runstats_finish.log @${SQL}/runstats_end.sql "$JOB_NAME" "$SCRIPT_NAME" "$SFILE_SIZE" "$FILE_NAME" "$LOAD_COUNT" "$FILE_COUNT" "$TFILE_SIZE" "$SOURCE_COUNT" "$TARGET_COUNT"
 EOF
 ################################################################
 echo -e "BI_PROMO_PROCESS ended at `date '+%a %b %e %T'`\n" >>${LOG_FILE}
@@ -106,11 +76,9 @@ echo -e "BI_PROMO_PROCESS ended at `date '+%a %b %e %T'`\n" >>${LOG_FILE}
 ################################################################
 if [ `egrep -c "^ERROR|ORA-|not found|SP2-0|^553" ${LOG_FILE}` -ne 0 ]
 then
-echo -e "${PROCESS} failed. Please investigate"
-echo -e "${PROCESS} failed. Please investigate\n" >> ${LOG_FILE}
-export SUBJECT=${BAD_SUBJECT}
-exit 99
+    echo -e "${PROCESS} failed. Please investigate\n" >> ${LOG_FILE}
+    export SUBJECT=${BAD_SUBJECT}
+    exit 99
 else
-echo -e "${PROCESS} completed without errors."
-echo -e "${PROCESS} completed without errors.\n" >> ${LOG_FILE}
+    echo -e "${PROCESS} completed without errors.\n" >> ${LOG_FILE}
 fi

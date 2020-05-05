@@ -11,6 +11,8 @@ DECLARE
     v_banner VARCHAR2(10);
     c_new NUMBER DEFAULT 0; c_upd_cancel NUMBER DEFAULT 0; c_upd_exis NUMBER DEFAULT 0; 
     c_loop_m NUMBER DEFAULT 0; 
+    no_record_found EXCEPTION;
+    deadlock_detected EXCEPTION;
     
 CURSOR c_order_data 
 IS
@@ -206,15 +208,20 @@ WITH all_order_data AS (
         cust.tracking_no                        AS tracking_number,
         to_number(ord.order_header_key)         AS order_header_key, 
         to_number(ord.order_line_key)           AS order_line_key,
-        CASE WHEN hist.order_line_key IS NOT NULL THEN 1 ELSE 0 END AS f_existing_order
-        --Extra
---        CASE WHEN ord.order_line_status_id IN ('3700.01.001','3700.01.002','3700.01.003','3700.01.004','3700.02') THEN ord.l_ret_can_date  ELSE NULL END  AS returndate,
---        ord.giftwrap_message      AS giftwrap_message,
+        CASE WHEN hist.order_line_key IS NOT NULL OR hist.orderdet IS NOT NULL THEN 1 ELSE 0 END AS f_existing_order,
+        CASE WHEN ord.orderdet IS NULL THEN to_number(ord.order_line_key) ELSE to_number(ord.orderdet) END AS f_matching_criteria -- To Handle Switch from BM to SFCC
+--        CASE WHEN hist.orderdet IS NOT NULL THEN 1 ELSE 0 END AS f_existing_order
+--        CASE WHEN hist.order_line_key IS NOT NULL THEN 1 ELSE 0 END AS f_existing_order
+-- Extra
+        CASE WHEN ord.order_line_status_id IN ('3700.01.001','3700.01.002','3700.01.003','3700.01.004','3700.02') THEN ord.l_ret_can_date  ELSE NULL END  AS returndate,
+        ord.giftwrap_message      AS giftwrap_message,
     FROM &1.t_so5_order_line_info      ord
     JOIN &1.t_so5_ord_cust_ship_dtls   cust ON ord.order_line_key = cust.order_line_key
-    LEFT JOIN (SELECT nvl(order_line_key,'X') order_line_key FROM bi_sale) hist ON ord.order_line_key = hist.order_line_key
---    WHERE  ( (TRUNC(ord.load_date) = TRUNC(sysdate)   OR ord.last_update_date  = TRUNC(sysdate)) 
---          OR (TRUNC(cust.load_date) = TRUNC(sysdate)  OR cust.last_update_date = TRUNC(sysdate)) )   
+    LEFT JOIN (SELECT order_line_key, orderdet FROM O5.bi_sale_ddw) hist ON ( ord.order_line_key = hist.order_line_key OR to_number(ord.orderdet) = hist.orderdet )
+--    LEFT JOIN (SELECT order_line_key FROM bi_sale) hist ON ord.order_line_key = hist.order_line_key
+--    LEFT JOIN (SELECT orderdet FROM O5.bi_sale_ddw) hist ON to_number(ord.orderdet) = hist.orderdet
+    WHERE  ( (TRUNC(ord.load_date) = TRUNC(sysdate)   OR ord.last_update_date  = TRUNC(sysdate)) 
+          OR (TRUNC(cust.load_date) = TRUNC(sysdate)  OR cust.last_update_date = TRUNC(sysdate)) )   
 --    WHERE ord.order_line_status_id = orderstatus
 ) 
 SELECT * FROM all_order_data;
@@ -226,7 +233,7 @@ SELECT * FROM all_order_data;
 -- ord_e l_order;      -- Existing Orders
 -- ord_ne l_order;     -- Non Existing Orders
 
---DEAL WITH ORDERS THAT ARE PRESENT IN BI_SALE
+-- DEAL WITH ORDERS THAT ARE PRESENT IN BI_SALE
 
 BEGIN
     v_process := 'ORDER PROCESSING - BI_SALE' ;
@@ -235,7 +242,7 @@ BEGIN
     v_process_st_time := to_char(sysdate,'DD-MON-RRRR HH.MI.SS AM');
     dbms_output.put_line('Process : ' || v_process || ' Begins at ' || v_process_st_time);
     
---BEGIN
+-- BEGIN
 -- EXAMPLE START
 -- Any of the following statements opens the cursor:
 
@@ -246,7 +253,7 @@ BEGIN
 --     -- process data record
 --    dbms_output.put_line('Name = ' || my_record.last_name || ', salary = ' || my_record.salary);
 --  END LOOP;
---END;
+-- END;
 
 -- EXAMPLE END
 
@@ -372,23 +379,26 @@ BEGIN
                     ord(idx).shoprunner_token
                 );
             END IF;
-            IF ord(idx).f_existing_order = 1 AND ord(idx).ordline_status = 'X'                              -- For Records Existing in BI_SALE and status Cancelled ) 
+            IF ord(idx).f_existing_order = 1 AND ord(idx).ordline_status = 'X'                              -- For Records Existing in BI_SALE and status Cancelled
             THEN
                 c_upd_cancel := c_upd_cancel + 1;  
                 UPDATE &1.bi_sale t1 
-                       SET t1.ordline_status = 'X', 
-                           t1.cancelreason = ord(idx).cancelreason,
-                           t1.canceldate = ord(idx).canceldate
-                     WHERE t1.order_header_key = ord(idx).order_header_key 
-                       AND t1.order_line_key = ord(idx).order_line_key -- Only Existing Orders
+                   SET t1.ordline_status = 'X', 
+                       t1.cancelreason  = ord(idx).cancelreason,
+                       t1.canceldate    = ord(idx).canceldate
+--                 WHERE t1.orderdet = ord(idx).orderdet                                -- To Update Based on ORDERDET
+--                   AND  t1.order_header_key = ord(idx).order_header_key               -- May Not be needed
+--                 WHERE t1.order_line_key = ord(idx).order_line_key                    -- To Update Based on ORDER_LINE_KEY 
+                  WHERE NVL(t1.orderdet,t1.order_line_key) = ord(idx).f_matching_criteria   -- To Update Based on ORDERDET and ORDER_LINE_KEY to handle switch from BM to SFCC
                      ;     
             END IF;
             IF ord(idx).f_existing_order = 1 AND ord(idx).ordline_status <> 'X'                             -- For Records Existing in BI_SALE and status NOT Cancelled 
             THEN
                 c_upd_exis := c_upd_exis + 1;
                 UPDATE &1.bi_sale t1 
-                   SET t1.orderhdr = ord(idx).orderhdr,
-                        t1.orderdet = ord(idx).orderdet,
+                   SET 
+--                        t1.orderhdr = ord(idx).orderhdr,
+--                        t1.orderdet = ord(idx).orderdet,
 --                        t1.orderseq = ord(idx).orderseq,              -- Not Needed if Existing Order is Update
                         t1.createfor = ord(idx).createfor,
                         t1.extponum = ord(idx).extponum,
@@ -466,35 +476,37 @@ BEGIN
                         t1.total_shipping = ord(idx).total_shipping,
                         t1.gift_wrap_fee = ord(idx).gift_wrap_fee,
                         t1.affiliate_id = ord(idx).affiliate_id,
-                        t1.tax_on_shipping = ord(idx).tax_on_shipping,
-                        t1.off5th_item = ord(idx).off5th_item,
-                        t1.offprice_item = ord(idx).offprice_item,
-                        t1.outletitem = ord(idx).outletitem,
-                        t1.rpt_flash = ord(idx).rpt_flash,
-                        t1.rpt_anytime = ord(idx).rpt_anytime,
-                        t1.offer = ord(idx).offer,
-                        t1.household_id = ord(idx).household_id,
-                        t1.individual_id = ord(idx).individual_id,
-                        t1.division_id = ord(idx).division_id,
-                        t1.group_id = ord(idx).group_id,
-                        t1.department_id = ord(idx).department_id,
+--                        t1.tax_on_shipping = ord(idx).tax_on_shipping,
+--                        t1.off5th_item = ord(idx).off5th_item,
+--                        t1.offprice_item = ord(idx).offprice_item,
+--                        t1.outletitem = ord(idx).outletitem,
+--                        t1.rpt_flash = ord(idx).rpt_flash,
+--                        t1.rpt_anytime = ord(idx).rpt_anytime,
+--                        t1.offer = ord(idx).offer,
+--                        t1.household_id = ord(idx).household_id,
+--                        t1.individual_id = ord(idx).individual_id,
+--                        t1.division_id = ord(idx).division_id,
+--                        t1.group_id = ord(idx).group_id,
+--                        t1.department_id = ord(idx).department_id,
                         t1.vendor_id = ord(idx).vendor_id,
-                        t1.product_id = ord(idx).product_id,
+--                        t1.product_id = ord(idx).product_id,
                         t1.sku = ord(idx).sku,
                         t1.item = ord(idx).item,
                         t1.canceldate = ord(idx).canceldate,
                         t1.fullfilllocation = ord(idx).fullfilllocation,
                         t1.more_number = ord(idx).order_source,
-                        t1.csr_id = ord(idx).more_number,
-                        t1.order_source = ord(idx).csr_id,
-                        t1.customer_display_price = ord(idx).customer_display_price,
+--                        t1.csr_id = ord(idx).more_number,
+--                        t1.order_source = ord(idx).csr_id,
+--                        t1.customer_display_price = ord(idx).customer_display_price,
                         t1.srind = ord(idx).sr_ind,
                         t1.tracking_number = ord(idx).tracking_number,
     --                    t1.ORDER_HEADER_KEY = ord(idx).ORDER_HEADER_KEY,
     --                    t1.ORDER_LINE_KEY = ord(idx).ORDER_LINE_KEY,
                         t1.sr_token = ord(idx).shoprunner_token
-                 WHERE t1.order_header_key = ord(idx).order_header_key
-                   AND t1.order_line_key = ord(idx).order_line_key -- Only Existing Orders and not cancelled
+--                 WHERE t1.orderdet = ord(idx).orderdet                                -- To Update Based on ORDERDET
+--                   AND  t1.order_header_key = ord(idx).order_header_key               -- May Not be needed
+--                 WHERE t1.order_line_key = ord(idx).order_line_key                    -- To Update Based on ORDER_LINE_KEY 
+                  WHERE NVL(t1.orderdet,t1.order_line_key) = ord(idx).f_matching_criteria   -- To Update Based on ORDERDET and ORDER_LINE_KEY to handle switch from BM to SFCC
                      ;
             END IF;
         END LOOP;                                                                                           -- Inner Loop For Record
@@ -516,10 +528,16 @@ BEGIN
     END LOOP;                                                                                               -- Outer Loop Of Cursor
     CLOSE c_order_data;
 
---dbms_output.put_line('NO OF NEW ORDERS IDENTIFIED FOR '|| v_banner || ' : ' || c_order_data%rowcount);
+-- dbms_output.put_line('NO OF NEW ORDERS IDENTIFIED FOR '|| v_banner || ' : ' || c_order_data%rowcount);
 v_process_end_time := to_char(sysdate,'DD-MON-RRRR HH.MI.SS AM');
 dbms_output.put_line('Process : ' || v_process || ' Completed at ' || v_process_end_time);
 COMMIT;
+
+EXCEPTION
+    WHEN no_record_found 
+        then null;
+--        insert into bi_sale_comments values (sysdate, 'No Order Identified', 'RunID : ' || to_char(sysdate,'HH24') );
+
 END;
 /
 EXIT;
