@@ -104,7 +104,7 @@ concat('https://m.saksoff5th.com/pd.jsp?productCode=', p.PRODUCT_ID) ||'|'||
 concat('https://image.s5a.com/is/image/saksoff5th/',p.PRODUCT_ID) ||'|'||
 BACKORDERABLE ||'|'||
 BRANDNAME ||'|'||
-DROPSHIP_IND ||'|'||
+nvl(DROPSHIP_IND,'F') ||'|'||
 FEATUREDTYPE ||'|'||
 nvl(GWP_FLAG,'F') ||'|'||
 ITEM_GENDER ||'|'||

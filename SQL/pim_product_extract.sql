@@ -318,7 +318,7 @@ FOLDER_ID
                           FROM &6 fla
                          WHERE fla.folder_path = fl.folder_path
                            AND (CASE WHEN lower(fla.attribute_name) = 'readyforprodfolder' AND fla.attribute_val = 'Yes' THEN 1
-                                     WHEN fla.attribute_name = 'folderactive'   AND fla.attribute_val = 'Yes' THEN 1
+                                     WHEN lower(fla.attribute_name) = 'folderactive'   AND fla.attribute_val = 'Yes' THEN 1
                                      ELSE 0
                                  END) = 1)
             ORDER BY LEVEL, fl.folder_id
@@ -430,7 +430,7 @@ WITH all_product_attributes AS
        (SELECT
                product_id,
                attribute_name,
-               TRIM(REPLACE(REPLACE(REPLACE(TRANSLATE(attribute_val, 'x'||CHR(10)||CHR(13), 'x'),'|',''),'^',''),'�','')) attribute_val
+               TRIM(REPLACE(REPLACE(REPLACE(TRANSLATE(pim_exp_bm.char_conversion_new(attribute_val), 'x'||CHR(10)||CHR(13), 'x'),'|',''),'^',''),'�','')) attribute_val
         FROM &3
        WHERE
        lower(attribute_name) IN  ('backorderable',
