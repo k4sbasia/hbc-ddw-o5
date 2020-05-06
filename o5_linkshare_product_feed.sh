@@ -13,7 +13,7 @@
 #####
 #####
 #############################################################################################################################
-. $HOME/params.conf o5
+. $HOME/params.conf $1
 export SQL=$HOME/SQL
 export LOG=$HOME/LOG
 export DATA=$HOME/DATA
@@ -32,6 +32,7 @@ export SOURCE_COUNT=0
 export TARGET_COUNT=0
 export LOAD_COUNT=0
 export BAD_SUBJECT="${PROCESS} failed"
+export BANNER=$1
 ########################################################################
 ##Initialize Email Function
 ########################################################################

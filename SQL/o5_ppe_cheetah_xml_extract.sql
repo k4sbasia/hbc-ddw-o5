@@ -48,7 +48,7 @@ xmlagg(
                               XMLCDATA(o5.ENCD_TO_CHAR_CONVERSION(SHRT_PROD_DESC)) AS "SHRT_PROD_DESC",
                                                           XMLCDATA (o5.ENCD_TO_CHAR_CONVERSION(PRODUCTCOPY)) AS "LONG_PROD_DESC",
                               DATE_SHIPPED AS "DATE_SHP",
-                              BM_PRD_ID AS "BM_PRODUCT_ID",
+                              PRODUCT_ID AS "BM_PRODUCT_ID",
                               mrep.convert_string_to_md5 (email) AS "USERID",
                                 replace(replace(o5.turn_to_convert_base64(turntoord),chr(13),''),chr(10),'') AS "TURNTOORD"
                               )))))))).
