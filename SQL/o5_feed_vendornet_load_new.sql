@@ -109,10 +109,10 @@ WHEN MATCHED THEN
    /*UPDATE COLOR & SIZE*/
    MERGE INTO o5.bi_vendornet_prod_new trg USING
  (SELECT UPC sku_code_lower,
-   SKU_COLOR color,
-   sku_size_desc sizes
+   NVL(SKU_COLOR ,'No Color' ) color,
+   NVL(US_STDSize ,'No Size')sizes
  FROM o5.all_active_pim_sku_attr_o5
- ) hst ON trg.upc = hst.sku_code_lower AND add_dt=TRUNC(sysdate))
+ ) hst ON (trg.upc = hst.sku_code_lower AND add_dt=TRUNC(sysdate))
 WHEN MATCHED THEN
  UPDATE
  SET trg.sku_description=trg.sku_description
