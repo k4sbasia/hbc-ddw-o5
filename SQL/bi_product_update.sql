@@ -620,9 +620,7 @@ BEGIN
  END;
 /
 EXEC DBMS_OUTPUT.PUT_LINE ('BI_PRODUCT Update for Inventory ended at '|| to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
-
 exec dbms_stats.gather_table_stats('o5','bi_product',force => true);
-
 EXEC DBMS_OUTPUT.PUT_LINE ('BI_PRODUCT Update for Price started at '|| to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 --- price status update
 DECLARE
