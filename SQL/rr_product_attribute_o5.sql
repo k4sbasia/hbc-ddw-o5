@@ -91,35 +91,33 @@ DISPLAY_REVIEW    ||'|'||
 NOW_PRICE_RANGE    ||'|'||
 WAS_PRICE_RANGE    ||'|'||
 SALES_FLAG    ||'|'||
+CASE   WHEN O5.F_GET_RR_ALT_IMAGE (p.PRODUCT_ID, 'A1')
+                                 IS NOT NULL
+                         THEN
+                            'Y'
+                         ELSE
+                            'N'
+                      END||'|'||
 O5.F_GET_RR_ALT_IMAGE (p.PRODUCT_ID, 'A1')  ||'|'||
 O5.F_GET_RR_ALT_IMAGE (p.PRODUCT_ID, 'A2')  ||'|'||
-                        CASE
-                           WHEN O5.F_GET_RR_ALT_IMAGE (p.PRODUCT_ID, 'A1')
-                                   IS NOT NULL
-                           THEN
-                              'Y'
-                           ELSE
-                              'N'
-                        END
-                            ||'|'||
 concat('https://m.saksoff5th.com/pd.jsp?productCode=', p.PRODUCT_ID) ||'|'||
 concat('https://image.s5a.com/is/image/saksoff5th/',p.PRODUCT_ID) ||'|'||
 BACKORDERABLE ||'|'||
 BRANDNAME ||'|'||
-DROPSHIP_IND ||'|'||
+nvl(DROPSHIP_IND,'F') ||'|'||
 FEATUREDTYPE ||'|'||
-GWP_FLAG ||'|'||
+nvl(GWP_FLAG,'F') ||'|'||
 ITEM_GENDER ||'|'||
 PD_RESTRICTEDCOUNTRY_TEXT ||'|'||
 PD_RESTRICTEDSTATE_TEXT ||'|'||
-PERSONALIZABLE ||'|'||
+nvl(PERSONALIZABLE,'F') ||'|'||
 PRODUCTSHORTDESCRIPTION ||'|'||
 RETURNABLE||'|'||
 NUM_REVIEWS||'|'||
-ISDESIGNERITEM ||'|'||
-ISEGC ||'|'||
-ISVIRTUAL ||'|'||
-LIFESTYLECONTEMPORARY ||'|'||
+nvl(ISDESIGNERITEM,'F') ||'|'||
+nvl(ISEGC,'F') ||'|'||
+nvl(ISVIRTUAL,'F') ||'|'||
+nvl(LIFESTYLECONTEMPORARY,'F') ||'|'||
 LIFESTYLEMODERN ||'|'||
 LIFESTYLEPREMIER ||'|'||
 REFINEMENTPRODUCTTYPE1 ||'|'||

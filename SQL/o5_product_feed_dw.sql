@@ -66,11 +66,10 @@ SELECT distinct SKU.PRODUCT_CODE PRD_ID,
    ASRT.SBA_PATH,
   NVL(S.in_stock_sellable_qty, 0)  AS WH_SELLABLE_QTY
 FROM o5.all_active_product_sku_o5 SKU
-JOIN o5.inventory S ON s.SKN_NO =sku.skn_no
+JOIN o5.inventory S ON s.SKN_NO =sku.skn_no  and in_stock_sellable_qty > 0
 JOIN o5.all_active_pim_prd_attr_o5 pa ON pa.PRODUCT_ID =sku.product_code
-JOIN O5.O5_WEB_ASSORTMENTS_BKUP ASRT ON (ASRT.PRoduct_code        = SKU.PRODUCT_CODE);
-commit ;
-;
+JOIN O5.O5_WEB_ASSORTMENTS ASRT ON (ASRT.PRoduct_code        = SKU.PRODUCT_CODE);
+
 COMMIT;
 EXEC DBMS_OUTPUT.PUT_LINE ('Preparing O5.O5_SR_PRODUCTS_BM completed at '||to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 TRUNCATE TABLE O5.BI_PRODUCT_INFO;
@@ -129,14 +128,10 @@ SELECT PRODUCT_CODE,
   BRAND_MANUFACTURER,
   PRODUCT_DESCRIPTION,
   DEPARTMENT ,
-  CATEGORY_MAPPING,
+  SUBSTR(REPLACE(CATEGORY_MAPPING,'/','>'),2) ,
   PRODUCT_NAME,
   SHOPRUNNER_ELIGIBLE,
   PRODUCT_URL,
-  CASE
-    WHEN COLOR_IND         = '1'
-    AND PRODUCT_COLOR NOT IN ('No Color','NO COLOR')
-    THEN (
       CASE
         WHEN LENGTH(NVL(O5.F_CHECK_MANIFEST_COLOR(TRIM( (PRODUCT_CODE)), TRIM( (PRODUCT_COLOR))), '')) > 0
         THEN 'https://image.s5a.com/is/image/saksoff5th/'
@@ -148,11 +143,8 @@ SELECT PRODUCT_CODE,
           || TRIM(( (PRODUCT_CODE)))
           ||'_'
           ||'300x400.jpg'
-      END )
-    ELSE 'https://image.s5a.com/is/image/saksoff5th/'
-      ||TRIM( (PRODUCT_CODE))
-      ||'_300x400.jpg'
-  END PRODUCT_IMAGE_URL_MAIN,
+      END
+     PRODUCT_IMAGE_URL_MAIN,
   PRODUCT_IMAGE_URL_ADDL,
   REGULAR_PRICE,
   SALE_PRICE,

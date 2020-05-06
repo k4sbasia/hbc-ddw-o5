@@ -620,65 +620,66 @@ BEGIN
  END;
 /
 EXEC DBMS_OUTPUT.PUT_LINE ('BI_PRODUCT Update for Inventory ended at '|| to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
-
+exec dbms_stats.gather_table_stats('o5','bi_product',force => true);
 EXEC DBMS_OUTPUT.PUT_LINE ('BI_PRODUCT Update for Price started at '|| to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 --- price status update
 DECLARE
-    CURSOR cur IS
-       select o.skn_no skn_no,PRICE_FLAG,MSRP ,Offer_price  from
-        (select  lpad(o.skn_no,13,'0') skn_no,
-       greatest(nvl(COMPARE_AT_AMT_DOL,0), nvl(original_ticket,0))  MSRP,Offer_price,
-       CASE WHEN trim(AMS_PRICE_TYPE_CD) = '0' THEN 'R'
-                     WHEN trim(AMS_PRICE_TYPE_CD) = '1' THEN 'M'
-                     WHEN trim(AMS_PRICE_TYPE_CD) = '2' THEN 'C'
-                     WHEN trim(AMS_PRICE_TYPE_CD) = '3' THEN 'F'
-                     END  as PRICE_FLAG
-                        from   edata_exchange.o5_sd_price o ) o, o5.bi_product p
-      where o.skn_no = p.sku
-           and (o.Offer_price <> sku_sale_price or  o.MSRP <> sku_list_price and o.PRICE_FLAG = p.PRICE_status);
-
-    TYPE v_typ IS
-        TABLE OF cur%rowtype;
-    v_coll     v_typ;
-    v_svs      VARCHAR2(4000) := '';
-    v_count    NUMBER(20) := 0;
-    err_code   NUMBER(20);
-    err_msg    VARCHAR2(4000);
-    v_run_id NUMBER(20);
-    v_err_cnt NUMBER;
-   bi_product_failure EXCEPTION;
+   CURSOR cur IS
+   select o.skn_no skn_no,PRICE_FLAG,MSRP ,Offer_price  from
+       (select  lpad(o.skn_no,13,'0') skn_no,
+      to_number(greatest(nvl(to_number(COMPARE_AT_AMT_DOL),0), nvl(to_number(original_ticket),0) ))  MSRP,
+      to_number(Offer_price) Offer_price,
+      CASE WHEN trim(AMS_PRICE_TYPE_CD) = '0' THEN 'R'
+                    WHEN trim(AMS_PRICE_TYPE_CD) = '1' THEN 'M'
+                    WHEN trim(AMS_PRICE_TYPE_CD) = '2' THEN 'C'
+                    WHEN trim(AMS_PRICE_TYPE_CD) = '3' THEN 'F'
+                    END  as PRICE_FLAG
+                       from   edata_exchange.o5_sd_price o ) o,
+                       (select sku,to_number(sku_sale_price) sku_sale_price,to_number(sku_list_price) sku_list_price,PRICE_status  from o5.bi_product )p
+     where o.skn_no = p.sku
+          and (o.Offer_price <> sku_sale_price or o.MSRP <> sku_list_price);
+   TYPE v_typ IS
+       TABLE OF cur%rowtype;
+   v_coll     v_typ;
+   v_svs      VARCHAR2(4000) := '';
+   v_count    NUMBER(20) := 0;
+   err_code   NUMBER(20);
+   err_msg    VARCHAR2(4000);
+   v_run_id NUMBER(20);
+   v_err_cnt NUMBER;
+  bi_product_failure EXCEPTION;
 BEGIN
 
-    OPEN cur;
-    LOOP
-        FETCH cur BULK COLLECT INTO v_coll LIMIT 500000;
-            EXIT WHEN v_coll.count = 0;
-            FOR indx IN v_coll.first..v_coll.last LOOP
-                BEGIN
+   OPEN cur;
+   LOOP
+       FETCH cur BULK COLLECT INTO v_coll LIMIT 300000;
+           EXIT WHEN v_coll.count = 0;
+           FOR indx IN v_coll.first..v_coll.last LOOP
+               BEGIN
 
-                        UPDATE o5.bi_product
-                            SET
-                             PRICE_status =v_coll(indx).PRICE_FLAG,
-                                sku_list_price = v_coll(indx).MSRP,
-                                sku_sale_price= v_coll(indx).Offer_price
-              where sku =  v_coll(indx).skn_no;
-              commit;
-                EXCEPTION
-                   WHEN NO_DATA_FOUND THEN
-                   NULL;
-                    WHEN OTHERS THEN
-                         err_code := SQLCODE;
-                        err_msg := SUBSTR(SQLERRM, 1 , 4000);
-                        INSERT INTO o5.excptn_logger(PROCESS_NM,EXCPTN,TABLE_NM,COLUMN_NM,KEY_ID,add_dt,RUN_ID) VALUES ( 'O5_IPRICE+_UPDATE',err_code||err_msg,'BI_PRODUCT','',v_coll(indx).skn_no,sysdate,'');
+                       UPDATE o5.bi_product
+                           SET
+                            PRICE_status =v_coll(indx).PRICE_FLAG,
+                               sku_list_price = v_coll(indx).MSRP,
+                               sku_sale_price= v_coll(indx).Offer_price
+             where sku =  v_coll(indx).skn_no;
+             commit;
+               EXCEPTION
+                  WHEN NO_DATA_FOUND THEN
+                  NULL;
+                   WHEN OTHERS THEN
+                        err_code := SQLCODE;
+                       err_msg := SUBSTR(SQLERRM, 1 , 4000);
+                       INSERT INTO o5.excptn_logger(PROCESS_NM,EXCPTN,TABLE_NM,COLUMN_NM,KEY_ID,add_dt,RUN_ID) VALUES ( 'O5_IPRICE+_UPDATE',err_code||err_msg,'BI_PRODUCT','',v_coll(indx).skn_no,sysdate,'');
 
-                        COMMIT;
-                END;
-            END LOOP;
-  END LOOP ;
+                       COMMIT;
+               END;
+           END LOOP;
+ END LOOP ;
 
-    CLOSE cur;
- END;
- /
+   CLOSE cur;
+END;
+/
 EXEC DBMS_OUTPUT.PUT_LINE ('BI_PRODUCT Update for Price ended at '|| to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
 --If upc is not present in RFS then make it deactive= 'Y' and default deactive = 'N'
 EXEC DBMS_OUTPUT.PUT_LINE ('BI_PRODUCT Update for deactive_ind started at '|| to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
@@ -691,6 +692,7 @@ select a.prd_upc from
 where trunc(add_dt)<> trunc(sysdate) and deactive_ind= 'N'
 ) a
 left join (select  upc from o5.OMS_RFS_o5_STG
+  where upc=reorder_upc_no
   ) b
   on trim(a.upc) = trim(b.upc)
   where b.upc is null )
@@ -732,7 +734,8 @@ UPDATE o5.bi_product t1
  WHERE deactive_ind = 'Y'
    AND EXISTS (SELECT 1
 		FROM o5.oms_rfs_o5_stg t2
-	       WHERE t2.upc = t1.upc
+	       WHERE  lpad(t2.skn_no,13,'0') = t1.sku
+           and  lpad(t2.upc,13,'0') = t1.upc
 		 AND t2.catalog_ind = 'Y'
 		 AND t2.upc = t2.reorder_upc_no);
 COMMIT;

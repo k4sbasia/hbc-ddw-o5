@@ -44,7 +44,7 @@ export EDATA_EXCHANGE_SCHEMA="EDATA_EXCHANGE."
 ##Staging the customer data from ucid table to history table
 #################################################################
 echo "START Customer backup data  for $BANNER `date +%Y%m%d` "  > ${LOG_FILE}
-sqlplus -S $CONNECTDW<<EOF
+sqlplus -s -l $CONNECTDW<<EOF
 delete from ${DW_USER}CUSTOMER_PROFILE_STAGE_HISTORY
 where trunc(CREATE_DT) = trunc(sysdate);
 commit;
