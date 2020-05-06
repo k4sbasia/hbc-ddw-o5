@@ -124,7 +124,7 @@ BEGIN
                     dbms_output.put_line('Error #' || i || ' at '|| 'iteration  #' || SQL%BULK_EXCEPTIONS(i).ERROR_INDEX);
                     dbms_output.put_line('Error message is ' || SQLERRM(-SQL%BULK_EXCEPTIONS(i).ERROR_CODE));
                     INSERT
-                    INTO USER_ACCOUNT_EXCEPTION
+                    INTO O5.USER_ACCOUNT_EXCEPTION
                       (
                         USA_EMAIL,
                         --USA_ID
@@ -280,7 +280,7 @@ WHEN ex_dml_errors THEN
     dbms_output.put_line('Error #' || i || ' at '|| 'iteration  #' || SQL%BULK_EXCEPTIONS(i).ERROR_INDEX);
     dbms_output.put_line('Error message is ' || SQLERRM(-SQL%BULK_EXCEPTIONS(i).ERROR_CODE));
     INSERT
-    INTO USER_ACCOUNT_EXCEPTION
+    INTO o5.USER_ACCOUNT_EXCEPTION
       (
         USA_EMAIL,
         --USA_ID
@@ -369,7 +369,7 @@ EXCEPTION
       #' || SQL%BULK_EXCEPTIONS(i).ERROR_INDEX);
       dbms_output.put_line('Error message is ' ||
       SQLERRM(-SQL%BULK_EXCEPTIONS(i).ERROR_CODE));
-      INSERT INTO  USER_ACCOUNT_EXCEPTION
+      INSERT INTO  o5.USER_ACCOUNT_EXCEPTION
                      (
                      USA_EMAIL,
                      --USA_ID
