@@ -209,15 +209,15 @@ WITH all_order_data AS (
         to_number(ord.order_header_key)         AS order_header_key, 
         to_number(ord.order_line_key)           AS order_line_key,
         CASE WHEN hist.order_line_key IS NOT NULL OR hist.orderdet IS NOT NULL THEN 1 ELSE 0 END AS f_existing_order,
-        CASE WHEN ord.orderdet IS NULL THEN to_number(ord.order_line_key) ELSE to_number(ord.orderdet) END AS f_matching_criteria -- To Handle Switch from BM to SFCC
+        CASE WHEN ord.orderdet IS NULL THEN to_number(ord.order_line_key) ELSE to_number(ord.orderdet) END AS f_matching_criteria, -- To Handle Switch from BM to SFCC
 --        CASE WHEN hist.orderdet IS NOT NULL THEN 1 ELSE 0 END AS f_existing_order
 --        CASE WHEN hist.order_line_key IS NOT NULL THEN 1 ELSE 0 END AS f_existing_order
 -- Extra
         CASE WHEN ord.order_line_status_id IN ('3700.01.001','3700.01.002','3700.01.003','3700.01.004','3700.02') THEN ord.l_ret_can_date  ELSE NULL END  AS returndate,
-        ord.giftwrap_message      AS giftwrap_message,
+        ord.giftwrap_message      AS giftwrap_message
     FROM &1.t_so5_order_line_info      ord
     JOIN &1.t_so5_ord_cust_ship_dtls   cust ON ord.order_line_key = cust.order_line_key
-    LEFT JOIN (SELECT order_line_key, orderdet FROM O5.bi_sale_ddw) hist ON ( ord.order_line_key = hist.order_line_key OR to_number(ord.orderdet) = hist.orderdet )
+    LEFT JOIN (SELECT order_line_key, orderdet FROM &1.bi_sale) hist ON ( ord.order_line_key = hist.order_line_key OR to_number(ord.orderdet) = hist.orderdet )
 --    LEFT JOIN (SELECT order_line_key FROM bi_sale) hist ON ord.order_line_key = hist.order_line_key
 --    LEFT JOIN (SELECT orderdet FROM O5.bi_sale_ddw) hist ON to_number(ord.orderdet) = hist.orderdet
     WHERE  ( (TRUNC(ord.load_date) = TRUNC(sysdate)   OR ord.last_update_date  = TRUNC(sysdate)) 
@@ -225,7 +225,7 @@ WITH all_order_data AS (
 --    WHERE ord.order_line_status_id = orderstatus
 ) 
 SELECT * FROM all_order_data;
---SELECT * FROM all_order_data where rownum < 1500;
+-- SELECT * FROM all_order_data where rownum < 1500;
 
 --  l_start := DBMS_UTILITY.get_time;
  TYPE l_order IS TABLE OF c_order_data%rowtype;
@@ -233,11 +233,8 @@ SELECT * FROM all_order_data;
 -- ord_e l_order;      -- Existing Orders
 -- ord_ne l_order;     -- Non Existing Orders
 
--- DEAL WITH ORDERS THAT ARE PRESENT IN BI_SALE
-
 BEGIN
     v_process := 'ORDER PROCESSING - BI_SALE' ;
---    v_banner  := '''O5''';
     v_banner  := CASE WHEN '&1' = 'O5.' THEN '''O5''' WHEN '&1' = 'MREP.' THEN '''MREP''' END;
     v_process_st_time := to_char(sysdate,'DD-MON-RRRR HH.MI.SS AM');
     dbms_output.put_line('Process : ' || v_process || ' Begins at ' || v_process_st_time);

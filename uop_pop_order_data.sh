@@ -40,7 +40,7 @@ then
 elif [ "$1" = "SAKS" ] || [ "$1" = "OFF5" ] 
 then
         #Variable Declaration  
-        PROCESS="UOP_ORDER_FETCH" 
+        PROCESS="UOP_ORDER_FETCH_POP" 
         SQL=$HOME/SQL
         SQL_FILE=${PROCESS}.sql
         LOG=$HOME/LOG
