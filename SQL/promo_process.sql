@@ -1,3 +1,5 @@
+SET SERVEROUTPUT ON
+
 DECLARE
     v_process VARCHAR2(50);
     v_banner    VARCHAR2(10);

@@ -51,4 +51,3 @@ else
 echo "${PROCESS} completed without errors."
 echo "${PROCESS} completed without errors." >> ${LOG_FILE}
 fi
-exit 0 
