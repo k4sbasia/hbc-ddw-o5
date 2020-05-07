@@ -21,8 +21,8 @@ then
         echo ""
         echo ""
         echo "         USAGE : This Script Needs to Have a Parameter Banner Value SAKS and OFF5 should be the banner data "
-        echo "         USAGE : This Script Needs to Have a Parameter The Vendor Name <UOP_ORDER_FETCH.sh> <BANNER> "
-        echo "         Example : . ./UOP_ORDER_FETCH.sh SAKS/OFF5 "
+        echo "         USAGE : This Script Needs to Have a Parameter The Vendor Name <UOP_POP_ORDER_FETCH.sh> <BANNER> "
+        echo "         Example : . ./UOP_POP_ORDER_FETCH.sh SAKS/OFF5 "
         echo ""
         echo ""
 
@@ -32,7 +32,7 @@ then
         echo ""
         echo ""
         echo "         USAGE : This Script Needs should have a VALID parameter. SAKS or OFF5"
-        echo "         Example : . ./UOP_ORDER_FETCH.sh SAKS/OFF5 "
+        echo "         Example : . ./UOP_POP_ORDER_FETCH.sh SAKS/OFF5 "
         echo ""
         echo ""
         
@@ -41,7 +41,7 @@ elif [ "$1" = "SAKS" ] || [ "$1" = "OFF5" ]
 then
         #Variable Declaration  
         PROCESS="UOP_ORDER_FETCH" 
-        SQL=$HOME/TESTING
+        SQL=$HOME/SQL
         SQL_FILE=${PROCESS}.sql
         LOG=$HOME/LOG
         LOG_FILE=${PROCESS}_${BANNER}_`date +"%Y%m%d_%H%M%S"`.log
@@ -49,7 +49,7 @@ then
         then
             SCHEMA="MREP."
             # CONNECTION="mrep/qsdw_2015@QASDW" # For QA
-            CONNECTION="mrep/qsdw_2015@QASDW"   # For PROD 
+            # CONNECTION="mrep/qsdw_2015@QASDW"   # For PROD 
         elif [ "$1" = "OFF5" ]
         then
             SCHEMA="O5."
@@ -64,7 +64,6 @@ then
         echo "LOG FILE : ${LOG_FILE}" >> ${LOG}/${LOG_FILE}
 fi
 
-#Run the SQL To Populate BI SALE
 #Run SQL Script to Merge Data into BI_SALE
 sqlplus -L $CONNECTION @${SQL}/${SQL_FILE} ${SCHEMA} >> ${LOG}/${LOG_FILE}
 
@@ -76,7 +75,7 @@ sqlplus -s -l $CONNECTION <<EOF
     DECLARE
         v_dmd_dollars NUMBER;
     BEGIN
-        v_count := 0;
+        -- v_dmd_dollars := 0;
         SELECT to_char(nvl(SUM (extend_price_amt),0))
           --INTO v_dmd_dollars
           FROM O5.BI_SALE
