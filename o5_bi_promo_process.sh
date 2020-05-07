@@ -9,14 +9,10 @@
 #####				   1. Calls the sql script that peforms parsing the promo info
 #####				   2. Calls the sql script that updates the promo info
 #####
-#####
-#####
 #####   CODE HISTORY :	Name				Date		Description
 #####					------------		----------	------------
 #####					Unknown				Unknown		Created
-#####					Rajesh Mathew		07/13/2010	Modified
-#####
-#####
+#####					
 #############################################################################################################################
 ################################################################
 . $HOME/params.conf o5
@@ -26,13 +22,13 @@
 ##Control File Variables
 export PROCESS='o5_bi_promo_process'
 export SQL=$HOME/SQL
+export SQL_FILE='promo_process'
 export LOG=$HOME/LOG
 export DATA=$HOME/DATA
 export LOG_FILE="$LOG/${PROCESS}_log.txt"
 export BAD_SUBJECT="${PROCESS} failed"
 export JOB_NAME="${PROCESS}"
 export SCRIPT_NAME="${PROCESS}"
-export SQL='promo_process'
 export BANNER=$1
 ########################################################################
 echo -e "BI_PROMO_PROCESS started at `date '+%a %b %e %T'`\n" >${LOG_FILE}
@@ -64,7 +60,7 @@ EOF
 ##DB SQL
 #################################################################
 echo -e "Run SQL To Populate Promo Tables at `date '+%a %b %e %T'`\n" >>${LOG_FILE}
-sqlplus -s -l  $CONNECTDW @${SQL}/${SQL}.sql "${SCHEMA}" >>${LOG_FILE}
+sqlplus -s -l  $CONNECTDW @${SQL}/${SQL_FILE}.sql "${SCHEMA}" >>${LOG_FILE}
 echo -e "Populate Promo Tables Completed at `date '+%a %b %e %T'`\n" >>${LOG_FILE}
 ################################################################
 sqlplus -s -l  $CONNECTDW<<EOF > ${LOG}/${PROCESS}_runstats_finish.log @${SQL}/runstats_end.sql "$JOB_NAME" "$SCRIPT_NAME" "$SFILE_SIZE" "$FILE_NAME" "$LOAD_COUNT" "$FILE_COUNT" "$TFILE_SIZE" "$SOURCE_COUNT" "$TARGET_COUNT"
