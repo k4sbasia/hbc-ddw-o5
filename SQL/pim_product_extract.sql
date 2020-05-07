@@ -217,7 +217,7 @@ EXECUTE IMMEDIATE 'truncate table &1.ALL_ACTV_PIM_ASST_FULL_&2';
          MAX(CASE WHEN attribute_name = 'pickUpAllowedInd' THEN attribute_val ELSE NULL END) AS pickUpAllowedInd,
          MAX(CASE WHEN attribute_name = 'Primary_Parent_Color' THEN attribute_val ELSE NULL END) AS Primary_Parent_Color,
          MAX(CASE WHEN attribute_name = 'SkuHexValue' THEN attribute_val ELSE NULL END) AS SkuHexValue,
-        MAX(CASE WHEN attribute_name = 'US_STDSize' THEN attribute_val ELSE NULL END) AS SkuHexValue,
+        MAX(CASE WHEN attribute_name = 'US_STDSize' THEN attribute_val ELSE NULL END) AS US_STDSize,
          max(PIM_ACTV_DT) As PIM_ACTV_DT,
          MAX(ADD_DT) AS ADD_DT,
         MAX(MODIFY_DT) AS MODIFY_DT
