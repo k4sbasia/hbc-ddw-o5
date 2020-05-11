@@ -5,6 +5,7 @@ set feedback off
 set trimspool on
 set serverout on
 set heading off
+SET VERIFY OFF
   SELECT    'ORDER_NO'
        || ','
        ||'ENTERPRISE_KEY'
@@ -42,5 +43,5 @@ set heading off
   ORDER BY SAL.ORDER_NO,
            SAL.EMAILID,
            SAL.CONTACT_TIME,
-           CSR.USER_NAME;
+           SAL.USERNAME;
 exit;

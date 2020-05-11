@@ -16,7 +16,7 @@
 #####
 #####
 ##################################################################################################################################
-. $HOME/params.conf o5
+. $HOME/params.conf $1
 ################################################################
 ##Control File Variables
 export SQL=$HOME/SQL
@@ -59,9 +59,9 @@ sqlplus -s -l  $CONNECTDW <<EOF>${LOG}/${PROCESS}_runstats_start.log @${SQL}/run
 EOF
 cd ${DATA}
 ###### get latest data from OMS
-sqlplus -s -l $CONNECTO5OMSREAD @${SQL}/${PROCESS}_OMS.sql >${OMS_FILE_NAME}
+sqlplus -s -l $CONNECTO5OMSREAD @${SQL}/${PROCESS}_oms.sql >${OMS_FILE_NAME}
 sqlldr $CONNECTDW CONTROL=$CONTROL_FILE LOG=$CTL_LOG BAD=$BAD_FILE DATA=${OMS_FILE_NAME}  ERRORS=99 SKIP=1 direct=true
-sqlplus -s -l $CONNECTDW @${SQL}/${PROCESS}.sql >${FILE_NAME}
+sqlplus -s -l $CONNECTDW @${SQL}/${PROCESS}.sql "${1}." >${FILE_NAME}
 wait
 echo "Starting the ftp process to echosurvey.com at `date '+%a %b %e %T %Z %Y'` " >>${LOG_FILE}
 lftp -u HBC-CX,'8mjp4lvp' sftp://filemanager.lrwcx.com<<EOF>>$LOG_FILE
