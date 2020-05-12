@@ -249,15 +249,18 @@ SELECT
                                 else
                                 'https://image.s5a.com/is/image/saks/'
                                 end
-                                || img.asset_id ||'_300x400.jpg',',') WITHIN GROUP(ORDER BY product_code) AS alt_image_url,
+                                || img.asset_id ||'_300x400.jpg',',') WITHIN GROUP(ORDER BY a.product_code) AS alt_image_url,
                                 SYSDATE
                             FROM
-                                &2.&4 a
-                                JOIN &2.media_manifest img ON regexp_replace(substr(asset_id,0,instr(asset_id,'_') - 1),'[^0-9]+','') = a.upc
-                            WHERE (img.asset_id LIKE '%_A1'  or img.asset_id LIKE '%_A2' or img.asset_id LIKE '%_A3' or img.asset_id LIKE '%_A4' or  img.asset_id LIKE '%_ASTL%' )
-                              AND a.catalog_ind = 'Y'
+                               ( select product_code from &2.&4 a
+                                 where a.catalog_ind = 'Y'
                               AND a.upc = a.reorder_upc_no
-                          GROUP BY a.product_code;
+                               GROUP BY a.product_code
+                              ) a
+                                JOIN &2.media_manifest img ON regexp_replace(substr(asset_id,0,instr(asset_id,'_') - 1),'[^0-9]+','') = a.product_code
+                            WHERE (img.asset_id LIKE '%_A1'  or img.asset_id LIKE '%_A2' or img.asset_id LIKE '%_A3' or img.asset_id LIKE '%_A4' or  img.asset_id LIKE '%_ASTL%' )
+                             group by product_code
+                         ;
 COMMIT;
 DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '||TO_CHAR(SYSDATE,'MM-DD-YYYY HH:Mi:SS')||' Loaded IMAGE_BAY_ALT table. '||' '||NVL((SQL%ROWCOUNT),0)||' rows affected.');
 INSERT INTO &2.bi_product_aggregate
