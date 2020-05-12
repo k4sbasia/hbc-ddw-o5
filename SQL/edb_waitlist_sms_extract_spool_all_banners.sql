@@ -16,7 +16,7 @@ FROM &1.EDB_WAITLIST_EXTRACT_SMS_WRK w,
      &1.O5_PARTNERS_EXTRACT_WRK bpw
 WHERE w.phone_number is not null and w.item_url is not null
   AND w.product_code = bpw.styl_seq_num
-and lpad(w.sku_code_lower,13,0)=bpw.bpw.upc
+and lpad(w.sku_code_lower,13,0)=bpw.upc
   AND length(w.phone_number) >=10
 ;
 
