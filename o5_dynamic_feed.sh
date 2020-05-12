@@ -14,7 +14,7 @@
 #####
 ##################################################################################################################################
 set -x
-. $HOME/params.conf bay
+. $HOME/params.conf o5
 ################################################################
 ##Control File Variables
 export SQL=$HOME/SQL
@@ -40,9 +40,10 @@ export FILE_COUNT=0
 export TFILE_SIZE=0
 export SOURCE_COUNT=0
 export TARGET_COUNT=0
-export ENV=$1
 export load_type=$2
 export SLEEP_TIME=120
+export RUN_DATE_EXPR="TO_DATE('`date +"%Y%m%d"`','YYYYMMDD')"
+export process_name=$1
 echo "Started Job :: ${PROCESS} " >${LOG_FILE}
 ################################################################
 ##Initialize Email Function
@@ -64,7 +65,8 @@ set pagesize 0
 set sqlprompt ''
 set heading off
 set trimspool on
-select ${DW_USER}price_load.fileCheck${load_type} from dual;
+select count(*) from EDATA_EXCHANGE.job_status where upper(system) = 'AMS'
+and process_name = '$process_name' and trunc(run_date) = trunc(${RUN_DATE_EXPR}) and process_status = 'Completed';
 quit;
 EOF`"
 }
@@ -92,6 +94,15 @@ then
         exit 99
 else
         echo "Product data loaded for the process ${PROCESS} is complete" >> ${LOG_FILE}
+fi
+sqlplus -s -l $CONNECTPIM @SQL/${PROCESS}_isnew_load.sql >> ${LOG_FILE}
+retcode=$?
+if [ $retcode -ne 0 ]
+then
+        echo "SQL Error in assortment data for process ${PROCESS}...Please check" >> ${LOG_FILE}
+        exit 99
+else
+        echo "Assortment data loaded for the process ${PROCESS} is complete" >> ${LOG_FILE}
 fi
 sqlplus -s -l $CONNECTDWXML @SQL/${PROCESS}_flag.sql ${DATE} >> ${LOG_FILE}
 #sqlplus -s -l $CONNECTPRODSDWXML @SQL/${PROCESS}_flag_parent.sql ${DATE} >> ${LOG_FILE} #commented as change to process at variant level inplace
@@ -142,8 +153,9 @@ zip -9 ${CAT_FILE_ZIP} ${CAT_FILE_NAME}
 sftp -o "IdentityFile=~/.ssh/${SFCC_NON_KEY}" ${SFCC_NON_USER}@sftp.integration.awshbc.io <<< "put ${DATA}/${FLAGS_FILE_ZIP} sfcc-inbound/catalog/products"
 sftp -o "IdentityFile=~/.ssh/${SFCC_NON_KEY}" ${SFCC_NON_USER}@sftp.integration.awshbc.io <<< "put ${DATA}/${CAT_FILE_ZIP} sfcc-inbound/catalog/assignments"
 sqlplus -S $CONNECTDW<<EOF
-UPDATE   JOB_STATUS set last_run_on =LAST_COMPLETED_TIME,  LAST_COMPLETED_TIME= sysdate where process_name='O5_DYNAMIC';
-UPDATE   JOB_STATUS set last_run_on =LAST_COMPLETED_TIME,  LAST_COMPLETED_TIME= sysdate where process_name='O5_DYNAMIC_ASSGN';
+UPDATE   O5.JOB_STATUS set last_run_on =LAST_COMPLETED_TIME,  LAST_COMPLETED_TIME= sysdate where process_name='SFCC_DYNAMIC';
+UPDATE   O5.JOB_STATUS set last_run_on =LAST_COMPLETED_TIME,  LAST_COMPLETED_TIME= sysdate where process_name='SFCC_DYNAMIC_ASSGN';
+UPDATE   O5.JOB_STATUS set last_run_on =LAST_COMPLETED_TIME,  LAST_COMPLETED_TIME= sysdate where process_name='SFCC_LOAD';
 COMMIT;
 quit;
 EOF
@@ -172,3 +184,4 @@ exit 1
 else
 echo -e "${PROCESS} completed without errors."
 echo -e "${PROCESS} completed without errors." >> ${LOG_FILE}
+fi

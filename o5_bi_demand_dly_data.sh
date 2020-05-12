@@ -11,11 +11,10 @@
 #####
 #####
 #####
-#####   CODE HISTORY :  Name                            Date            Description
-#####                                   ------------            ----------      ------------
-#####                                   Rajesh Mathew           05/17/2011      Created
-#####
-#####                                  Jayanthi Dudala     Added the check before sending file to Jackson 
+#####   CODE HISTORY :  Name                    Date            Description
+#####                   ------------            ----------      ------------
+#####                   Rajesh Mathew           05/17/2011      Created
+#####                   Jayanthi Dudala                         Added the check before sending file to Jackson 
 #############################################################################################################################
 ################################################################
 . $HOME/params.conf o5
@@ -55,7 +54,7 @@ function send_email {
 #################################################################
 ##Update Runstats Start
 #################################################################
-sqlplus -s -l  $CONNECTDW <<EOF> ${LOG}/${PROCESS}_runstats_start.log @${SQL}/runstats_start.sql "$JOB_NAME" "$SCRIPT_NAME" "$SFILE_SIZE" "$FILE_NAME" "$LOAD_COUNT" "$FILE_COUNT" "$TFILE_SIZE" "$SOURCE_COUNT" "$TARGET_COUNT"
+sqlplus -s -l  $CONNECTDW <<EOF > ${LOG}/${PROCESS}_runstats_start.log @${SQL}/runstats_start.sql "$JOB_NAME" "$SCRIPT_NAME" "$SFILE_SIZE" "$FILE_NAME" "$LOAD_COUNT" "$FILE_COUNT" "$TFILE_SIZE" "$SOURCE_COUNT" "$TARGET_COUNT"
 EOF
 #################################################################
 echo -e "O5_BI_DEMAND_DLY_DATA Process started at `date '+%a %b %e %T'`\n" >${LOG_FILE}
@@ -102,7 +101,7 @@ SELECT   DATEKEY,
 quit;
 EOF`
 #################################################################
-sqlplus -s -l  $CONNECTDW<<EOF> ${LOG}/${PROCESS}_runstats_finish.log @${SQL}/runstats_end.sql "$JOB_NAME" "$SCRIPT_NAME" "$SFILE_SIZE" "$FILE_NAME" "$LOAD_COUNT" "$FILE_COUNT" "$TFILE_SIZE" "$SOURCE_COUNT" "$TARGET_COUNT"
+sqlplus -s -l  $CONNECTDW<<EOF > ${LOG}/${PROCESS}_runstats_finish.log @${SQL}/runstats_end.sql "$JOB_NAME" "$SCRIPT_NAME" "$SFILE_SIZE" "$FILE_NAME" "$LOAD_COUNT" "$FILE_COUNT" "$TFILE_SIZE" "$SOURCE_COUNT" "$TARGET_COUNT"
 EOF
 #################################################################
 #Ftp the file to Jackson 
@@ -120,15 +119,15 @@ put PK.NF.O5DFLASH.txt 'PK.NF.O5DFLASH'
 put PK.NF.O5DFLASH.COUNTS.txt 'PK.NF.O5DFLASH.COUNTS'
 quit
 EOF
-cd $HOME
-echo "CHECK_COUNT:= ${CHECK_COUNT}" >> $LOG_FILE
-echo -e "Finished the O5 ftp process to Jackson at `date '+%a %b %e %T %Z %Y'`\n " >>${LOG_FILE}
-echo -e "o5_bi_demand_dly_data Process Ended at `date '+%a %b %e %T'`\n" >>${LOG_FILE}
-else
-echo "CHECK_COUNT:= ${CHECK_COUNT}" >> $LOG_FILE
-echo "${PROCESS} was not sent.The file didn't pass the check. Please check the counts in the file matches the PSA counts " >> $LOG_FILE
-send_email
-exit 99
+    cd $HOME
+    echo "CHECK_COUNT:= ${CHECK_COUNT}" >> $LOG_FILE
+    echo -e "Finished the O5 ftp process to Jackson at `date '+%a %b %e %T %Z %Y'`\n " >>${LOG_FILE}
+    echo -e "o5_bi_demand_dly_data Process Ended at `date '+%a %b %e %T'`\n" >>${LOG_FILE}
+    else
+    echo "CHECK_COUNT:= ${CHECK_COUNT}" >> $LOG_FILE
+    echo "${PROCESS} was not sent.The file didn't pass the check. Please check the counts in the file matches the PSA counts " >> $LOG_FILE
+    send_email
+    exit 99
 fi
 
 ################################################################
@@ -145,15 +144,10 @@ find /home/cognos -name '*_sd_item_demand_ext_cnt.txt' -atime +7 -exec rm {} \;
 ################################################################
 if [ `egrep -c "^ERROR|ORA-|not found|SP2-0|^553" ${LOG_FILE}` -ne 0 ]
 then
-#mv "${LOG_FILE}" "${LOG_FILE}.`date +%Y%m%d`"
-echo -e "${PROCESS} failed. Please investigate"
-echo -e "${PROCESS} failed. Please investigate\n" >> ${LOG_FILE}
-export SUBJECT=${BAD_SUBJECT}
+    echo -e "${PROCESS} failed. Please investigate." >> ${LOG_FILE}
+    export SUBJECT=${BAD_SUBJECT}
 #send_email
 else
-export SUBJECT="SUCCESS: O5_BI_DEMAND_DLY_DATA extract process completed"
-echo -e "${PROCESS} completed without errors."
-echo -e "${PROCESS} completed without errors.\n" >> ${LOG_FILE}
+    export SUBJECT="SUCCESS: O5_BI_DEMAND_DLY_DATA extract process completed"
+    echo -e "${PROCESS} completed without errors." >> ${LOG_FILE}
 fi
-exit 0
-

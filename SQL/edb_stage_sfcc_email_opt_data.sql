@@ -42,10 +42,99 @@ canada_flag,
 language
 from
 &1.edb_stage_sfcc_email_opt_data
-where the_bay_opt_status = 'Y'
+where 
+(source_id in ('9166','500','9184','9197','9168','9050','9192','9193') and
+decode('&1','o5.',trim(OFF5TH_OPT_STATUS),'mrep.',trim(saks_opt_status)) = 'Y')
 and email_address is not null;
 
 commit;
+
+insert into mrep.edb_stage_sub
+(
+source_id,
+email_address,
+subscribed,
+first_name,
+middle_name,
+last_name,
+address,
+address_two,
+city,
+state,
+zip_full,
+country,
+phone,
+canada_flag,
+language_id
+)
+select
+decode(source_id,'9168','9173'),
+email_address,
+case when sub_unsub_date is null then sysdate else sub_unsub_date end,
+first_name,
+middle_name,
+last_name,
+address,
+address_two,
+city,
+state,
+zip_full,
+country,
+phone,
+canada_flag,
+language
+from
+&1.edb_stage_sfcc_email_opt_data
+where 
+ source_id in ('9168') and trim(saks_opt_status) = 'Y'
+and email_address is not null;
+
+COMMIT;
+
+--mmost probably for Saks adding O5 optin from saks should be uncommented when same script used for Saks
+/*
+insert into o5.edb_stage_sub
+(
+source_id,
+email_address,
+subscribed,
+first_name,
+middle_name,
+last_name,
+address,
+address_two,
+city,
+state,
+zip_full,
+country,
+phone,
+canada_flag,
+language_id
+)
+select
+decode(source_id,'9050','9173'),
+email_address,
+case when sub_unsub_date is null then sysdate else sub_unsub_date end,
+first_name,
+middle_name,
+last_name,
+address,
+address_two,
+city,
+state,
+zip_full,
+country,
+phone,
+canada_flag,
+language
+from
+mrep.edb_stage_sfcc_email_opt_data
+where 
+ source_id in ('9050') and trim(OFF5TH_OPT_STATUS) = 'Y'
+and email_address is not null;
+*/
+
+COMMIT;
 
 insert into &1.edb_stage_unsub
 (source_id,
@@ -82,7 +171,7 @@ canada_flag,
 'M',
 language
 from &1.edb_stage_sfcc_email_opt_data
-where the_bay_opt_status = 'N'
+where decode('&1','o5.',trim(OFF5TH_OPT_STATUS),'mrep.',trim(saks_opt_status)) = 'N'
 and email_address is not null;
 
 commit;

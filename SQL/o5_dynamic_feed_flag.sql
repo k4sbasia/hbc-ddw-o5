@@ -49,7 +49,7 @@ AS CLOB INDENT SIZE = 5--.EXTRACT ('/*').getclobVal ()
         XMLELEMENT(
             "catalog",
             XMLATTRIBUTES(
-                'master-bay' AS "catalog-id",
+                'master-o5a' AS "catalog-id",
                 'http://www.demandware.com/xml/impex/catalog/2006-10-31' AS "xmlns"
             ),   xmlagg(
                 XMLELEMENT ("product",
@@ -58,7 +58,9 @@ AS CLOB INDENT SIZE = 5--.EXTRACT ('/*').getclobVal ()
                                 XMLELEMENT ("custom-attribute",
                                             XMLATTRIBUTES ('isClearance' as "attribute-id"),NVL(sp.isClearance,'false')),
                                 XMLELEMENT ("custom-attribute",
-                                            XMLATTRIBUTES ('isFinalSale' as "attribute-id"),NVL(sp.ISFINALSALE,'false'))
+                                            XMLATTRIBUTES ('isNew' as "attribute-id"),NVL(sp.isNew,'false')),
+                                XMLELEMENT ("custom-attribute",
+                                            XMLATTRIBUTES ('Waitlist' as "attribute-id"),NVL(sp.isWaitlist,'false'))
                                             )
                                             )
                                             ),
@@ -70,7 +72,7 @@ AS CLOB INDENT SIZE = 5--.EXTRACT ('/*').getclobVal ()
                                 XMLELEMENT ("custom-attribute",
                                             XMLATTRIBUTES ('isClearance' as "attribute-id"),NVL(si.isClearance,'false')),
                                 XMLELEMENT ("custom-attribute",
-                                            XMLATTRIBUTES ('isFinalSale' as "attribute-id"),NVL(si.isFinalSale,'false'))
+                                            XMLATTRIBUTES ('finalSale' as "attribute-id"),NVL(si.isFinalSale,'false'))
                                             )
                                             ) )
                             from
@@ -84,7 +86,8 @@ AS CLOB INDENT SIZE = 5--.EXTRACT ('/*').getclobVal ()
 from    o5.SFCC_PROD_PRODUCT_DATA sp
 where  (exists  (select 'X' from  o5.SFCC_PROD_SKU_DYN_FLAGS si where sp.PRDUCT_CODE=si.product_id and
                               (  si.DYN_FLAG_CHG_DT  >= (select last_run_on from o5.JOB_STATUS where process_name='SFCC_DYNAMIC')
-                                OR  si.IN_STOCK_CHG_DT  >= (select last_run_on from o5.JOB_STATUS where process_name='SFCC_DYNAMIC')   )
+                                OR  si.IN_STOCK_CHG_DT  >= (select last_run_on from o5.JOB_STATUS where process_name='SFCC_DYNAMIC') 
+								OR si.PIM_CHG_DT >=(select last_run_on from o5.JOB_STATUS where process_name='SFCC_DYNAMIC')  )
                           )
         OR
         sp.DYN_FLAG_CHG_DT  >= (select last_run_on from o5.JOB_STATUS where process_name='SFCC_DYNAMIC')

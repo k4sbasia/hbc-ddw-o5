@@ -32,6 +32,7 @@ EXECUTE IMMEDIATE 'truncate table &1.all_active_pim_prd_attr_&2';
 EXECUTE IMMEDIATE 'truncate table &1.all_active_pim_sku_attr_&2';
 EXECUTE IMMEDIATE 'truncate table &1.all_actv_pim_assortment_&2';
 EXECUTE IMMEDIATE 'truncate table &1.ALL_PRODUCT_ATTR_RR_FEED_&2';
+EXECUTE IMMEDIATE 'truncate table &1.ALL_ACTV_PIM_ASST_FULL_&2';
     --Get Product Attributes
     DBMS_OUTPUT.PUT_LINE('PIM Product ATTRIBUTE Fetch Process Start :  '|| to_char(sysdate,'MM-DD-YYYY HH:MI:SS'));
     INSERT INTO all_active_pim_prd_attr_&2
@@ -70,14 +71,21 @@ EXECUTE IMMEDIATE 'truncate table &1.ALL_PRODUCT_ATTR_RR_FEED_&2';
    PD_RESTRICTEDSTATE_TEXT ,
    PD_RESTRICTEDSHIPTYPE_TEXT,
    CountryOfOrigin,
-   DROPSHIP_LEADDAYS
+   DROPSHIP_LEADDAYS,
+    PIM_ACTV_DT,
+     PIM_ADD_DT,
+     PIM_MODIFY_DT,
+   DisplayPlayVideo
      )
         WITH all_product_attributes AS
        (
        SELECT
                product_id,
                attribute_name,
-               TRIM(REPLACE(REPLACE(REPLACE(TRANSLATE(attribute_val, 'x'||CHR(10)||CHR(13), 'x'),'|',''),'^',''),'�','')) attribute_val
+               PIM_ACTV_DT,
+               ADD_DT,
+               MODIFY_DT,
+               TRIM(REPLACE(REPLACE(REPLACE(TRANSLATE(pim_exp_bm.char_conversion_new(attribute_val), 'x'||CHR(10)||CHR(13), 'x'),'|',''),'^',''),'�','')) attribute_val
         FROM &3
        WHERE
        attribute_name IN  ( 'status',
@@ -111,7 +119,9 @@ EXECUTE IMMEDIATE 'truncate table &1.ALL_PRODUCT_ATTR_RR_FEED_&2';
    'waitlist',
    'Zoom',
    'CountryOfOrigin',
-   'DropShip_LeadDays')
+   'DropShip_LeadDays',
+   'DisplayPlayVideo'
+    )
      AND attribute_val IS NOT NULL
        )
        SELECT
@@ -149,10 +159,13 @@ EXECUTE IMMEDIATE 'truncate table &1.ALL_PRODUCT_ATTR_RR_FEED_&2';
                 MAX(CASE WHEN attribute_name = 'PD_RestrictedState_Text' THEN attribute_val END) PD_RestrictedState_Text,
                 MAX(CASE WHEN attribute_name = 'PD_RestrictedShipType_Text' THEN attribute_val END) AS PD_RestrictedShipType_Text,
                 MAX(CASE WHEN attribute_name = 'CountryOfOrigin' THEN attribute_val END) AS CountryOfOrigin,
-                MAX(CASE WHEN attribute_name = 'DropShip_LeadDays' THEN attribute_val END) AS DropShip_LeadDays
+                MAX(CASE WHEN attribute_name = 'DropShip_LeadDays' THEN attribute_val END) AS DropShip_LeadDays,
+                max(PIM_ACTV_DT) As PIM_ACTV_DT,
+                MAX(ADD_DT) AS ADD_DT,
+                MAX(MODIFY_DT) AS MODIFY_DT,
+                MAX(CASE WHEN attribute_name = 'DisplayPlayVideo' THEN attribute_val END) AS DisplayPlayVideo
    FROM all_product_attributes
-       GROUP BY product_id
-    ;
+       GROUP BY product_id;
     COMMIT;
     DBMS_OUTPUT.PUT_LINE('PIM Product Attribute Fetch Process End :  '|| to_char(sysdate,'MM-DD-YYYY HH:MI:SS') || ' - ' || nvl((SQL%rowcount),0));
     COMMIT;
@@ -171,13 +184,22 @@ EXECUTE IMMEDIATE 'truncate table &1.ALL_PRODUCT_ATTR_RR_FEED_&2';
   WEBENDDATE,
   PICKUPALLOWEDIND ,
   PRIMARY_PARENT_COLOR,
-  SKUHEXVALUE)
+  SKUHEXVALUE,
+  US_STDSIZE,
+  PIM_ACTV_DT,
+  PIM_ADD_DT,
+  PIM_MODIFY_DT,
+  US_STDSize3,
+  Secondary_Parent_Color)
     WITH all_sku_attributes AS
                 (
                 SELECT
                         product_id,
                         upc,
                         attribute_name,
+                        PIM_ACTV_DT,
+                        ADD_DT,
+                        MODIFY_DT,
                         TRIM(REPLACE(REPLACE(TRANSLATE(attribute_val, 'x'||CHR(10)||CHR(13), 'x'),'|',''),'^','')) attribute_val
                  FROM &4
                 WHERE attribute_name IN ('Color','Size','status','US_STDSize2','ComplexSwatch',
@@ -185,7 +207,7 @@ EXECUTE IMMEDIATE 'truncate table &1.ALL_PRODUCT_ATTR_RR_FEED_&2';
                     'webEndDate',
                     'pickUpAllowedInd',
                     'Primary_Parent_Color',
-                    'SkuHexValue')
+                    'SkuHexValue','US_STDSize')
                   AND attribute_val IS NOT NULL
                 )
         SELECT upc,
@@ -199,7 +221,13 @@ EXECUTE IMMEDIATE 'truncate table &1.ALL_PRODUCT_ATTR_RR_FEED_&2';
           MAX(CASE WHEN attribute_name = 'webEndDate' THEN attribute_val ELSE NULL END) AS webEndDate,
          MAX(CASE WHEN attribute_name = 'pickUpAllowedInd' THEN attribute_val ELSE NULL END) AS pickUpAllowedInd,
          MAX(CASE WHEN attribute_name = 'Primary_Parent_Color' THEN attribute_val ELSE NULL END) AS Primary_Parent_Color,
-         MAX(CASE WHEN attribute_name = 'SkuHexValue' THEN attribute_val ELSE NULL END) AS SkuHexValue
+         MAX(CASE WHEN attribute_name = 'SkuHexValue' THEN attribute_val ELSE NULL END) AS SkuHexValue,
+        MAX(CASE WHEN attribute_name = 'US_STDSize' THEN attribute_val ELSE NULL END) AS US_STDSize,
+         max(PIM_ACTV_DT) As PIM_ACTV_DT,
+         MAX(ADD_DT) AS ADD_DT,
+        MAX(MODIFY_DT) AS MODIFY_DT,
+         MAX(CASE WHEN attribute_name = 'US_STDSize3' THEN attribute_val ELSE NULL END) AS US_STDSize3,
+          MAX(CASE WHEN attribute_name = 'Secondary_Parent_Color' THEN attribute_val ELSE NULL END) AS Secondary_Parent_Color
         FROM all_sku_attributes sku_attr
         GROUP BY upc
     ;
@@ -226,7 +254,7 @@ READYFORPRODFOLDER
                 substr(sys_connect_by_path(fl.LABEL,'~'),2) AS path_label,
                 LEVEL
             FROM &5 fl
-            START WITH fl.folder_parent_id = 1464881062518
+            START WITH fl.folder_parent_id = 1408474395181059
             CONNECT BY PRIOR fl.folder_id = fl.folder_parent_id
             AND fl.folder_path LIKE '/Assortments/SaksMain/ShopCategory%'
 --Below Change to get the Missing and Accurate Folder Path for all the products
@@ -234,8 +262,8 @@ READYFORPRODFOLDER
             AND EXISTS (SELECT 1
                           FROM &6 fla
                          WHERE fla.folder_path = fl.folder_path
-                           AND (CASE WHEN fla.attribute_name = 'readyForProdFolder' AND fla.attribute_val = 'Yes' THEN 1
-                                     WHEN fla.attribute_name = 'folderactive'   AND fla.attribute_val = 'Yes' THEN 1
+                           AND (CASE WHEN   lower(fla.attribute_name) = 'readyforprodfolder' AND fla.attribute_val = 'Yes' THEN 1
+                                     WHEN lower(fla.attribute_name) = 'folderactive' AND fla.attribute_val = 'Yes' THEN 1
                                      ELSE 0
                                  END) = 1)
             ORDER BY LEVEL, fl.folder_id
@@ -248,7 +276,7 @@ READYFORPRODFOLDER
                 fd.folder_path,
 --                asrt.assort_name ||
                 asrt.sub_assrt_name  || '/' || object_name AS product_asrt,
-                row_number() OVER(PARTITION BY asrt.object_name ORDER BY greatest(asrt.pim_actv_dt,asrt.modify_dt) DESC) AS latest_prd_path
+                 row_number() OVER(PARTITION BY asrt.object_name ORDER BY least(asrt.pim_actv_dt,asrt.modify_dt) ASC) AS latest_prd_path
         FROM
                 &7 asrt
                 JOIN all_folder_data fd ON fd.folder_path = asrt.assort_name || asrt.sub_assrt_name
@@ -267,12 +295,151 @@ READYFORPRODFOLDER
     DBMS_OUTPUT.PUT_LINE('PIM Assortment Fetch Process End :  '|| to_char(sysdate,'MM-DD-YYYY HH:MI:SS') || ' - ' || nvl((SQL%rowcount),0));
     COMMIT;
 DBMS_OUTPUT.PUT_LINE('Rich Relavance all product attribite Fetch Process Started  :  '|| to_char(sysdate,'MM-DD-YYYY HH:MI:SS'));
+INSERT INTO &1.ALL_ACTV_PIM_ASST_FULL_&2
+    (
+      PRODUCT_ID  ,
+PRIMARY_PARENT_CATEGORY ,
+PATH_LABEL ,
+FOLDER_PATH,
+PRODUCT_ASRT ,
+FOLDERACTIVE,
+READYFORPRODFOLDER,
+LABEL,
+FOLDER_PARENT_ID,
+FOLDER_NAME,
+FOLDER_ID
+    )
+    WITH all_folder_data
+      AS (
+          SELECT DISTINCT
+                fl.folder_id,
+                fl.folder_name,
+                fl.folder_path,
+                fl.label,
+                fl.folder_parent_id,
+                CONNECT_BY_ROOT fl.folder_name AS primary_parent_category,
+                substr(sys_connect_by_path(fl.LABEL,'~'),2) AS path_label,
+                LEVEL
+            FROM &5 fl
+            START WITH fl.folder_parent_id = 1408474395181057
+            CONNECT BY PRIOR fl.folder_id = fl.folder_parent_id
+            AND EXISTS (SELECT 1
+                          FROM &6 fla
+                         WHERE fla.folder_path = fl.folder_path
+                           AND (CASE WHEN lower(fla.attribute_name) = 'readyforprodfolder' AND fla.attribute_val = 'Yes' THEN 1
+                                     WHEN lower(fla.attribute_name) = 'folderactive'   AND fla.attribute_val = 'Yes' THEN 1
+                                     ELSE 0
+                                 END) = 1)
+            ORDER BY LEVEL, fl.folder_id
+        )
+        ,all_assortments AS (
+            SELECT
+                asrt.object_name AS product_id,
+                fd.primary_parent_category,
+                fd.path_label,
+                fd.folder_path,
+                fd.label,
+                fd.folder_parent_id,
+                fd.folder_name,
+                fd.folder_id,
+--                asrt.assort_name ||
+                asrt.sub_assrt_name  || '/' || object_name AS product_asrt,
+                row_number() OVER(PARTITION BY asrt.object_name ORDER BY greatest(asrt.pim_actv_dt,asrt.modify_dt) DESC) AS latest_prd_path
+        FROM
+                &7 asrt
+                JOIN all_folder_data fd ON fd.folder_path = asrt.assort_name || asrt.sub_assrt_name
+            WHERE ACTIVITY_IND<>'Delete'
+        ) SELECT
+            product_id,
+            primary_parent_category,
+            path_label,
+            folder_path,
+            product_asrt,
+            'T' FOLDERACTIVE,
+            'T' READYFORPRODFOLDER,
+            label,
+            folder_parent_id,
+            folder_name,
+            folder_id
+        FROM all_assortments;
+Commit;
+         INSERT INTO &1.ALL_ACTV_PIM_ASST_FULL_&2
+    (
+      PRODUCT_ID  ,
+PRIMARY_PARENT_CATEGORY ,
+PATH_LABEL ,
+FOLDER_PATH,
+PRODUCT_ASRT ,
+FOLDERACTIVE,
+READYFORPRODFOLDER,
+LABEL,
+FOLDER_PARENT_ID,
+FOLDER_NAME,
+FOLDER_ID
+    )
+    WITH all_folder_data
+      AS (
+            SELECT DISTINCT
+                fl.folder_id,
+                fl.folder_name,
+                fl.folder_path,
+                fl.folder_parent_id,
+                fl.label,
+              CONNECT_BY_ROOT fl.folder_name AS primary_parent_category,
+                substr(sys_connect_by_path(fl.LABEL,'~'),2) AS path_label,
+                LEVEL
+            FROM &5 fl
+            START WITH fl.folder_parent_id = 1408474395181059
+            CONNECT BY PRIOR fl.folder_id = fl.folder_parent_id
+            AND fl.folder_path LIKE '/Assortments/SaksMain/ShopCategory%'
+            AND EXISTS (SELECT 1
+                          FROM  &6 fla
+                         WHERE fla.folder_path = fl.folder_path
+                           AND (CASE WHEN   lower(fla.attribute_name) = 'readyforprodfolder' AND fla.attribute_val = 'Yes' THEN 1
+                                     WHEN lower(fla.attribute_name) = 'folderactive' AND fla.attribute_val = 'Yes' THEN 1
+                                     ELSE 0
+                                 END) = 1)
+            ORDER BY LEVEL, fl.folder_id
+        )
+        ,all_assortments AS (
+            SELECT
+                asrt.object_name AS product_id,
+                fd.primary_parent_category,
+                fd.path_label,
+                fd.folder_path,
+                fd.label,
+                fd.folder_parent_id,
+                fd.folder_name,
+                fd.folder_id,
+--                asrt.assort_name ||
+                asrt.sub_assrt_name  || '/' || object_name AS product_asrt,
+                row_number() OVER(PARTITION BY asrt.object_name ORDER BY greatest(asrt.pim_actv_dt,asrt.modify_dt) DESC) AS latest_prd_path
+        FROM
+                            &7 asrt
+                JOIN all_folder_data fd ON fd.folder_path = asrt.assort_name || asrt.sub_assrt_name
+            WHERE TRIM(asrt.assort_name) = '/Assortments/SaksMain/ShopCategory'
+                and ACTIVITY_IND<>'Delete'
+        ) SELECT
+            product_id,
+            primary_parent_category,
+            path_label,
+            folder_path,
+            product_asrt,
+            'T' FOLDERACTIVE,
+            'T' READYFORPRODFOLDER,
+            label,
+            folder_parent_id,
+            folder_name,
+            folder_id
+        FROM all_assortments
+      ;
+commit;
 insert into ALL_PRODUCT_ATTR_RR_FEED_&2
 WITH all_product_attributes AS
        (SELECT
                product_id,
                attribute_name,
-               TRIM(REPLACE(REPLACE(REPLACE(TRANSLATE(attribute_val, 'x'||CHR(10)||CHR(13), 'x'),'|',''),'^',''),'�','')) attribute_val
+               TRIM(REPLACE(REPLACE(REPLACE(TRANSLATE(pim_exp_bm.char_conversion_new(attribute_val), 'x'||CHR(10)||CHR(13), 'x'),'|',''),'^',''),'�','')) attribute_val
         FROM &3
        WHERE
        lower(attribute_name) IN  ('backorderable',

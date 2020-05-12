@@ -224,11 +224,12 @@ then
 echo -e "${PROCESS} failed. Please investigate"
 echo -e "${PROCESS} failed. Please investigate " >> ${LOG_FILE}
 export SUBJECT=${BAD_SUBJECT}
+exit 99
 #send_email
 else
 export SUBJECT="SUCCESS: quick hits Completed"
 echo -e "${PROCESS} completed without errors."
 echo -e "${PROCESS} completed without errors." >> ${LOG_FILE}
+exit 0
 #send_email
 fi
-exit 0

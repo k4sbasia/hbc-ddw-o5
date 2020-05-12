@@ -2,42 +2,43 @@ SET ECHO OFF
 SET FEEDBACK OFF
 SET LINESIZE 1000
 SET PAGESIZE 0
-SET SQLPROMPT ''
 SET HEADING OFF
 
-truncate table o5.Bi_Whqty_Wrk;
+-- select * from o5.bi_whqty_wrk;
+TRUNCATE TABLE o5.bi_whqty_wrk;
 
-insert into o5.Bi_Whqty_Wrk ( ADD_DT,
-MODIFY_DT,
-PO_CANCEL_DATE,
-PO_DETAIL_STATUS_CODE,
-PO_SHIP_DATE,
-PO_STATUS_CODE,
-UPC,
-WH_BACKORDER_QTY,
-WH_PO_DATE,
-WH_PO_NUMBER,
-WH_SELLABLE_QTY  )
-select trunc(sysdate) ADD_DT,
- trunc(sysdate)  MODIFY_DT,
-null PO_CANCEL_DATE,
-null PO_DETAIL_STATUS_CODE,
-null PO_SHIP_DATE,
-null PO_STATUS_CODE,
-p.upc UPC,
-0 WH_BACKORDER_QTY,
-i.WH_PO_DATE,
-i.WH_PO_NUMBER,
-case when in_stock_sellable_qty >= in_store_qty then (in_stock_sellable_qty-in_store_qty)
-else in_stock_sellable_qty end
-From o5.inventory i,
-o5.bi_product p
-where
-p.sku = i.SKN_NO 
-and 
-(i.in_stock_sellable_qty  > 0)
-;
+INSERT INTO o5.bi_whqty_wrk (
+    add_dt,
+    modify_dt,
+    po_cancel_date,
+    po_detail_status_code,
+    po_ship_date,
+    po_status_code,
+    upc,
+    wh_backorder_qty,
+    wh_po_date,
+    wh_po_number,
+    wh_sellable_qty
+)
+    SELECT
+        trunc(sysdate) add_dt,
+        trunc(sysdate) modify_dt,
+        NULL po_cancel_date,
+        NULL po_detail_status_code,
+        NULL po_ship_date,
+        NULL po_status_code,
+        p.upc upc,
+        0 wh_backorder_qty,
+        i.wh_po_date,
+        i.wh_po_number,
+        CASE
+            WHEN in_stock_sellable_qty >= in_store_qty THEN ( in_stock_sellable_qty - in_store_qty )
+            ELSE in_stock_sellable_qty
+        END
+    FROM o5.inventory    i
+    JOIN o5.bi_product   p ON p.sku = i.skn_no
+   WHERE ( i.in_stock_sellable_qty > 0 );
 
-commit;
+COMMIT;
 
 EXIT;

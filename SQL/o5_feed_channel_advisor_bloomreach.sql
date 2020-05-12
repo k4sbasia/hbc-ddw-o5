@@ -213,7 +213,7 @@ SELECT Manufacturer_part#
        || '~'
        ||replace(replace(Material,chr(10)),'~')
        || '~'
-       ||o5.f_get_category_path_all (Manufacturer_part#)
+       ||o5.f_get_category_path_all_sfcc (Manufacturer_part#)
        || '~'
        ||department_id
        || '~'
@@ -224,7 +224,7 @@ SELECT Manufacturer_part#
        || case when qty_on_hand = 0 then 'N' else 'Y' end
 	   || '~'
 	   || CASE WHEN (nvl(fcae.sale_price,0) = 0 OR t2.item_cst_amt IS NULL) THEN 0
-          WHEN round(((fcae.sale_price - t2.item_cst_amt) / fcae.sale_price),2) < 0 THEN 0.01 
+          WHEN round(((fcae.sale_price - t2.item_cst_amt) / fcae.sale_price),2) < 0 THEN 0.01
           ELSE round(((fcae.sale_price - t2.item_cst_amt) / fcae.sale_price),2)
       END
     from O5.CHANNEL_ADVISOR_EXTRACT_NEW fcae
@@ -232,7 +232,7 @@ SELECT Manufacturer_part#
         FROM o5.oms_rfs_o5_stg t2
        GROUP BY product_code, skn_no, upc) t2 ON fcae.manufacturer_part# = t2.product_code AND to_number(fcae.sku_number) = t2.upc
 and to_number(fcae.Retail_Price) >= to_number(fcae.Sale_Price)
-        and fcae.qty_on_hand > 0 
+        and fcae.qty_on_hand > 0
    ;
 
 exit

@@ -9,11 +9,11 @@ WHENEVER OSERROR  EXIT FAILURE
 WHENEVER SQLERROR EXIT FAILURE
          DECLARE
     CURSOR cur IS
-        select pd.PRODUCT_ID,DECODE(pd.attribute_name,'publish-date','publish_dt',pd.attribute_name) attribute_name,pd.ATTRIBUTE_VAL,ps.PRDUCT_CODE pcd 
+        select pd.PRODUCT_ID,DECODE(pd.attribute_name,'publish-date','publish_dt',pd.attribute_name) attribute_name,pd.ATTRIBUTE_VAL,ps.PRDUCT_CODE pcd
         from pim_exp_bm.PIM_AB_O5_PRD_ATTR_DATA@pim_read  pd,o5.SFCC_PROD_PRODUCT_DATA ps
         where
         attribute_name in ('waitlist','status','readyForProd','Returnable','selloff','publish-date')
-        and  pd.PRODUCT_ID in (select PRODUCT_ID from  pim_exp_bm.PIM_AB_O5_PRD_ATTR_DATA@pim_read WHERE (ADD_DT >= (select last_run_on from JOB_STATUS where process_name='SFCC_LOAD') OR MODIFY_DT >= (select last_run_on from JOB_STATUS where process_name='SFCC_LOAD')  )
+        and  pd.PRODUCT_ID in (select PRODUCT_ID from  pim_exp_bm.PIM_AB_O5_PRD_ATTR_DATA@pim_read WHERE (ADD_DT >= (select last_run_on from O5.JOB_STATUS where process_name='SFCC_LOAD') OR MODIFY_DT >= (select last_run_on from O5.JOB_STATUS where process_name='SFCC_LOAD')  )
 -- where skn_no in (select skn from BAY_DS.bi_sku_inventory i where i.skn=sa.SKN_NO and i.qty >0) --98103
 )
         and pd.PRODUCT_ID=ps.PRDUCT_CODE(+)

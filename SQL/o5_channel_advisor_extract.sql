@@ -8,10 +8,8 @@ SET SQLPROMPT ''
 SET HEADING OFF
 
 TRUNCATE TABLE &1.STYLE_SEQ_NUMS;
-
 INSERT INTO &1.STYLE_SEQ_NUMS
 SELECT DISTINCT STYL_SEQ_NUM FROM &1.O5_PARTNERS_EXTRACT_WRK WRK;
-
 COMMIT;
 
 TRUNCATE TABLE &1.CHANNEL_ADVISOR_CORE_DATA;
@@ -192,7 +190,7 @@ FROM
     FROM O5.bi_product_aggregate WRK
     WHERE product_code = PRD.STYL_SEQ_NUM)
      AS SIZES,
-    (SELECT prod_sizes
+    (SELECT prod_colors
     FROM O5.bi_product_aggregate WRK
     WHERE product_code = PRD.STYL_SEQ_NUM) AS COLOR,
     'P'                                                        AS VARIATION_NAME ,

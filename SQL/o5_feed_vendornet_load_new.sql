@@ -94,7 +94,7 @@ WHEN MATCHED THEN
   MERGE INTO o5.bi_vendornet_prod_new trg USING
   (SELECT product_id prd_code_lower,
     case when PRD_READYFORPROD= 'Yes' then 'T' else 'F' end READYFORPROD ,
-    bm_desc
+   REPLACE (REPLACE(REPLACE(REPLACE( bm_desc, '^', '\^'), '\', '\\'),'amp;',''),'<br>','') bm_desc
   FROM
     o5.all_active_pim_prd_attr_o5
     ) hst ON (trg.product_id = hst.prd_code_lower AND add_dt=TRUNC(sysdate))
@@ -109,10 +109,10 @@ WHEN MATCHED THEN
    /*UPDATE COLOR & SIZE*/
    MERGE INTO o5.bi_vendornet_prod_new trg USING
  (SELECT UPC sku_code_lower,
-   SKU_COLOR color,
-   sku_size_desc sizes
+   NVL(SKU_COLOR ,'No Color' ) color,
+   NVL(US_STDSize ,'No Size')sizes
  FROM o5.all_active_pim_sku_attr_o5
- ) hst ON (regexp_replace(trg.upc,'^0*') = hst.sku_code_lower AND add_dt=TRUNC(sysdate))
+ ) hst ON (trg.upc = hst.sku_code_lower AND add_dt=TRUNC(sysdate))
 WHEN MATCHED THEN
  UPDATE
  SET trg.sku_description=trg.sku_description

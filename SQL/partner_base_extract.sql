@@ -12,6 +12,7 @@ ALTER SESSION ENABLE PARALLEL DML;
 declare
 Begin
 DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '|| TO_CHAR(SYSDATE,'MM-DD-YYYY HH:MI:SS') || ' START of Partners Extract Insert');
+
 EXECUTE IMMEDIATE 'TRUNCATE TABLE &2.&3';
 EXECUTE IMMEDIATE 'TRUNCATE TABLE &2.image_alt_&1';
 EXECUTE IMMEDIATE 'TRUNCATE TABLE &2.bi_product_aggregate';
@@ -126,9 +127,9 @@ INSERT INTO &2.&3 (
             url.eng_url                  AS product_url,
             CASE
                 WHEN '&1' = 'o5' THEN
-                    'https://image.s5a.com/is/image/saksoff5th/' || bm.product_id
+                    'https://image.s5a.com/is/image/saksoff5th/' || bm.product_id||'_300x400.jpg'
                 ELSE
-                    'https://image.s5a.com/is/image/saks/' || bm.product_id
+                    'https://image.s5a.com/is/image/saks/' || bm.product_id||'_300x400.jpg'
             END upc_url,
             NULL AS clearance_type,
             nvl(rfs.division_id, prd.division_id) AS division_id,
@@ -223,7 +224,7 @@ INSERT INTO &2.&3 (
             LEFT JOIN (
                 SELECT
                     product_code,
-                    seo_url eng_url
+                    'https://www.saksoff5th.com'||seo_url  eng_url
                 FROM
                     &2.product_seo_url_mapping
             ) url ON bm.product_id = url.product_code;
@@ -243,12 +244,12 @@ INSERT INTO &2.image_alt_&1
 SELECT
              REGEXP_REPLACE(a.PRODUCT_CODE,'[^[:digit:]]','') product_code,
                                 LISTAGG(
-                                case when '_&1' = 'o5'
+                                case when '&1' = 'o5'
                                 then 'https://image.s5a.com/is/image/saksoff5th/'
                                 else
                                 'https://image.s5a.com/is/image/saks/'
                                 end
-                                || a.product_code||'_300x400.jpg',',') WITHIN GROUP(ORDER BY product_code) AS alt_image_url,
+                                || img.asset_id ||'_300x400.jpg',',') WITHIN GROUP(ORDER BY product_code) AS alt_image_url,
                                 SYSDATE
                             FROM
                                 &2.&4 a

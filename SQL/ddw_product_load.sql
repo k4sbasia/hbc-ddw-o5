@@ -1,6 +1,6 @@
 REM ##############################################################
 REM                         SAKS, INC.
-REM ############################################################################
+REM ########################################################################
 REM
 REM  SCRIPT NAME:  ddw_product_load.sql
 REM  DESCRIPTION:  This script populates the partner base table for O5 products
@@ -30,13 +30,12 @@ BEGIN
     EXECUTE IMMEDIATE 'TRUNCATE TABLE &1.all_active_pim_prd_attr_&2';
     EXECUTE IMMEDIATE 'TRUNCATE TABLE &1.all_active_pim_sku_attr_&2';
     EXECUTE IMMEDIATE 'TRUNCATE TABLE &1.all_actv_pim_assortment_&2';
+    EXECUTE IMMEDIATE 'TRUNCATE TABLE &1.all_active_product_sku_&2';
+    EXECUTE IMMEDIATE 'TRUNCATE TABLE &1.ALL_ACTV_PIM_ASST_FULL_&2';
 
-
-
-    DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '||TO_CHAR(SYSDATE,'MM-DD-YYYY HH:Mi:SS')||' Products Identified from BM : '||' '||NVL((SQL%ROWCOUNT),0)||' rows affected.');
-
+DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '||TO_CHAR(SYSDATE,'MM-DD-YYYY HH:Mi:SS')||' Products Identified from BM : '||' '||NVL((SQL%ROWCOUNT),0)||' rows affected.');
 /*
-        Get Data from PIM to BAY_DS-- Populate bi_partners_extract_wrk
+        Get Data from PIM - Populate bi_partners_extract_wrk
 */
 
     DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '|| TO_CHAR(SYSDATE,'MM-DD-YYYY HH:MI:SS') || ' START PIM Data Move from PIM to Local Schema');
@@ -44,6 +43,12 @@ BEGIN
             SELECT * FROM pim_exp_bm.all_active_pim_prd_attr_&2@&3;
     DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '||TO_CHAR(SYSDATE,'MM-DD-YYYY HH:MI:SS')||' Product Attribute Rows '|| NVL((SQL%rowcount),0)|| ' copied');
     COMMIT;
+
+    update  &1.all_active_pim_prd_attr_&2 set item_gender  = 1 WHERE  REGEXP_like(item_gender,'[^0-9]') ;
+ commit;
+
+ update  &1.all_active_pim_prd_attr_&2 set alternate  = 1 WHERE  REGEXP_like(alternate,'[^0-9]') ;
+ commit;
 
     --DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '||TO_CHAR(SYSDATE,'MM-DD-YYYY HH:Mi:SS')||' Start extracting PIM SKU data ');
     INSERT INTO &1.all_active_pim_sku_attr_&2
@@ -55,9 +60,10 @@ BEGIN
             SELECT * FROM pim_exp_bm.all_actv_pim_assortment_&2@&3;
     DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '||TO_CHAR(SYSDATE,'MM-DD-YYYY HH:MI:SS')||' Product Assortment Rows '|| NVL((SQL%rowcount),0)|| ' copied');
     COMMIT;
+    INSERT INTO &1.ALL_ACTV_PIM_ASST_FULL_&2
+            SELECT * FROM pim_exp_bm.ALL_ACTV_PIM_ASST_FULL_&2@&3;
+   COMMIT;
     DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '|| TO_CHAR(SYSDATE,'MM-DD-YYYY HH:MI:SS') || ' END PIM Data Move from PIM to Local Schema');
-
-
     DBMS_OUTPUT.PUT_LINE('SQL OUTPUT :  '||TO_CHAR(SYSDATE,'MM-DD-YYYY HH:Mi:SS')||' Start fetching active products ');
 
     --Fetch all active poroducts from BlueMartini
@@ -105,4 +111,8 @@ THEN
     RAISE;
 END;
 /
+exec  dbms_stats.gather_table_stats('o5','all_active_pim_sku_attr_o5',force => true);
+exec  dbms_stats.gather_table_stats('o5','all_active_pim_prd_attr_o5',force => true);
+exec  dbms_stats.gather_table_stats('o5','all_actv_pim_assortment_o5',force => true);
+exec  dbms_stats.gather_table_stats('o5','ALL_ACTV_PIM_ASST_FULL_o5',force => true);
 EXIT;

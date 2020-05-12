@@ -11,15 +11,15 @@ UPC||'|'||
 replace(MREP.CHAR_REPLACE_NEW(SKU_DESC), '|', ' ') ||'|'||
 STYL_SEQ_NUM||'|'||
 replace(MREP.CHAR_REPLACE_NEW(category), '|', ' ') ||'|'||
-prd_parent_id ||'|'||
+''||'|'||
 replace(MREP.CHAR_REPLACE_NEW(bm_desc), '|', ' ') ||'|'||
 sku_sale_price||'|'||
 COMPARE_PRICE ||'|'||
 replace(MREP.CHAR_REPLACE_NEW(BRAND_NAME), '|', ' ') ||'|'||
 replace(MREP.CHAR_REPLACE_NEW(SKU_COLOR), '|', ' ') ||'|'||
 replace(MREP.CHAR_REPLACE_NEW(SKU_SIZE1_DESC), '|', '/') ||'|'||
-image_url||'_247x329.jpg'||'|'||
-image_url||'_222x296.jpg'||'|'||
+REPLACE(image_url,'_300x400.jpg','_247x329.jpg')||'|'||
+REPLACE(image_url,'_300x400.jpg','_222x296.jpg')||'|'||
 'USD'||'|'||
 ''
 from

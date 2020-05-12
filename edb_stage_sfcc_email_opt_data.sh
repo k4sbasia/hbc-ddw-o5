@@ -76,23 +76,23 @@ quit;
 EOF`
 if [ $PRCSD = '0' ]
 then
-  sqlplus -s -l $CONNECTDW<<EOF>>${LOG_FILE}
-  WHENEVER SQLERROR EXIT FAILURE
-  WHENEVER OSERROR EXIT FAILURE
-  set echo off
-  set heading off
-  set feedback off
-  set verify off
-  insert into O5.FILE_PROCESS_STATUS(PROCESS_NAME ,FILE_NAME) VALUES ('SUBS_LOAD','${f}');
-  commit;
-  EOF
-  retcode=$?
-  if [ $retcode -ne 0 ]
-  then
+sqlplus -s -l $CONNECTDW<<EOF>>${LOG_FILE}
+WHENEVER SQLERROR EXIT FAILURE
+WHENEVER OSERROR EXIT FAILURE
+set echo off
+set heading off
+set feedback off
+set verify off
+insert into O5.FILE_PROCESS_STATUS(PROCESS_NAME ,FILE_NAME) VALUES ('SUBS_LOAD','${f}');
+commit;
+EOF
+retcode=$?
+if [ $retcode -ne 0 ]
+then
           echo "SQL Error in inserting a row in the FILE_PROCESS_STATUS table for the process ${PROCESS}...Please check" >> ${LOG_FILE}
-  else
+else
           echo "Insert of a row in FILE_PROCESS_STATUS table for the process ${PROCESS} is complete" >> ${LOG_FILE}
-  fi
+fi
 echo sqlldr $CONNECTDW CONTROL=$CTL/${PROCESS}.ctl LOG=$LOG/${PROCESS}.log BAD=$DATA/${PROCESS}.bad DATA=${DATA}/${f} ERRORS=999999 SKIP=1 >> ${LOG_FILE}
 sqlldr $CONNECTDW CONTROL=$CTL/${PROCESS}.ctl LOG=$LOG/${PROCESS}.log BAD=$DATA/${PROCESS}.bad DATA=${DATA}/${f} ERRORS=999999 SKIP=1
 retcode=`echo $?`
@@ -113,7 +113,7 @@ retcode=`echo $?`
               mv $DATA/${f} $DATA/ARCHIVE
       fi
 #################################################################
-sqlplus -s -l $CONNECTDW <<EOF>> ${LOG_FILE} @$SQL/${PROCESS}.sql "bay_ds." >> ${LOG_FILE}
+sqlplus -s -l $CONNECTDW <<EOF>> ${LOG_FILE} @$SQL/${PROCESS}.sql "${BANNER}." >> ${LOG_FILE}
 retcode=$?
 if [ $retcode -ne 0 ]
 then
