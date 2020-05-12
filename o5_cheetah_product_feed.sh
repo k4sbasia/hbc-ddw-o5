@@ -87,11 +87,11 @@ put ${FILE_NAME}
 quit
 EOF
 #### FTP the file to SAS
-#ftp -nv 10.130.176.210  <<EOF>>${LOG_FILE}
+ftp -nv 10.130.176.210  <<EOF>>${LOG_FILE}
 user sasftp sasftp0313S
 prompt off
 bin
-#put ${FILE_NAME} o5_cm_product.txt
+put ${FILE_NAME} o5_cm_product.txt
 quit
 EOF
 ##########################################################################################
