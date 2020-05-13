@@ -85,7 +85,7 @@ EOF
 #################################################################
 echo "Starting the ftp process to vendornet at `date '+%a %b %e %T %Z %Y'` " >>${LOG_FILE}
 cd $DATA
-sftp SaksFifthAve@prd-transfer.vendornet.com <<EOF>>${LOG_FILE}
+sftp '-oIdentityFile=/home/ddwo5/.ssh/cognos_id_rsa' SaksFifthAve@prd-transfer.vendornet.com <<EOF>>${LOG_FILE}
 cd  Live/DS/Products
 put dropship_extract_o5.txt
 quit
