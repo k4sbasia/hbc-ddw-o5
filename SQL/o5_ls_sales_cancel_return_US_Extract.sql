@@ -17,7 +17,8 @@ INSERT  --append
                                          QUANTITY,
                                          AMOUNT,
                                          CURRENCY,
-                                         MID)
+                                         MID,
+										 product_name)
    SELECT /*+ use_hash(bs,bp,ls) parallel(bs,2) leading(bs) */
          ordernum,
           orderseq,
@@ -29,7 +30,13 @@ INSERT  --append
           qtyordered,
           EXTEND_PRICE_AMT,
           'USD',
-          MID
+          MID,
+          (
+        SELECT
+            MAX(prd.product_name) AS product_name
+        FROM o5.feed_channel_advisor_extract prd
+        where prd.manufacturer_part# = BP.product_code
+    ) product_name
      FROM O5.bi_sale bs,
           O5.BI_PRODUCT BP,
           (SELECT DISTINCT order_line, upc,mid FROM o5.LINK_SHARE_SALES_HIST) ls
