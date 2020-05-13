@@ -71,23 +71,7 @@ sqlplus -s -l  $CONNECTDW <<EOF>${LOG}/${PROCESS}_runstats_start.log @${SQL}/run
 EOF
 ###################################################################
 echo "Started preparing data at `date '+%a %b %e %T'`" >${LOG_FILE}
-sqlplus -s -l  $CONNECTDW @${SQL}/${PROCESS_SQL1} ${SCHEMA} ${PIM_DBLINK}>>${LOG_FILE}
-SQL_RET_CODE=$?
-echo "Finished preparing data  at `date '+%a %b %e %T'`" >>${LOG_FILE}
-################################################################
-##SQL ERROR VALIDATION
-#################################################################
-if [ ${SQL_RET_CODE} -eq 0  ]
-then
-        echo "Finished preparing data successfully at `date '+%a %b %e %T'`" >>${LOG_FILE}
-else
-        BBODY="O5 Versa feed is delayed and we are looking into it. Thanks"
-        BADDRESS='David.Mataranglo@360i.com Sofia_Azzolina@s5a.com Hannah_Tevolini@s5a.com'
-        BSUBJECT="O5 VERSA FEED DELAYED"
-        send_delay_email
-        echo "Aborting: Error in ${PROCESS_SQL1} at `date '+%a %b %e %T'`" >>${LOG_FILE}
-        exit 99
-fi
+#sqlplus -s -l  $CONNECTDW @${SQL}/${PROCESS_SQL1} ${SCHEMA} ${PIM_DBLINK}>>${LOG_FILE}
 #################################################################
 echo "Started exporting data at `date '+%a %b %e %T'`" >>${LOG_FILE}
 sqlplus -s -l  $CONNECTDW @${SQL}/${PROCESS_SQL2} ${SCHEMA} >${FILE_NAME}
@@ -137,7 +121,7 @@ fi
 ################################################################
 #SCP the file to Versafeed
 #################################################################
-scp -P 22 /home/cognos/DATA/CA_o5_feed_intl_`date +"%Y%m%d"`.txt a_2954@ftp.versafeed.com:/CA_o5_feed_intl_`date +"%Y%m%d"`.txt
+scp -P 22 -i .ssh/cognos_id_rsa /home/ddwo5/DATA/CA_o5_feed_intl_`date +"%Y%m%d"`.txt a_2954@ftp.versafeed.com:/CA_o5_feed_intl_`date +"%Y%m%d"`.txt
 SCP_RET_CODE=$?
 #################################################################
 ##SCP VALIDATION need to find out how

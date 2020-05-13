@@ -99,7 +99,7 @@ echo "Finished Onera extracting data at `date '+%a %b %e %T'`" >>${LOG_FILE}
 cd $DATA
 
 dos2unix ${FILE_NAME}
-sftp saks@feeds-saks.oneracommerce.com  <<end-of-session
+sftp '-oIdentityFile=/home/ddwo5/.ssh/cognos_id_rsa' saks@feeds-saks.oneracommerce.com  <<end-of-session
 cd saksoff5th
 put saks_off5th_onera_product_daily_feed_`date +%Y%m%d`.txt onera_product_daily_feed_`date +%Y%m%d`.txt
 bye
@@ -113,7 +113,7 @@ fi
 gzip ${FILE_NAME}
 
 echo "sftp to internal server" >>${LOG_FILE}
-sftp -oIdentityFile=/home/cognos/.ssh/vendor_keys/id_saks hbc-safety-stock@sftp2.data.hbc.io<<EOF>> ${LOG_FILE}
+sftp -oIdentityFile=/home/ddwo5/.ssh/vendor_keys/id_saks hbc-safety-stock@sftp2.data.hbc.io<<EOF>> ${LOG_FILE}
 cd hbc-safety-stock/O5/PRODUCT/
 put saks_off5th_onera_product_daily_feed_`date +%Y%m%d`.txt.gz
 quit
