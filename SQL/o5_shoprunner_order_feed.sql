@@ -194,10 +194,10 @@ INTO O5.SR_ORDER_FEED
               END
           END "ADJUSTMENTREASON"
         FROM O5.BI_SALE BS,
-          --O5.BI_SALE_SR BS, -- this is for testing only. Later before moving to PROD change it to above
           O5.BI_PRODUCT BP,
           MREP.CANCEL_REASON_CODE BCRC
         WHERE BS.SKU            =BP.SKU
+        AND BP.DEACTIVE_IND = 'N'
         AND BS.PRODUCT_ID       =BP.UPC
         AND BS.CANCELREASON     =BCRC.CANCEL_CODE(+)
         AND BS.ORDERMODIFYDATE >=TRUNC(SYSDATE-1)
@@ -254,7 +254,7 @@ INTO O5.SR_ORDER_FEED
   ) ;
 
 EXEC DBMS_OUTPUT.PUT_LINE ('Preparing O5.SR_ORDER_FEED completed at '||to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
-  
+
 COMMIT;
 
 EXEC DBMS_OUTPUT.PUT_LINE ('Update ADJUSTMENTID on O5.SR_ORDER_FEED started at '||to_char(sysdate , 'MM/DD/YYYY HH:MI:SS AM'));
@@ -272,29 +272,29 @@ EXEC DBMS_OUTPUT.PUT_LINE ('Generate Daily file starting at '||to_char(sysdate ,
 DECLARE
   XML_ITEM CLOB;
 BEGIN
-  SELECT '<?xml version="1.0" encoding="UTF-8"?>' || 
-  XMLELEMENT( "Orders", 
-	XMLELEMENT ("Partner", 'OFF5TH'), 
-	XMLELEMENT ("VersionNumber", '3.1'), 
-	XMLAGG( XMLELEMENT ("Order", 
-			XMLFOREST ( ORDERNUMBER AS "OrderNumber", 
-						TO_CHAR(ORDERDATE,'MM/DD/YYYY HH24:MI:SS') AS "OrderDate", 
-						TOTALNUMBEROFITEMS AS "TotalNumberOfItems", 
-						TOTALNUMBEROFSHOPRUNNERITEMS AS "TotalNumberOfShopRunnerItems", 
-						SRAUTHENTICATIONTOKEN AS "SRAuthenticationToken", 
-						CURRENCYCODE AS "CurrencyCode", 
-						ORDERTOTAL AS "OrderTotal", 
-						BILLINGSUBTOTAL AS "BillingSubTotal", 
-						PAYMENTTENDERTYPE AS "PaymentTenderType"), 
+  SELECT '<?xml version="1.0" encoding="UTF-8"?>' ||
+  XMLELEMENT( "Orders",
+	XMLELEMENT ("Partner", 'OFF5TH'),
+	XMLELEMENT ("VersionNumber", '3.1'),
+	XMLAGG( XMLELEMENT ("Order",
+			XMLFOREST ( ORDERNUMBER AS "OrderNumber",
+						TO_CHAR(ORDERDATE,'MM/DD/YYYY HH24:MI:SS') AS "OrderDate",
+						TOTALNUMBEROFITEMS AS "TotalNumberOfItems",
+						TOTALNUMBEROFSHOPRUNNERITEMS AS "TotalNumberOfShopRunnerItems",
+						SRAUTHENTICATIONTOKEN AS "SRAuthenticationToken",
+						CURRENCYCODE AS "CurrencyCode",
+						ORDERTOTAL AS "OrderTotal",
+						BILLINGSUBTOTAL AS "BillingSubTotal",
+						PAYMENTTENDERTYPE AS "PaymentTenderType"),
 	XMLAGG(
 		CASE
 		  WHEN ADJUSTMENTTYPE IS NOT NULL
-		  THEN XMLELEMENT ("Adjustment", 
-			XMLFOREST ( AdjustmentId AS "AdjustmentId", 
-						TO_CHAR(ADJUSTMENTDATE,'MM/DD/YYYY HH24:MI:SS') AS "AdjustmentDate", 
-						ADJUSTMENTAMOUNT AS "AdjustmentAmount", 
-						BILLINGADJUSTMENTAMOUNT AS "BillingAdjustmentAmount", 
-						ADJUSTMENTTYPE AS "AdjustmentType", 
+		  THEN XMLELEMENT ("Adjustment",
+			XMLFOREST ( AdjustmentId AS "AdjustmentId",
+						TO_CHAR(ADJUSTMENTDATE,'MM/DD/YYYY HH24:MI:SS') AS "AdjustmentDate",
+						ADJUSTMENTAMOUNT AS "AdjustmentAmount",
+						BILLINGADJUSTMENTAMOUNT AS "BillingAdjustmentAmount",
+						ADJUSTMENTTYPE AS "AdjustmentType",
 						ADJUSTMENTREASON AS "AdjustmentReason" ) )
 		END ) ) ) ). EXTRACT ('/*').getclobVal ()
   INTO XML_ITEM
@@ -311,8 +311,8 @@ BEGIN
     BILLINGSUBTOTAL,
     PAYMENTTENDERTYPE;
   DBMS_XSLPROCESSOR.CLOB2FILE(XML_ITEM, 'DATASERVICE', 'o5_shoprunner_order_feed.xml');
-EXCEPTION 
-WHEN OTHERS THEN 
+EXCEPTION
+WHEN OTHERS THEN
 DBMS_OUTPUT.PUT_LINE ('Error in file generation '|| SQLCODE || '-' || SQLERRM);
 END;
 /
