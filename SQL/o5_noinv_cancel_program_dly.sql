@@ -27,7 +27,7 @@ from
     join o5.user_account@reportdb usr on ol.createfor = usr.usa_id
     join o5.bi_product@reportdb p on ol.product_id = p.upc and deactive_ind = 'N'
     join o5.all_active_pim_prd_attr_o5@reportdb prd ON p.product_code = prd.product_id
-       WHERE ordline_status = 'X' and cancelreason = 'B' and trunc(canceldate) = trunc(sysdate)-1
+       WHERE ordline_status = 'X' and cancelreason in ('B','A') and trunc(canceldate) = trunc(sysdate)-1
              AND NOT EXISTS (SELECT *
                                FROM sdmrk.raw_weekly_crm_feed_o5_2 crm
                               WHERE margin_flag > .20

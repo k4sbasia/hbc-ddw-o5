@@ -99,12 +99,12 @@ then
 fi
 
 
-#echo "sftp to internal server" >> $LOG_FILE
-#sftp -oIdentityFile=/home/cognos/.ssh/vendor_keys/id_saks hbc-safety-stock@sftp2.data.hbc.io<<EOF>> ${LOG_FILE}
-#cd hbc-safety-stock/O5/ORDER/
-#put ${FILE_NAME}
-#quit
-#EOF
+echo "sftp to internal server" >> $LOG_FILE
+sftp -oIdentityFile=/home/cognos/.ssh/vendor_keys/id_saks hbc-safety-stock@sftp2.data.hbc.io<<EOF>> ${LOG_FILE}
+cd hbc-safety-stock/O5/ORDER/
+put ${FILE_NAME}
+quit
+EOF
 
 
 mv ${DATA}/ONERA/${FILE_NAME} ${DATA}
