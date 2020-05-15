@@ -121,7 +121,7 @@ fi
 ################################################################
 #SCP the file to Versafeed
 #################################################################
-scp -P 22 -i .ssh/cognos_id_rsa /home/ddwo5/DATA/CA_o5_feed_intl_`date +"%Y%m%d"`.txt a_2954@ftp.versafeed.com:/CA_o5_feed_intl_`date +"%Y%m%d"`.txt
+scp -P 22 -i /home/ddwo5/.ssh/cognos_id_rsa /home/ddwo5/DATA/CA_o5_feed_intl_`date +"%Y%m%d"`.txt a_2954@ftp.versafeed.com:/CA_o5_feed_intl_`date +"%Y%m%d"`.txt
 SCP_RET_CODE=$?
 #################################################################
 ##SCP VALIDATION need to find out how

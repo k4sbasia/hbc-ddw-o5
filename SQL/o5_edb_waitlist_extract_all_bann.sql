@@ -3,7 +3,7 @@ set feedback on
 
 TRUNCATE TABLE O5.EDB_WAITLIST_EXTRACT_WRK;
 
-INSERT INTO O5.EDB_WAITLIST_EXTRACT_WRK 
+INSERT INTO O5.EDB_WAITLIST_EXTRACT_WRK
             (WAITLIST_ID,
                EMAIL,
                SKU_CODE_LOWER,
@@ -18,14 +18,14 @@ INSERT INTO O5.EDB_WAITLIST_EXTRACT_WRK
 				       sku_COLOR,
                        sku_id,
                        sku_parent_id,
-                       compare_price, 
+                       compare_price,
                        sku_price
 		)
 SELECT DISTINCT W.WAITLIST_ID,
   upper(trim(W.EMAIL_address)),
   w.upc,
   w.SKU_PRICE,
-  opw.product_url,
+  REPLACE(opw.product_url,'https://',''),
   w.SKU_IMAGE_URL,
   lpad(w.product_code,13,'0'),
   w.qty,
@@ -52,15 +52,15 @@ COMMIT;
 
 delete  from o5.edb_waitlist_extract_wrk a
  where rowid>
- ( select min(rowid) from o5.edb_waitlist_extract_wrk  b where 
- a.email=b.email and a.sku_code_lower=b.sku_code_lower); 
- 
+ ( select min(rowid) from o5.edb_waitlist_extract_wrk  b where
+ a.email=b.email and a.sku_code_lower=b.sku_code_lower);
+
  commit;
 
 MERGE INTO O5.EDB_WAITLIST_EXTRACT_WRK W
      USING (SELECT email, ROWNUM - 1 AS request_id
               FROM (SELECT DISTINCT email
-                      FROM O5.EDB_WAITLIST_EXTRACT_WRK)) src        
+                      FROM O5.EDB_WAITLIST_EXTRACT_WRK)) src
       ON (w.email = src.email )
 WHEN MATCHED
 THEN
@@ -116,7 +116,7 @@ SELECT  WAITLIST_ID,
    &1,
    SYSDATE
 FROM O5.EDB_WAITLIST_EXTRACT_WRK;
-   
+
 COMMIT;
 
 exit
