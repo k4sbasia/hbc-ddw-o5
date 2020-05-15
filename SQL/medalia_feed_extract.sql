@@ -22,7 +22,7 @@ SET VERIFY OFF
        || ','
        || 'ORDERTYPE'
        from dual;
-       SELECT    SAL.ORDER_NO
+       SELECT    to_number(SAL.ORDER_NO)
            || ','
            ||'OFF5TH'
            || ','
