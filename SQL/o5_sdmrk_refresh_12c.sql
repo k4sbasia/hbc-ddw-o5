@@ -629,7 +629,7 @@ INSERT INTO SDMRK.O5_PRODUCT
           FIRST_RECV_DT First_Receipt_Date,
           LAST_RECV_DT Last_Receipt_Date,
           ANALYSIS_CDE_1 Analysis_Code_1,
-          WH_SELLABLE_QTY Warehouse_Sellable_Units,
+          nvl(s.in_stock_sellable_qty,'0') Warehouse_Sellable_Units,
           WH_BACKORDER_QTY Warehouse_Backorder_Units,
           ACTIVE_IND Active_Indicator,
           SELLOFF_IND Sell_Off_Indicator,
@@ -644,7 +644,7 @@ INSERT INTO SDMRK.O5_PRODUCT
           PRICE_STATUS price_status,
           BRAND_NAME brand_name,
           NVL(a.PRODUCT_CODE,a.ITEM) PRODUCT_CODE,
-          s.in_store_qty as STORE_INVENTORY,
+          nvl(s.in_store_qty,'0')  as STORE_INVENTORY,
           a.product_code PRD_ID,
           a.DEACTIVE_IND,
           DECODE(NVL(a.COMPARE_PRICE,0),0,NVL(a.ITEM_LIST_PRICE,0),NVL(a.COMPARE_PRICE,0)) COMPARE_PRICE,
@@ -653,7 +653,7 @@ INSERT INTO SDMRK.O5_PRODUCT
           end
      FROM &1.bi_product@reportdb a,
      &1.inventory@reportdb s
-     WHERE a.sku = lpad(s.SKN_NO,13,'0');
+     WHERE  a.sku = lpad(s.SKN_NO (+) ,13,'0') ;
 
 commit;
 
@@ -689,6 +689,7 @@ merge into sdmrk.o5_product trg
 using (select f_rev_char_conversion(replace(replace(initcap(bm_desc),'Amp;',''),'''S','''s'))  bm_desc,
 to_date(READYFORPROD_TIMER,'MM/DD/YYYY HH:MI AM') readyforprod_timer, product_id item_id
 from o5.ALL_ACTIVE_PIM_PRD_ATTR_O5@reportdb
+where ( bm_desc is not null or READYFORPROD_TIMER is not null)
 ) src
 on (trg.PRODUCT_CODE = src.ITEM_ID)
 when matched then

@@ -59,39 +59,24 @@ wait
 
 sqlplus -s -l $CONNECTSDMRK12C @${SQL}/${PROCESS}.sql   >  $DATA/$FILE_NAME
 wait
-
-
 cd ${DATA}
-
-#scp ${FILE_NAME} cognos@sd1pdw01vl.saksdirect.com:/home/cognos/DATA
-#ssh -n cognos@sd1pdw01vl.saksdirect.com  --commented since moved to ddwo5 box as part of SFCC migration
-ftp_to_jackson.sh ${FILE_NAME}
-if [ $? -eq 0 ]
-then
-echo "${PROCESS} ftp completed" >> ${LOG_FILE}
-else
-echo "ERROR in ftp ">> ${LOG_FILE}
-fi
 ################################################################
 ##Commented as ft taking longer from hd1box
-
-#echo "Ftp the file to Jackson SAS server" >> ${LOG_FILE}
-#ftp -nv 10.130.176.210  <<EOF>>${LOG_FILE}
-#user sasftp sasftp0313S
-#prompt off
-#bin
-#put  "${FILE_NAME}"
-#quit
-#EOF
+echo "Ftp the file ${FILE_NAME_ORDER} to Jackson SAS server" > ${LOG_FILE}
+ftp -nv 10.130.176.210  <<EOF>>${LOG_FILE}
+user sasftp sasftp0313S
+prompt off
+bin
+put  ${FILE_NAME_ORDER}
+quit
+EOF
 ################################################################
 cd ${HOME}
 ##Update Runstats Finish
 #################################################################
 sqlplus -s -l $CONNECTRUNSTATS12C<<EOF> ${LOG}/${PROCESS}_runstats_finish.log @${SQL}/runstats_end_12c.sql "$JOB_NAME" "$SCRIPT_NAME" "$SFILE_SIZE" "$FILE_NAME" "$LOAD_COUNT" "$FILE_COUNT" "$TFILE_SIZE" "$SOURCE_COUNT" "$TARGET_COUNT"
 EOF
-
 echo "${PROCESS} completed" >> ${LOG_FILE}
-
 #################################################################
 ##Error Log Check
 #################################################################

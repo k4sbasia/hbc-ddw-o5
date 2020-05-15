@@ -5,9 +5,7 @@ set feedback off
 set pagesize 0
 set trimspool on
 set serverout on
-
 truncate table &1;
-
 INSERT INTO &1 (product_code, folder_id, folder_parent_id, folder_name, parent_folder_name, assortment)
 select
 product_id product_code,folder_id,folder_parent_id,label folder_name,
@@ -23,6 +21,5 @@ case when primary_parent_category = 'EditorialEvents' then 'Editorial Events'
         primary_parent_category assortment
 --rtrim(lower(replace(replace(replace(replace( folder_path,'/Assortments/SaksMain/ShopCategory/',''),'/Assortments/SaksMain/Custom/',''),'/','>'),folder_name,'')),'>')
 from &2.ALL_ACTV_PIM_ASST_FULL_o5@&3 a;
-
 commit;
 exit;
