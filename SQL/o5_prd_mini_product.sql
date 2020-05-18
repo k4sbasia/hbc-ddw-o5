@@ -155,7 +155,9 @@ MERGE INTO &1.bi_mini_product hst
            oa.RETURNABLE AS returnable,
            oa.PERSONALIZABLE AS personalizable,
            oa.SELLOFF AS  selloff,
-           oa.PRD_READYFORPROD AS readyforprod
+           case when oa.PRD_READYFORPROD = 'Yes' then 'T'
+           else 'F'
+           end readyforprod
  FROM &1.all_active_pim_prd_attr_&2  oa
  ) trn
         ON (trn.product_id = hst.product_code)
@@ -205,26 +207,6 @@ THEN
                                 hst.pub_date=trn.readyforprod_set_dt;
 
 commit;
-
---Pubdate upodated with itemsetup task complete date after checking the readyfor prod date.
---After SFCC datamart tables are not populated when check workflow is only used in reports not in any SDW changes do commenting this
-/*
-MERGE INTO &1.bi_mini_product hst
-     USING (select distinct i.svs,Max(p.current_workflow_status)current_workflow_status,Max(trunc(to_date(p.item_set_up_task_complete,'MM/DD/YYYY HH:MI PM')))pub_date from mrch_dm.item@sdwdsg_LT i,mrch_dm.product@sdwdsg_LT p
-   where lpad(p.PRODUCT_NO, 13, '0') = replace(i.PRODUCT_NO,CHR(13),'')
-   and p.O5_PRODUCT = 'Yes' and i.O5_ITEM = 'Yes'
-   and p.banner='7' and i.banner='7' and current_workflow_status is not null
-   group by i.svs) trn
-        ON (trn.svs = hst.product_code)
-WHEN MATCHED
-THEN
-   UPDATE SET hst.workflow_status = trn.current_workflow_status,
-                                hst.pub_date=trn.pub_date;
-
-commit;
-*/
-
-
 
 EXEC dbms_output.put_line ('BI_PRODUCT - update procedure started');
 
@@ -352,16 +334,16 @@ END;
 
 EXEC dbms_output.put_line ('BI_PRODUCT - update procedure completed');
 
-exec  dbms_stats.gather_table_stats('&1','bi_mini_product',estimate_percent=> 100);
+exec  dbms_stats.gather_table_stats('&2','bi_mini_product',estimate_percent=> 100);
 
 --Dropping the indexes for MV
-exec sddw.p_drop_index_on_mv('&3');
+exec sddw.p_drop_index_on_mv('MV_O5_BI_MINI_PRODUCT');
 
 --Refreshing the MV
-exec DBMS_MVIEW.REFRESH('sddw.&3','c');
+exec DBMS_MVIEW.REFRESH('sddw.mv_o5_bi_mini_product','c');
 
 --Recreating the indexes
-CREATE INDEX "SDDW"."IDX_&2_ITEM_IDX_MV" ON "SDDW"."&3"
+CREATE INDEX "SDDW"."IDX_O5_ITEM_IDX_MV" ON "SDDW"."MV_O5_BI_MINI_PRODUCT"
   (
     "ITEM"
   );
