@@ -17,13 +17,12 @@ DECLARE
   LASTPROCESEDDATE DATE := SYSDATE;
   CURSOR C1
   IS
-    SELECT
-    cp.*,a.usa_email
-    FROM &2.CUSTOMER_PROFILE_STAGE_O5_S5A CP
-    left join &3.user_account a on  upper(CP.EMAIL_ADDRESS) = a.usa_email
-    WHERE CP.EMAIL_ADDRESS    IS NOT NULL
-  and cp.banner_id = 7
-    ;
+  SELECT
+ cp.*,a.usa_email
+ FROM &2.CUSTOMER_PROFILE_STAGE_O5_S5A CP
+ left join &3.user_account a on  upper(CP.EMAIL_ADDRESS) = a.usa_email
+ WHERE a.usa_email   IS  NULL and   cp.banner_id = 7
+ and emaiL_address is not null;
 TYPE CUST_REC_TYPE
 IS
   TABLE OF C1%rowtype;
