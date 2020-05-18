@@ -165,7 +165,9 @@ cp ${O5_FILE_NAME1}  ${O5_FILE_NAME2} >>${LOG_FILE}
 ## DO FTP here
 ################################################################
 echo -e "FTP for O5 product started to google at `date '+%a %b %e %T'`" >>${LOG_FILE}
-lftp -u mc-sftp-17287421,'q!c!_6m{Oa' sftp://partnerupload.google.com:19321 <<EOF>>${LOG_FILE}
+###removed google reference to Versa for product feed
+#lftp -u mc-sftp-17287421,'q!c!_6m{Oa' sftp://partnerupload.google.com:19321 <<EOF>>${LOG_FILE}
+lftp -u a_3068,'B8N2nhvbkqELA' sftp://ftp.versafeed.com <<EOF>>${LOG_FILE}
 put ${O5_FILE_NAME2}
 wait
 Bye
