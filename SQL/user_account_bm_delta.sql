@@ -10,7 +10,7 @@ set timing on
 --***********************************************************
 truncate table &1.USER_ACCOUT_WRK;
 truncate table  &1.USER_ADDRESS_WRK;
-truncate table OBJECT_ATTR_CUST_WRK;
+truncate table &1.OBJECT_ATTR_CUST_WRK;
 INSERT INTO &1.USER_ACCOUT_WRK
 select * from martini_store.user_account@&2 t
 where usa_uid is not null and t.USA_SYS_TIMESTAMP > trunc(sysdate-2);
