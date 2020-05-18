@@ -3,20 +3,13 @@
 #####                           SAKS INC.
 #############################################################################################################################
 #####
-#####   PROGRAM NAME : o5_edb_bm_extract_status_update.sh
-#####
-#####   DESCRIPTION  : This script does the following
-#####                              1.Updating the time for last Mongo/BM data pull
-#####
-#####   CODE HISTORY :  				Name                    Date            Description
-#####                                   ------------            ----------      ------------
-#####                                   Sripriya Rao           	09/16/2015      Created
+#####   PROGRAM NAME : o5_ppe_cheetah_16days_extract.sh
 #####
 #####
 #############################################################################################################################
 ################################################################
 . $HOME/params.conf o5
-export PROCESS='o5_edb_extract_status_update_sfcc'
+export PROCESS='o5_ppe_cheetah_16days_extract'
 export SQL=$HOME/SQL
 export LOG=$HOME/LOG
 export DATA=$HOME/DATA
@@ -31,8 +24,7 @@ export FILE_COUNT='0'
 export TFILE_SIZE='0'
 export SOURCE_COUNT='0'
 export TARGET_COUNT='0'
-export VALIDATE_COUNT='1'
-export UPDATE=''
+SQL1='o5_ppe_cheetah_xml_extract_16days'
 ########################################################################
 ##Initialize Email Function
 ########################################################################
@@ -47,38 +39,38 @@ function send_email {
 #################################################################
 ##Update Runstats Start
 #################################################################
-echo -e "O5 EDB Mongo/BM time UPDATE process started at `date '+%a %b %e %T'`\n" >${LOG_FILE}
+sqlplus -sl $CONNECTDW <<EOF> ${LOG}/${PROCESS}_runstats_start.log @${SQL}/runstats_start.sql "$JOB_NAME" "$SCRIPT_NAME" "$SFILE_SIZE" "$FILE_NAME" "$LOAD_COUNT" "$FILE_COUNT" "$TFILE_SIZE" "$SOURCE_COUNT" "$TARGET_COUNT"
+EOF
 #################################################################
-
-UPDATE=`sqlplus -s $CONNECTDW <<EOF
-set heading off
-update o5.edb_sub_status
-set last_extract_time = curr_extract_time,
-curr_extract_time = sysdate
-;
-commit;
-select * from o5.edb_sub_status;
-quit;
-EOF`
-
-echo -e "O5 EDB Mongo/BM time UPDATE" >> ${LOG_FILE}
-
-#cat $UPDATE >>${LOG_FILE}
-
-echo -e "O5 EDB BM UPDATE process completed at `date '+%a %b %e %T'`\n" >> ${LOG_FILE}
+echo -e "o5_ppe_cheetah_16days_extract Process started at `date '+%a %b %e %T'`\n" >${LOG_FILE}
 #################################################################
+echo -e "Starting the off5th ppe xml data extract fpr 16 days `date '+%a %b %e %T %Z %Y'`\n " >>${LOG_FILE}
+################################################################
+sqlplus -s -l $CONNECTDWXML @${SQL}/${SQL1}.sql>> ${LOG_FILE}
+#################################################################
+sqlplus -s -l $CONNECTDW<<EOF> ${LOG}/${PROCESS}_runstats_finish.log @${SQL}/runstats_end.sql "$JOB_NAME" "$SCRIPT_NAME" "$SFILE_SIZE" "$FILE_NAME" "$LOAD_COUNT" "$FILE_COUNT" "$TFILE_SIZE" "$SOURCE_COUNT" "$TARGET_COUNT"
+EOF
+#################################################################
+#Pull the data from 145 box
+#################################################################
+echo -e "copying the o5 ppe data from 145 to 101 at `date '+%a %b %e %T %Z %Y'`\n " >>${LOG_FILE}
+scp cognos@$ORACLESRV:/oracle/EXPORTS/dataservices/Off5th_ppe_`date +%Y%m%d`.xml $DATA
+wait
+echo -e "Finished copying the data from oracle server at `date '+%a %b %e %T %Z %Y'`\n " >>${LOG_FILE}
+echo -e "o5_ppe_cheetah_16days_extract Process Ended at `date '+%a %b %e %T'`\n" >>${LOG_FILE}
+################################################################
 # Check for errors
 ################################################################
-if [ `egrep -c "^ERROR|ORA-|not found|SP2-0|^553|not connected" ${LOG_FILE}` -ne 0 ]
+if [ `egrep -c "^ERROR|ORA-|not found|SP2-0|^553" ${LOG_FILE}` -ne 0 ]
 then
-#mv "${LOG_FILE}" "${LOG_FILE}.`date +%Y%m%d`"
+cp "${LOG_FILE}" "${LOG_FILE}.`date +%Y%m%d`"
 echo -e "${PROCESS} failed. Please investigate"
 echo -e "${PROCESS} failed. Please investigate\n" >> ${LOG_FILE}
 export SUBJECT=${BAD_SUBJECT}
-#send_email
 exit 99
 else
+export SUBJECT="SUCCESS:Off5th PPE DAILY DATA IS PRODUCED AND copied 145-101-30 and READY FOR FURTHER PROCESS"
 echo -e "${PROCESS} completed without errors."
 echo -e "${PROCESS} completed without errors.\n" >> ${LOG_FILE}
+exit 0
 fi
-exit $?
