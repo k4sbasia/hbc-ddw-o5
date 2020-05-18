@@ -18,8 +18,8 @@ CURSOR c_order_data
 IS
 WITH all_order_data AS (
     SELECT
-        NULL                                    AS orderhdr,           --Changed from BM to OMS
-        to_number(ord.orderdet)                 AS orderdet,           --Temporary till SFCC Goes Live
+        NULL                                    AS orderhdr,           -- Changed from BM to OMS
+        to_number(ord.orderdet)                 AS orderdet,           -- Temporary till SFCC Goes Live
         row_number() OVER (PARTITION BY ord.order_header_key ORDER BY ord.order_line_key) AS orderseq,  -- Changed to Order Line SEQ 
         to_number(nvl(cust.customer_id, cust.bill_to_key))             AS createfor, -- Assuming Registered Customers will Have GENERIC_ATTRIBUTE1 populated, Guest Using BILL_TO_KEY
         NULL                                    AS extponum,
@@ -208,23 +208,42 @@ WITH all_order_data AS (
         cust.tracking_no                        AS tracking_number,
         to_number(ord.order_header_key)         AS order_header_key, 
         to_number(ord.order_line_key)           AS order_line_key,
-        CASE WHEN hist.order_line_key IS NOT NULL OR hist.orderdet IS NOT NULL THEN 1 ELSE 0 END AS f_existing_order,
-        CASE WHEN ord.orderdet IS NULL THEN to_number(ord.order_line_key) ELSE to_number(ord.orderdet) END AS f_matching_criteria, -- To Handle Switch from BM to SFCC
---        CASE WHEN hist.orderdet IS NOT NULL THEN 1 ELSE 0 END AS f_existing_order
---        CASE WHEN hist.order_line_key IS NOT NULL THEN 1 ELSE 0 END AS f_existing_order
 -- Extra
         CASE WHEN ord.order_line_status_id IN ('3700.01.001','3700.01.002','3700.01.003','3700.01.004','3700.02') THEN ord.l_ret_can_date  ELSE NULL END  AS returndate,
         ord.giftwrap_message      AS giftwrap_message
     FROM &1.t_so5_order_line_info      ord
     JOIN &1.t_so5_ord_cust_ship_dtls   cust ON ord.order_line_key = cust.order_line_key
-    LEFT JOIN (SELECT order_line_key, orderdet FROM &1.bi_sale) hist ON ( ord.order_line_key = hist.order_line_key OR to_number(ord.orderdet) = hist.orderdet )
---    LEFT JOIN (SELECT order_line_key FROM bi_sale) hist ON ord.order_line_key = hist.order_line_key
---    LEFT JOIN (SELECT orderdet FROM O5.bi_sale_ddw) hist ON to_number(ord.orderdet) = hist.orderdet
-    WHERE  ( (TRUNC(ord.load_date) = TRUNC(sysdate)   OR ord.last_update_date  = TRUNC(sysdate)) 
-          OR (TRUNC(cust.load_date) = TRUNC(sysdate)  OR cust.last_update_date = TRUNC(sysdate)) )   
+--    LEFT JOIN (SELECT order_line_key, orderdet FROM &1.bi_sale) hist ON ( ord.order_line_key = hist.order_line_key OR ( hist.ordernum = ord.order_no AND ord.orderdet = hist.orderdet ) )
+--    WHERE  ( (TRUNC(ord.load_date) = TRUNC(sysdate)   OR ord.last_update_date  = TRUNC(sysdate)) 
+--          OR (TRUNC(cust.load_date) = TRUNC(sysdate)  OR cust.last_update_date = TRUNC(sysdate)) )   
 --    WHERE ord.order_line_status_id = orderstatus
 ) 
-SELECT * FROM all_order_data;
+-- SELECT * FROM all_order_data;
+,all_matching_order as (
+SELECT ord.*,
+--       nvl(oms.ordernum, bm.ordernum) as sl_ordernum,
+--       nvl(oms.orderdet, bm.orderdet) as sl_orderdet,
+--       nvl(oms.order_line_key, bm.order_line_key) as sl_order_line_key,
+       case when oms.order_line_key is not null or bm.orderdet is not null then 1 else 0 end f_existing_order
+--       case when bm.order_line_key is not null then 1 else 0 end f_existing_order
+  FROM all_order_data ord
+  LEFT JOIN ( SELECT 
+                     ordernum, 
+                     order_line_key, 
+                     orderdet
+                FROM &1.bi_sale_ddw sale
+             ) oms ON  ( oms.order_line_key = ord.order_line_key  )                 -- For OMS Orders
+  LEFT JOIN ( SELECT 
+                     ordernum, 
+                     order_line_key, 
+                     orderdet
+--                     case when sale.order_line_key is null then sale.ordernum || sale.orderdet else to_char(sale.order_line_key) end as order_line_pk
+                FROM &1.bi_sale_ddw sale
+--             WHERE orderdate >= trunc(sysdate - 360) 
+             ) bm ON (  bm.ordernum = ord.ordernum AND ord.orderdet = bm.orderdet AND ord.order_line_key is null ) -- For BM & OMS Orders
+
+)
+SELECT * FROM all_matching_order;
 -- SELECT * FROM all_order_data where rownum < 1500;
 
 --  l_start := DBMS_UTILITY.get_time;
@@ -383,10 +402,8 @@ BEGIN
                    SET t1.ordline_status = 'X', 
                        t1.cancelreason  = ord(idx).cancelreason,
                        t1.canceldate    = ord(idx).canceldate
---                 WHERE t1.orderdet = ord(idx).orderdet                                -- To Update Based on ORDERDET
---                   AND  t1.order_header_key = ord(idx).order_header_key               -- May Not be needed
---                 WHERE t1.order_line_key = ord(idx).order_line_key                    -- To Update Based on ORDER_LINE_KEY 
-                  WHERE NVL(t1.orderdet,t1.order_line_key) = ord(idx).f_matching_criteria   -- To Update Based on ORDERDET and ORDER_LINE_KEY to handle switch from BM to SFCC
+                 WHERE t1.ordernum = ord(idx).ordernum AND t1.orderdet = ord(idx).orderdet                     -- Handles BM & OMS Order for Now, May be NOT Split Orders
+    --                 WHERE t1.order_line_key = ord(idx).order_line_key                                       -- Only Existing Orders and not cancelled
                      ;     
             END IF;
             IF ord(idx).f_existing_order = 1 AND ord(idx).ordline_status <> 'X'                             -- For Records Existing in BI_SALE and status NOT Cancelled 
@@ -500,10 +517,10 @@ BEGIN
 --                        t1.ORDER_HEADER_KEY = ord(idx).ORDER_HEADER_KEY,
 --                        t1.ORDER_LINE_KEY = ord(idx).ORDER_LINE_KEY,
                         t1.sr_token = NVL(t1.sr_token,ord(idx).shoprunner_token)
---                 WHERE t1.orderdet = ord(idx).orderdet                                -- To Update Based on ORDERDET
---                   AND  t1.order_header_key = ord(idx).order_header_key               -- May Not be needed
---                 WHERE t1.order_line_key = ord(idx).order_line_key                    -- To Update Based on ORDER_LINE_KEY 
-                  WHERE NVL(t1.orderdet,t1.order_line_key) = ord(idx).f_matching_criteria   -- To Update Based on ORDERDET and ORDER_LINE_KEY to handle switch from BM to SFCC
+--                      WHERE ( t1.order_line_key = ord(idx).order_line_key ) 
+                    WHERE t1.ordernum = ord(idx).ordernum AND t1.orderdet = ord(idx).orderdet                     -- Handles BM & OMS Order for Now, May be NOT Split Orders
+    --                 WHERE t1.order_line_key = ord(idx).order_line_key                                            -- Only Existing Orders and not cancelled
+                    ;
                      ;
             END IF;
         END LOOP;                                                                                           -- Inner Loop For Record
