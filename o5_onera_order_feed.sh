@@ -86,7 +86,7 @@ wait
 
 
 
-sftp saks@feeds-saks.oneracommerce.com  <<end-of-session
+sftp '-oIdentityFile=/home/ddwo5/.ssh/cognos_id_rsa' saks@feeds-saks.oneracommerce.com  <<end-of-session
 cd /mnt/saksoff5th/data/prod
 put ${FILE_NAME}
 bye
@@ -98,13 +98,13 @@ then
   mailx -s "WARNING: ${FILE_NAME} did not ftp'ed to Onera" hbcdigitaldatamanagement@saksinc.com
 fi
 
-
-echo "sftp to internal server" >> $LOG_FILE
-sftp -oIdentityFile=/home/cognos/.ssh/vendor_keys/id_saks hbc-safety-stock@sftp2.data.hbc.io<<EOF>> ${LOG_FILE}
-cd hbc-safety-stock/O5/ORDER/
-put ${FILE_NAME}
-quit
-EOF
+#Commented the internal SFTP as of SFCC Migration
+#echo "sftp to internal server" >> $LOG_FILE
+#sftp -oIdentityFile=/home/cognos/.ssh/vendor_keys/id_saks hbc-safety-stock@sftp2.data.hbc.io<<EOF>> ${LOG_FILE}
+#cd hbc-safety-stock/O5/ORDER/
+#put ${FILE_NAME}
+#quit
+#EOF
 
 
 mv ${DATA}/ONERA/${FILE_NAME} ${DATA}
