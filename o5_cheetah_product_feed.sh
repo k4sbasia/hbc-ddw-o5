@@ -94,6 +94,9 @@ bin
 put ${FILE_NAME} o5_cm_product.txt
 quit
 EOF
+
+smbclient -C "\\\\nyco-ms-psas01.intranet.saksroot.saksinc.com\DWfiles\\" --authentication-file /home/cognos/auth.txt --command 'lcd '$DATA';put '$FILE_NAME';quit'
+
 ##########################################################################################
 #### Bad Records Check
 ##################################################################################################
