@@ -10,12 +10,12 @@ WHENEVER SQLERROR EXIT FAILURE
 
 
 --to be removed before go live
-TRUNCATE TABLE o5.inventory;
+--TRUNCATE TABLE o5.inventory;
 
-INSERT INTO o5.inventory i (i.skn_no,i.IN_STOCK_SELLABLE_QTY,i.IN_STOCK_UPDATE_DATE,add_dt,i.IN_STORE_QTY,i.IN_STORE_UPDATE_DATE)
-select sku_code,IN_STOCK_SELLABLE_QTY,IN_STOCK_UPDATE_DATE,sysdate,store_qty,store_update_date from saks_custom.inventory@o5prod_mrep;
+--INSERT INTO o5.inventory i (i.skn_no,i.IN_STOCK_SELLABLE_QTY,i.IN_STOCK_UPDATE_DATE,add_dt,i.IN_STORE_QTY,i.IN_STORE_UPDATE_DATE)
+--select sku_code,IN_STOCK_SELLABLE_QTY,IN_STOCK_UPDATE_DATE,sysdate,store_qty,store_update_date from saks_custom.inventory@o5prod_mrep;
 
-COMMIT;
+--COMMIT;
 -----------------------------------------------------------------------------SFCC_PROD_SKU_DYN_FLAGS update/insert------------------------------------------------------------------------
 
 	DECLARE
