@@ -12,7 +12,7 @@
 #####
 #############################################################################################################################
 ################################################################
-. $HOME/initvars
+. $HOME/params.conf $1
 export BANNER=$1
 export ENV=$2
 export PROCESS='edb_sms_subs_vibe_ftp_all_banners'
@@ -66,7 +66,7 @@ cp ${FILE} ${FILENAME}
 
 if [ "${BANNER}" = "saks" ]
 then
-	if [ "${ENV}" == "qa" ] 
+	if [ "${ENV}" == "qa" ]
 	then
 		lftp -u saksfif2153,d5f7d014a2db5 sftp://upload.vibes.com<<EOF>>${LOG_FILE}
 		cd files/in
@@ -81,7 +81,7 @@ EOF
 EOF
 	fi
 else
-	if [ "${ENV}" == "qa" ] 
+	if [ "${ENV}" == "qa" ]
 	then
 		lftp -u off5th5498,4fe29ea35cee5 sftp://upload.vibes.com<<EOF>>${LOG_FILE}
 		cd files/in

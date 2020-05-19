@@ -17,7 +17,7 @@
 #####
 #############################################################################################################################
 ################################################################
-. $HOME/initvars
+. $HOME/params.conf $1
 export BANNER=$1
 export PROCESS='edb_sms_subscribers_spool_all_banners'
 export SQL=$HOME/SQL
@@ -69,11 +69,11 @@ then
 	SCHEMA="mrep."
 	FILE=${SAKS_FILE}
 	SPOOL_SQL=${SAKS_SPOOL_SQL}
-else 
+else
 	SCHEMA="o5."
 	FILE=${O5_FILE}
 	SPOOL_SQL=${O5_SPOOL_SQL}
-fi 
+fi
 
 echo "staring spool" >> ${LOG_FILE}
 sqlplus -s $CONNECTDW  @${SQL}/${SPOOL_SQL} "$SCHEMA" > ${DATA}/${FILE}
