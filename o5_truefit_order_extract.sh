@@ -17,7 +17,6 @@ export LOG_FILE="$LOG/${PROCESS}_log.txt"
 export BAD_SUBJECT="${PROCESS} failed"
 export FILE_NAME="$DATA/o5_Sales_`date +"%Y%m%d"`.txt"
 export SFILE_SIZE='0'
-export FILE_NAME='0'
 export LOAD_COUNT='0'
 export FILE_COUNT='0'
 export TFILE_SIZE='0'
